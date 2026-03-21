@@ -174,6 +174,20 @@ body{font-family:var(--body);background:var(--bg);color:var(--text);font-size:14
 .set-acc.dragging{opacity:.4;transform:scale(.98)}
 .set-acc.drag-over{border-top:2px solid var(--gold)}
 .cfg-drag-handle{cursor:grab;color:var(--text3);padding:0 6px;font-size:16px;flex-shrink:0;opacity:.5;transition:opacity .15s}
+/* ── VOICE INPUT ── */
+@keyframes voicePulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.8}}
+@keyframes voiceRing{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.8);opacity:0}}
+.voice-btn{width:36px;height:36px;border-radius:50%;border:2px solid var(--border);background:var(--bg2);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;flex-shrink:0;touch-action:manipulation;position:relative}
+.voice-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-l)}
+.voice-btn.listening{border-color:var(--red);background:var(--red-l);color:var(--red);animation:voicePulse .8s ease-in-out infinite}
+.voice-btn.listening::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--red);animation:voiceRing 1s ease-out infinite}
+.voice-transcript{font-size:11px;color:var(--text3);font-style:italic;min-height:16px;transition:all .2s;padding:4px 0}
+.voice-result{background:var(--gold-l);border:1px solid rgba(200,146,42,.3);border-radius:var(--r);padding:10px 12px;margin-top:6px;display:none}
+.voice-result.show{display:block}
+.voice-result-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px}
+.voice-result-row:last-child{margin-bottom:0}
+.voice-result-label{color:var(--text3);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.voice-result-value{color:var(--text);font-weight:700}
 .cfg-drag-handle:hover{opacity:1}
 .set-acc-hd{display:flex;align-items:center;gap:10px;padding:13px 16px;background:var(--bg2);border:calc(var(--bw) * 1.5) solid var(--border);cursor:pointer;user-select:none;transition:background .18s,border-color .18s;touch-action:manipulation}
 .set-acc-hd:hover{background:var(--gold-l);border-color:var(--gold-m)}
@@ -1080,7 +1094,7 @@ body.compact .inv-stat{padding:9px 12px}
 
   // ── Build manifest object ──
   // ── VERSÃO DO APP ──
-  const APP_VERSION = '1.6.1';
+  const APP_VERSION = '1.7.0';
   const APP_BUILD   = new Date().toISOString().slice(0,10).replace(/-/g,'.');
 
   const isPng = icon192.startsWith('data:image/png');
@@ -2645,6 +2659,34 @@ function renderLancamentos(el){
         <div>
           <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Descrição</label>
           <input type="text" class="fc" id="lt-desc" placeholder="Ex: Supermercado Extra" style="margin:0">
+          <div class="voice-transcript" id="voice-transcript"></div>
+        </div>
+
+        <!-- Botão de voz -->
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+          <button class="voice-btn" id="voiceBtn" onclick="voiceStart()" title="Falar lançamento (🎤)">🎤</button>
+          <span style="font-size:11px;color:var(--text3)">Fale: <em>"Gastei 150 no mercado"</em></span>
+        </div>
+        <div class="voice-result" id="voiceResult">
+          <div class="voice-result-row">
+            <span class="voice-result-label">Entendido</span>
+          </div>
+          <div class="voice-result-row">
+            <span class="voice-result-label">Valor</span>
+            <span class="voice-result-value" id="vr-val">—</span>
+          </div>
+          <div class="voice-result-row">
+            <span class="voice-result-label">Descrição</span>
+            <span class="voice-result-value" id="vr-desc">—</span>
+          </div>
+          <div class="voice-result-row">
+            <span class="voice-result-label">Categoria</span>
+            <span class="voice-result-value" id="vr-cat">—</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-primary" style="flex:1;padding:8px" onclick="voiceApply()">✓ Usar</button>
+            <button class="btn btn-secondary" style="flex:1;padding:8px" onclick="voiceCancel()">✕ Cancelar</button>
+          </div>
         </div>
 
         <!-- Valor + Data -->
@@ -2826,6 +2868,227 @@ function ltClear(){
   if(saveBtn) saveBtn.textContent='✔ Adicionar';
   document.getElementById('lt-desc')?.focus();
 }
+
+// ================================================================
+// VOICE INPUT — Lançamento por voz (Web Speech API)
+// ================================================================
+let _voiceRecog = null;
+let _voiceParsed = null;
+
+// Mapa de palavras-chave → categorias
+const VOICE_CATS = {
+  'mercado|supermercado|feira|hortifruti|atacado|compras|alimentação|comida|restaurante|lanche|café|pizza|hamburguer|ifood|rappi|delivery|padaria|açougue': 'Alimentação',
+  'posto|gasolina|combustível|álcool|shell|ipiranga|petrobras|br|diesel': 'Combustível',
+  'farmácia|remédio|medicamento|drogaria|saúde|médico|consulta|exame|hospital|dentista|plano': 'Saúde',
+  'uber|99|táxi|ônibus|metrô|passagem|transporte|estacionamento|pedágio|combustivel': 'Transporte',
+  'netflix|spotify|amazon|prime|disney|hbo|globo|assinatura|mensalidade|streaming': 'Assinaturas',
+  'roupa|sapato|calçado|loja|shopping|zara|renner|riachuelo|c&a|hering|vestuário': 'Vestuário',
+  'conta|luz|água|energia|internet|telefone|celular|tim|claro|vivo|oi|gás|aluguel|condomínio': 'Contas',
+  'escola|faculdade|curso|livro|material|educação|mensalidade escolar': 'Educação',
+  'cinema|teatro|show|ingresso|entretenimento|diversão|viagem|hotel|airbnb': 'Lazer',
+  'mercado livre|americanas|magazine|shopee|amazon|aliexpress|online|eletrônico|celular|notebook': 'Compras Online',
+};
+
+// Converte número por extenso para float
+function voiceParseNumber(text) {
+  const map = {
+    'zero':0,'um':1,'uma':1,'dois':2,'duas':2,'três':3,'quatro':4,'cinco':5,
+    'seis':6,'sete':7,'oito':8,'nove':9,'dez':10,'onze':11,'doze':12,
+    'treze':13,'quatorze':14,'catorze':14,'quinze':15,'dezesseis':16,
+    'dezessete':17,'dezoito':18,'dezenove':19,'vinte':20,'trinta':30,
+    'quarenta':40,'cinquenta':50,'sessenta':60,'setenta':70,'oitenta':80,
+    'noventa':90,'cem':100,'cento':100,'duzentos':200,'duzentas':200,
+    'trezentos':300,'trezentas':300,'quatrocentos':400,'quatrocentas':400,
+    'quinhentos':500,'quinhentas':500,'seiscentos':600,'seiscentas':600,
+    'setecentos':700,'setecentas':700,'oitocentos':800,'oitocentas':800,
+    'novecentos':900,'novecentas':900,'mil':1000,
+  };
+
+  // Tenta número direto primeiro (ex: "150,90" ou "150.90" ou "150")
+  let clean = text.replace(/r\$\s*/gi,'').trim();
+  let directMatch = clean.match(/(\d+)[,.](\d{1,2})/);
+  if(directMatch) return parseFloat(directMatch[1] + '.' + directMatch[2]);
+  let intMatch = clean.match(/(\d+)/);
+  if(intMatch) {
+    // Verifica se tem centavos após
+    let centMatch = clean.match(/(\d+)\s+(?:reais?\s+)?(?:e\s+)?(\d{1,2})\s*(?:centavos?)?/);
+    if(centMatch) return parseFloat(centMatch[1] + '.' + centMatch[2].padEnd(2,'0'));
+    return parseFloat(intMatch[1]);
+  }
+
+  // Converte por extenso
+  let normalized = text.toLowerCase()
+    .replace(/reais?|real/g,'')
+    .replace(/vírgula|ponto|e/g,' ')
+    .replace(/\s+/g,' ').trim();
+
+  let parts = normalized.split(/\s+/);
+  let total = 0, current = 0, cents = false, centVal = 0;
+
+  for(let p of parts){
+    if(p === 'centavos' || p === 'centavo') { cents = false; continue; }
+    if(map[p] !== undefined){
+      let v = map[p];
+      if(cents){ centVal += v; continue; }
+      if(v === 1000){ current = (current||1) * 1000; total += current; current = 0; }
+      else if(v >= 100){ current += v; }
+      else { current += v; }
+    }
+  }
+  total += current;
+  if(centVal > 0) total += centVal / 100;
+  return total > 0 ? total : null;
+}
+
+// Detecta categoria pelo texto
+function voiceDetectCat(text) {
+  const lower = text.toLowerCase();
+  for(const [keywords, cat] of Object.entries(VOICE_CATS)){
+    for(const kw of keywords.split('|')){
+      if(lower.includes(kw)) return cat;
+    }
+  }
+  return '';
+}
+
+// Detecta parcelas
+function voiceDetectInst(text) {
+  const lower = text.toLowerCase();
+  const match = lower.match(/(\d+)\s*(?:x|vezes|parcelas?)/);
+  if(match) return parseInt(match[1]);
+  if(lower.includes('à vista') || lower.includes('avista')) return 1;
+  return null;
+}
+
+// Inicia reconhecimento de voz
+function voiceStart() {
+  if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
+    showToast('Reconhecimento de voz não disponível neste browser. Use o Chrome.','red');
+    return;
+  }
+
+  const btn = document.getElementById('voiceBtn');
+  const transcript = document.getElementById('voice-transcript');
+  const result = document.getElementById('voiceResult');
+
+  // Se já está ouvindo, para
+  if(_voiceRecog){
+    _voiceRecog.stop();
+    return;
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  _voiceRecog = new SR();
+  _voiceRecog.lang = 'pt-BR';
+  _voiceRecog.interimResults = true;
+  _voiceRecog.maxAlternatives = 3;
+
+  btn.classList.add('listening');
+  btn.innerHTML = '⏹';
+  if(transcript) transcript.textContent = 'Ouvindo…';
+  if(result) result.classList.remove('show');
+
+  _voiceRecog.onresult = (e) => {
+    const interim = Array.from(e.results).map(r => r[0].transcript).join(' ');
+    if(transcript) transcript.textContent = '🎤 ' + interim;
+
+    if(e.results[e.results.length-1].isFinal){
+      const final = e.results[e.results.length-1][0].transcript;
+      voiceProcess(final);
+    }
+  };
+
+  _voiceRecog.onerror = (e) => {
+    voiceStop();
+    if(e.error === 'not-allowed'){
+      showToast('Permissão de microfone negada. Verifique as configurações do browser.','red');
+    } else {
+      showToast('Erro no microfone: ' + e.error,'red');
+    }
+  };
+
+  _voiceRecog.onend = () => { voiceStop(); };
+  _voiceRecog.start();
+}
+
+function voiceStop(){
+  const btn = document.getElementById('voiceBtn');
+  if(btn){ btn.classList.remove('listening'); btn.innerHTML = '🎤'; }
+  _voiceRecog = null;
+}
+
+function voiceProcess(text){
+  voiceStop();
+  const transcript = document.getElementById('voice-transcript');
+  if(transcript) transcript.textContent = '"' + text + '"';
+
+  const val = voiceParseNumber(text);
+  const cat = voiceDetectCat(text);
+  const inst = voiceDetectInst(text);
+
+  // Extrai descrição — remove valor e palavras de comando
+  let desc = text
+    .replace(/gastei|paguei|comprei|lancei|adicionar|lançar|registrar/gi,'')
+    .replace(/r\$\s*[\d.,]+/gi,'')
+    .replace(/\d+/gi,'')
+    .replace(/reais?|real|centavos?/gi,'')
+    .replace(/\d+\s*[xX]\s*|\d+\s*vezes|\d+\s*parcelas?/gi,'')
+    .replace(/à vista|avista/gi,'')
+    .replace(/vírgula|ponto/gi,'')
+    .replace(/\s+/g,' ').trim();
+  // Capitaliza
+  if(desc) desc = desc.charAt(0).toUpperCase() + desc.slice(1);
+
+  _voiceParsed = { val, desc, cat, inst };
+
+  // Mostra resultado
+  const result = document.getElementById('voiceResult');
+  document.getElementById('vr-val').textContent = val ? 'R$ ' + val.toFixed(2).replace('.',',') : '⚠️ Não detectado';
+  document.getElementById('vr-desc').textContent = desc || '—';
+  document.getElementById('vr-cat').textContent = cat || '—';
+  if(result) result.classList.add('show');
+}
+
+function voiceApply(){
+  if(!_voiceParsed) return;
+  const { val, desc, cat, inst } = _voiceParsed;
+
+  if(val){
+    const amtEl = document.getElementById('lt-amount');
+    if(amtEl) amtEl.value = val.toFixed(2);
+  }
+  if(desc){
+    const descEl = document.getElementById('lt-desc');
+    if(descEl) descEl.value = desc;
+  }
+  if(cat){
+    const catEl = document.getElementById('lt-cat');
+    if(catEl){
+      for(let opt of catEl.options){
+        if(opt.value === cat || opt.text === cat){ catEl.value = opt.value; break; }
+      }
+    }
+  }
+  if(inst && inst > 1){
+    const instEl = document.getElementById('lt-inst');
+    if(instEl){ instEl.value = inst; ltInstPrev(); }
+  }
+
+  // Limpa UI
+  voiceCancel();
+  // Foca no valor se não detectado
+  if(!val) document.getElementById('lt-amount')?.focus();
+  else showToast('✓ Lançamento preenchido por voz', 'green');
+}
+
+function voiceCancel(){
+  const result = document.getElementById('voiceResult');
+  const transcript = document.getElementById('voice-transcript');
+  if(result) result.classList.remove('show');
+  if(transcript) transcript.textContent = '';
+  _voiceParsed = null;
+}
+
 
 function ltSave(){
   const desc  = (document.getElementById('lt-desc')?.value||'').trim();
