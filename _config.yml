@@ -1,0 +1,7 @@
+# GitHub Pages config
+theme: null
+plugins: []
+
+# Serve index.html at root
+include:
+  - index.html
