@@ -1080,7 +1080,7 @@ body.compact .inv-stat{padding:9px 12px}
 
   // ── Build manifest object ──
   // ── VERSÃO DO APP ──
-  const APP_VERSION = '1.6.0';
+  const APP_VERSION = '1.6.1';
   const APP_BUILD   = new Date().toISOString().slice(0,10).replace(/-/g,'.');
 
   const isPng = icon192.startsWith('data:image/png');
@@ -6205,11 +6205,12 @@ function loadJbConfig(){
   renderSyncBtn();
 }
 
-function saveJbConfig(){
+function saveJbConfig(skipRender){
   try{ localStorage.setItem('ccp-jb', JSON.stringify({key:JB.key,binId:JB.binId,lastSync:JB.lastSync})); }catch(e){}
   JB.status = (JB.key && JB.binId) ? 'ok' : 'disconnected';
   renderSyncBtn();
-  if(S.tab==='settings') renderContent();
+  // Só re-renderiza quando não vier de um input (evita perda de foco ao digitar)
+  if(!skipRender && S.tab==='settings') renderContent();
 }
 
 function jbDisconnect(){
@@ -6284,11 +6285,11 @@ function renderJsonbinStatus(){
       <div class="jb-fields">
         <div class="jb-field">
           <label>API Key (X-Master-Key)</label>
-          <input type="password" class="fc" id="jb-key" placeholder="\\$2a\\$10\\$..." value="${JB.key||''}" oninput="JB.key=this.value;saveJbConfig()" style="margin:0">
+          <input type="password" class="fc" id="jb-key" placeholder="\\$2a\\$10\\$..." value="${JB.key||''}" oninput="JB.key=this.value;saveJbConfig(true)" onblur="saveJbConfig()" style="margin:0">
         </div>
         <div class="jb-field">
           <label>ID do Cofre (Bin ID)</label>
-          <input type="text" class="fc" id="jb-binid" placeholder="64abc123..." value="${JB.binId||''}" oninput="JB.binId=this.value;saveJbConfig()" style="margin:0">
+          <input type="text" class="fc" id="jb-binid" placeholder="64abc123..." value="${JB.binId||''}" oninput="JB.binId=this.value;saveJbConfig(true)" onblur="saveJbConfig()" style="margin:0">
         </div>
       </div>
       <button class="jb-btn primary" onclick="jbCreateBin()">✨ Criar Cofre Novo</button>
