@@ -77,7 +77,7 @@ lastTap = now;
 }, { passive: true });
 })();</script> <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"> <meta http-equiv="Pragma" content="no-cache"> <meta http-equiv="Expires" content="0">
 </head>
-<script>var APP_VERSION = '3.2.1';
+<script>var APP_VERSION = '3.3.1';
 var APP_BUILD = new Date().toISOString().slice(0,10).replace(/-/g,'.');</script>
 <script>(function(){
 function makeIcon(size){
@@ -236,7 +236,7 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
 </div> <div id="addProfileModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);align-items:center;justify-content:center"> <div style="background:var(--bg2);border-radius:var(--r-modal);padding:24px;width:90%;max-width:320px;border:1.5px solid var(--border)"> <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px">Novo Perfil</div> <div style="margin-bottom:12px"> <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Nome</label> <input type="text" class="fc" id="newProfileName" placeholder="Ex: Esposa, Pessoal..." style="margin:0"> </div> <div style="margin-bottom:16px"> <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Avatar</label> <div style="display:flex;gap:8px;flex-wrap:wrap" id="avatarPicker"> <button onclick="selectAvatar('👤',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--gold);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👤</button> <button onclick="selectAvatar('👨',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👨</button> <button onclick="selectAvatar('👩',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👩</button> <button onclick="selectAvatar('👦',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👦</button> <button onclick="selectAvatar('👧',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👧</button> <button onclick="selectAvatar('🧑',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">🧑</button> <button onclick="selectAvatar('👴',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👴</button> <button onclick="selectAvatar('👵',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👵</button> </div> <input type="hidden" id="newProfileAvatar" value="👤"> </div> <div style="display:flex;gap:8px"> <button class="btn btn-secondary" style="flex:1" onclick="closeAddProfile()">Cancelar</button> <button class="btn btn-primary" style="flex:1" onclick="createProfile()">Criar</button> </div> </div>
 </div> <div id="editProfileModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);align-items:center;justify-content:center"> <div style="background:var(--bg2);border-radius:var(--r-modal);padding:24px;width:90%;max-width:320px;border:1.5px solid var(--border)"> <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">Editar Perfil</div> <div id="editProfileId" style="display:none"></div> <div style="font-size:11px;color:var(--text3);margin-bottom:16px">Altere nome e avatar do perfil</div> <div style="margin-bottom:12px"> <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Nome</label> <input type="text" class="fc" id="editProfileName" placeholder="Nome do perfil..." style="margin:0"> </div> <div style="margin-bottom:16px"> <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Avatar</label> <div style="display:flex;gap:8px;flex-wrap:wrap" id="editAvatarPicker"> <button onclick="selectEditAvatar('👤',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--gold);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👤</button> <button onclick="selectEditAvatar('👨',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👨</button> <button onclick="selectEditAvatar('👩',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👩</button> <button onclick="selectEditAvatar('👦',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👦</button> <button onclick="selectEditAvatar('👧',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👧</button> <button onclick="selectEditAvatar('🧑',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">🧑</button> <button onclick="selectEditAvatar('👴',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👴</button> <button onclick="selectEditAvatar('👵',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👵</button> </div> <input type="hidden" id="editProfileAvatar" value="👤"> </div> <div style="display:flex;gap:8px"> <button class="btn btn-secondary" style="flex:1" onclick="closeEditProfile()">Cancelar</button> <button class="btn btn-primary" style="flex:1" onclick="saveEditProfile()">Salvar</button> </div> </div>
 </div> <div id="lockScreen" style="display:none"> <div class="lock-logo"> <div style="padding:3px;border-radius:18px;background:linear-gradient(135deg,#f5d078,#c8922a,#8a5e10);display:inline-flex;box-shadow:0 6px 20px rgba(0,0,0,.3);"> <div style="width:64px;height:64px;border-radius:15px;background:#0d1829;display:flex;align-items:center;justify-content:center;"> <svg width="40" height="40" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"> <text x="5" y="39" font-size="30" font-weight="800" fill="white" font-family="'Space Grotesk',sans-serif" letter-spacing="-1">Au</text> <rect x="5" y="43" width="46" height="3" rx="1.5" fill="#c8922a"/> <rect x="38" y="9" width="13" height="9" rx="2" fill="rgba(200,146,42,0.3)" stroke="rgba(200,146,42,0.8)" stroke-width="0.8"/> <rect x="38" y="9" width="13" height="2.8" rx="2" fill="rgba(200,146,42,0.85)"/> </svg> </div> </div> </div> <div class="lock-title">Aurum</div> <div class="lock-sub" id="lockSub">Digite seu PIN para entrar</div> <div class="pin-dots" id="pinDots"> <div class="pin-dot" id="pd0"></div> <div class="pin-dot" id="pd1"></div> <div class="pin-dot" id="pd2"></div> <div class="pin-dot" id="pd3"></div> </div> <div class="pin-pad"> <button class="pin-key" onclick="pinPress('1')">1<span class="pin-key-sub"></span></button> <button class="pin-key" onclick="pinPress('2')">2<span class="pin-key-sub">ABC</span></button> <button class="pin-key" onclick="pinPress('3')">3<span class="pin-key-sub">DEF</span></button> <button class="pin-key" onclick="pinPress('4')">4<span class="pin-key-sub">GHI</span></button> <button class="pin-key" onclick="pinPress('5')">5<span class="pin-key-sub">JKL</span></button> <button class="pin-key" onclick="pinPress('6')">6<span class="pin-key-sub">MNO</span></button> <button class="pin-key" onclick="pinPress('7')">7<span class="pin-key-sub">PQRS</span></button> <button class="pin-key" onclick="pinPress('8')">8<span class="pin-key-sub">TUV</span></button> <button class="pin-key" onclick="pinPress('9')">9<span class="pin-key-sub">WXYZ</span></button> <button class="pin-key bio" id="pinBioBtn" onclick="tryBiometric()" style="display:none" title="Face ID / Digital">👤🔓</button> <button class="pin-key" onclick="pinPress('0')">0</button> <button class="pin-key del" onclick="pinDel()">⌫</button> </div> <div class="lock-msg" id="lockMsg"></div> <button class="lock-forgot" onclick="pinForgot()">🔑 Esqueci meu PIN</button>
-</div> <div id="toast"></div> <div class="app-shell" id="appShell" style="visibility:hidden"> <nav class="sidebar" id="sidebar" aria-label="Navegação principal"> <div class="sidebar-logo"> <div class="sidebar-logo-icon"> <div class="sidebar-logo-icon-inner"> <svg width="22" height="22" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"> <text x="7" y="38" font-size="30" font-weight="800" fill="white" font-family="'Space Grotesk',sans-serif" letter-spacing="-1">Au</text> <rect x="7" y="42" width="42" height="4" rx="2" fill="#c8922a"/> <rect x="38" y="9" width="12" height="8" rx="2" fill="rgba(200,146,42,0.35)" stroke="#c8922a" stroke-width="0.8"/> <rect x="38" y="9" width="12" height="2.5" rx="2" fill="rgba(200,146,42,0.85)"/> </svg> </div> </div> <div class="sidebar-logo-text-wrap"> <div class="sidebar-logo-text">Aurum</div> <div class="sidebar-logo-sub" id="topbarSub" style="display:inline-block;background:linear-gradient(135deg,rgba(200,146,42,.18),rgba(200,146,42,.08));border:0.5px solid rgba(200,146,42,.4);border-radius:4px;padding:1px 6px;font-weight:700;letter-spacing:.12em;color:var(--gold);font-size:9px">PRO</div> </div> </div> <button class="sidebar-toggle" onclick="toggleSidebar()" title="Recolher menu" id="sidebarToggle">‹</button> <div class="sidebar-nav" id="sidebarNav"> <div class="nav-section"> <div class="nav-section-title">Principal</div> <div class="nav-item active" data-tab="invoice" onclick="setTab('invoice')" aria-label="Fatura"> <span class="nav-icon">💳</span><span class="nav-label">Fatura</span> </div> <div class="nav-item" data-tab="lancamentos" onclick="setTab('lancamentos')" aria-label="Lançamentos"> <span class="nav-icon">➕</span><span class="nav-label">Lançar</span> </div> </div> <div class="nav-section"> <div class="nav-section-title">Análise</div> <div class="nav-item" data-tab="charts" onclick="setTab('charts')" aria-label="Gráficos"> <span class="nav-icon">📊</span><span class="nav-label">Gráficos & Projeção</span> </div> <div class="nav-item" data-tab="history" onclick="setTab('history')" aria-label="Histórico"> <span class="nav-icon">🕑</span><span class="nav-label">Histórico & Anual</span> </div> <div class="nav-item" data-tab="future" onclick="setTab('future')" aria-label="Parcelas Futuras"> <span class="nav-icon">⏳</span><span class="nav-label">Parcelas Futuras</span> </div> </div> <div class="nav-section"> <div class="nav-section-title">Gestão</div> <div class="nav-item" data-tab="budgets" onclick="setTab('budgets')" aria-label="Teto de Gastos"> <span class="nav-icon">🎯</span><span class="nav-label">Teto de Gastos</span> </div> <div class="nav-item" data-tab="family" onclick="setTab('family')" aria-label="Família" id="navFamily" style="display:none"> <span class="nav-icon">👨‍👩‍👧</span><span class="nav-label">Família</span> </div> </div> <div class="nav-section"> <div class="nav-section-title">App</div> <div class="nav-item" onclick="openAddCardModal()" aria-label="Novo Cartão"> <span class="nav-icon">➕</span><span class="nav-label">Novo Cartão</span> </div> <div class="nav-item" onclick="document.getElementById('pdf-file-input').click()" aria-label="Importar PDF"> <span class="nav-icon">📄</span><span class="nav-label">Importar PDF</span> </div> <div class="nav-item" onclick="openModal('calc')" aria-label="Calculadora"> <span class="nav-icon">🧮</span><span class="nav-label">Calculadora</span> </div> <div class="nav-item" data-tab="faq" onclick="setTab('faq')" aria-label="Ajuda"> <span class="nav-icon">💬</span><span class="nav-label">Ajuda</span> </div> <div class="nav-item" data-tab="settings" onclick="setTab('settings')" aria-label="Configurações"> <span class="nav-icon">⚙️</span><span class="nav-label">Configurações</span> </div> </div> </div> <div class="sidebar-footer"> <div class="sidebar-footer-item" id="themePickerWrap"> <span style="font-size:14px;flex-shrink:0">🎨</span> <div class="theme-dots sidebar-footer-text" id="themePicker"></div> </div> <div class="sidebar-footer-item sidebar-footer-text" style="justify-content:center;padding:5px 8px;cursor:pointer" id="lockBtnWrap"
+</div> <div id="toast"></div> <div class="app-shell" id="appShell" style="visibility:hidden"> <nav class="sidebar" id="sidebar" aria-label="Navegação principal"> <div class="sidebar-logo"> <div class="sidebar-logo-icon"> <div class="sidebar-logo-icon-inner"> <svg width="22" height="22" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"> <text x="7" y="38" font-size="30" font-weight="800" fill="white" font-family="'Space Grotesk',sans-serif" letter-spacing="-1">Au</text> <rect x="7" y="42" width="42" height="4" rx="2" fill="#c8922a"/> <rect x="38" y="9" width="12" height="8" rx="2" fill="rgba(200,146,42,0.35)" stroke="#c8922a" stroke-width="0.8"/> <rect x="38" y="9" width="12" height="2.5" rx="2" fill="rgba(200,146,42,0.85)"/> </svg> </div> </div> <div class="sidebar-logo-text-wrap"> <div class="sidebar-logo-text">Aurum</div> <div class="sidebar-logo-sub" id="topbarSub" style="display:inline-block;background:linear-gradient(135deg,rgba(200,146,42,.18),rgba(200,146,42,.08));border:0.5px solid rgba(200,146,42,.4);border-radius:4px;padding:1px 6px;font-weight:700;letter-spacing:.12em;color:var(--gold);font-size:9px">PRO</div> </div> </div> <button class="sidebar-toggle" onclick="toggleSidebar()" title="Recolher menu" id="sidebarToggle">‹</button> <div class="sidebar-nav" id="sidebarNav"> <div class="nav-section"> <div class="nav-section-title">Principal</div> <div class="nav-item" data-tab="invoice" onclick="setTab('invoice')" aria-label="Fatura"> <span class="nav-icon">💳</span><span class="nav-label">Fatura</span> </div> <div class="nav-item" data-tab="lancamentos" onclick="setTab('lancamentos')" aria-label="Lançamentos"> <span class="nav-icon">➕</span><span class="nav-label">Lançar</span> </div> </div> <div class="nav-section"> <div class="nav-section-title">Análise</div> <div class="nav-item" data-tab="charts" onclick="setTab('charts')" aria-label="Gráficos"> <span class="nav-icon">📊</span><span class="nav-label">Gráficos & Projeção</span> </div> <div class="nav-item" data-tab="history" onclick="setTab('history')" aria-label="Histórico"> <span class="nav-icon">🕑</span><span class="nav-label">Histórico & Anual</span> </div> <div class="nav-item" data-tab="future" onclick="setTab('future')" aria-label="Parcelas Futuras"> <span class="nav-icon">⏳</span><span class="nav-label">Parcelas Futuras</span> </div> </div> <div class="nav-section"> <div class="nav-section-title">Gestão</div> <div class="nav-item" data-tab="budgets" onclick="setTab('budgets')" aria-label="Teto de Gastos"> <span class="nav-icon">🎯</span><span class="nav-label">Teto de Gastos</span> </div> <div class="nav-item" data-tab="family" onclick="setTab('family')" aria-label="Família" id="navFamily" style="display:none"> <span class="nav-icon">👨‍👩‍👧</span><span class="nav-label">Família</span> </div> </div> <div class="nav-section"> <div class="nav-section-title">App</div> <div class="nav-item" onclick="openAddCardModal()" aria-label="Novo Cartão"> <span class="nav-icon">➕</span><span class="nav-label">Novo Cartão</span> </div> <div class="nav-item" onclick="document.getElementById('pdf-file-input').click()" aria-label="Importar PDF"> <span class="nav-icon">📄</span><span class="nav-label">Importar PDF</span> </div> <div class="nav-item" onclick="openModal('calc')" aria-label="Calculadora"> <span class="nav-icon">🧮</span><span class="nav-label">Calculadora</span> </div> <div class="nav-item" data-tab="faq" onclick="setTab('faq')" aria-label="Ajuda"> <span class="nav-icon">💬</span><span class="nav-label">Ajuda</span> </div> <div class="nav-item" data-tab="settings" onclick="setTab('settings')" aria-label="Configurações"> <span class="nav-icon">⚙️</span><span class="nav-label">Configurações</span> </div> </div> </div> <div class="sidebar-footer"> <div class="sidebar-footer-item" id="themePickerWrap"> <span style="font-size:14px;flex-shrink:0">🎨</span> <div class="theme-dots sidebar-footer-text" id="themePicker"></div> </div> <div class="sidebar-footer-item sidebar-footer-text" style="justify-content:center;padding:5px 8px;cursor:pointer" id="lockBtnWrap"
            onclick="lockFromBtn()" title="Bloquear app"> <span style="font-size:12px;display:flex;align-items:center;gap:5px;opacity:.6;transition:opacity .2s"
               onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.6'"> <span style="font-size:13px">🔒</span> <span style="font-family:var(--body);font-size:10px;font-weight:600;color:var(--sb-text3);letter-spacing:.04em">Bloquear</span> </span> </div> <div class="sidebar-footer-item sidebar-footer-text" style="justify-content:center;padding:5px 8px;cursor:pointer"
            onclick="logoutApp()" title="Sair e trocar perfil"> <span style="font-size:12px;display:flex;align-items:center;gap:5px;opacity:.6;transition:opacity .2s"
@@ -261,7 +261,7 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
   ontouchend="ccTouchEnd(event)"></div> </div> <div id="cardDetail"></div> <div id="tabContent"></div> </main> </div> <button id="fabBtn" onclick="fabAdd()" title="Novo lançamento (Ctrl+N)"
       style="position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(0,98,204,.45);z-index:500;transition:all .2s cubic-bezier(.16,1,.3,1);display:flex;align-items:center;justify-content:center">
       ＋
-    </button> </div> </div> <nav class="bottom-nav" id="bottomNav"> <div class="bottom-nav-inner"> <div class="bn-item active" data-tab="invoice" onclick="setTab('invoice')"> <span class="bn-icon">💳</span> <span class="bn-label">Fatura</span> </div> <div class="bn-item" data-tab="lancamentos" onclick="setTab('lancamentos')"> <span class="bn-icon">➕</span> <span class="bn-label">Lançar</span> </div> <div class="bn-item" data-tab="charts" onclick="setTab('charts')"> <span class="bn-icon">📊</span> <span class="bn-label">Análise</span> </div> <div class="bn-item" data-tab="budgets" onclick="setTab('budgets')"> <span class="bn-icon">🎯</span> <span class="bn-label">Teto</span> </div> <div class="bn-item" data-tab="faq" onclick="setTab('faq')"> <span class="bn-icon">💬</span> <span class="bn-label">Ajuda</span> </div> <div class="bn-item" data-tab="settings" onclick="setTab('settings')"> <span class="bn-icon">⚙️</span> <span class="bn-label">Config</span> </div> </div>
+    </button> </div> </div> <nav class="bottom-nav" id="bottomNav"> <div class="bottom-nav-inner"> <div class="bn-item active" data-tab="dashboard" onclick="setTab('dashboard')"> <span class="bn-icon">🏠</span> <span class="bn-label">Início</span></div> <div class="bn-item" data-tab="invoice" onclick="setTab('invoice')"> <span class="bn-icon">💳</span> <span class="bn-label">Fatura</span> </div> <div class="bn-item" data-tab="lancamentos" onclick="setTab('lancamentos')"> <span class="bn-icon">➕</span> <span class="bn-label">Lançar</span> </div> <div class="bn-item" data-tab="charts" onclick="setTab('charts')"> <span class="bn-icon">📊</span> <span class="bn-label">Análise</span> </div> <div class="bn-item" data-tab="budgets" onclick="setTab('budgets')"> <span class="bn-icon">🎯</span> <span class="bn-label">Teto</span> </div> <div class="bn-item" data-tab="faq" onclick="setTab('faq')"> <span class="bn-icon">💬</span> <span class="bn-label">Ajuda</span> </div> <div class="bn-item" data-tab="settings" onclick="setTab('settings')"> <span class="bn-icon">⚙️</span> <span class="bn-label">Config</span> </div> </div>
 </nav> <div class="modal-overlay" id="modal-card" onclick="closeOuter(event,'card')"> <div class="modal"> <div class="modal-header"> <div class="modal-title" id="cardModalTitle">Novo Cartão</div> <button class="modal-close" onclick="closeModal('card')">✕</button> </div> <div class="fr"> <div class="fg"> <label class="fl">Nome do Cartão</label> <input type="text" class="fc" id="c-name" placeholder="Nubank, Itaú..."> </div> <div class="fg"> <label class="fl">Últimos 4 Dígitos</label> <input type="text" class="fc" id="c-last4" placeholder="0000" maxlength="4"> </div> </div> <div class="fr"> <div class="fg" style="flex:2"> <label class="fl">Nome do Titular</label> <input type="text" class="fc" id="c-holder" placeholder="Como aparece no cartão"> </div> <div class="fg" style="flex:1"> <label class="fl">Validade (MM/AA)</label> <input type="text" class="fc" id="c-expiry" placeholder="12/28" maxlength="5" oninput="fmtExpiry(this)"> </div> </div> <div class="fr"> <div class="fg"> <label class="fl">Limite (R$)</label> <input type="number" class="fc" id="c-limit" placeholder="0,00" min="0"> </div> <div class="fg"> <label class="fl">Bandeira</label> <select class="fc" id="c-brand"> <option>Visa</option><option>Mastercard</option><option>Elo</option> <option>Amex</option><option>Hipercard</option> </select> </div> </div> <div class="fr3"> <div class="fg"> <label class="fl">Dia Fechamento</label> <input type="number" class="fc" id="c-close" min="1" max="31" placeholder="20"> </div> <div class="fg"> <label class="fl">Dia Vencimento</label> <input type="number" class="fc" id="c-due" min="1" max="31" placeholder="5"> </div> <div class="fg"> <label class="fl">Juros % a.m.</label> <input type="number" class="fc" id="c-rate" placeholder="14.9" step="0.1" min="0"> </div> </div> <div class="fg"> <label class="fl">Cor do Cartão</label> <div class="color-opts" id="colorOpts"></div> </div> <div class="fg" style="margin-top:4px"> <label class="fl">Tipo de Cartão</label> <div class="corp-field"> <span class="corp-chip active" id="chip-personal" onclick="setCardType('personal')">🪙 Pessoal</span> <span class="corp-chip" id="chip-corp" onclick="setCardType('corp')">💼 Empresarial</span> </div> </div> <div id="corp-extra" style="display:none"> <div class="fr"> <div class="fg"> <label class="fl">Empresa / Projeto</label> <input type="text" class="fc" id="c-corp-name" placeholder="Acme Corp · Q2 2025"> </div> <div class="fg" style="flex:0 0 160px"> <label class="fl" style="display:flex;align-items:center;gap:6px"> <input type="checkbox" id="c-corp-reimb" style="width:14px;height:14px;accent-color:var(--corp)"> Reembolsável
           </label> <div style="height:38px;display:flex;align-items:center;font-size:12px;color:var(--text2)">Marcar gastos como reemb.</div> </div> </div> </div> <div class="modal-actions"> <button class="btn btn-secondary" onclick="closeModal('card')">Cancelar</button> <button class="btn btn-primary" id="cardSaveBtn" onclick="saveCard()">Salvar Cartão</button> </div> </div>
 </div> <div class="modal-overlay" id="modal-pay" onclick="closeOuter(event,'pay')"> <div class="modal" style="max-width:460px"> <div class="modal-header"> <div class="modal-title">Registrar Pagamento</div> <button class="modal-close" onclick="closeModal('pay')">✕</button> </div> <div style="background:var(--blue-l);border:1px solid var(--blue-m);border-radius:var(--r);padding:14px 16px;margin-bottom:18px"> <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue-d);margin-bottom:5px">Total da Fatura</div> <div style="font-family:var(--num-font);font-size:32px;font-weight:800;color:var(--blue);letter-spacing:-1px" id="payTotal">R$ 0,00</div> <div style="font-size:11px;color:var(--text3);margin-top:3px;font-weight:500" id="payDueInfo"></div> </div> <div class="fg"> <label class="fl">Valor Pago (R$)</label> <input type="number" class="fc" id="pay-amt" placeholder="0,00" step="0.01" min="0.01" oninput="calcPayPrev()"> </div> <div class="fg"> <label class="fl">Data do Pagamento</label> <input type="date" class="fc" id="pay-date"> </div> <div id="pay-prev" style="background:var(--amber-l);border:1px solid rgba(201,112,0,.18);border-radius:var(--r);padding:13px 15px;margin-bottom:14px;display:none"> <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:10px">Projeção</div> <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:7px"> <span style="color:var(--text2);font-weight:500">Saldo não pago</span> <span id="pp-rem" style="color:var(--red);font-family:var(--num-font);font-size:16px;font-weight:700"></span> </div> <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:7px"> <span style="color:var(--text2);font-weight:500">Juros rotativo (<span id="pp-rate"></span>% a.m.)</span> <span id="pp-int" style="color:var(--amber);font-family:var(--num-font);font-size:16px;font-weight:700"></span> </div> <div id="pp-encargos-row" style="display:none;justify-content:space-between;font-size:12px;margin-bottom:7px"> <span style="color:var(--text2);font-weight:500">Multa + Mora</span> <span id="pp-encargos" style="color:var(--red);font-family:var(--num-font);font-size:16px;font-weight:700"></span> </div> <div id="pp-estorno-row" style="display:none;justify-content:space-between;font-size:12px;margin-bottom:7px"> <span style="color:var(--text2);font-weight:500">Estorno aplicado</span> <span id="pp-estorno-val" style="color:var(--green);font-family:var(--num-font);font-size:16px;font-weight:700"></span> </div> <div style="display:flex;justify-content:space-between;font-size:12px;padding-top:8px;border-top:1px solid rgba(201,112,0,.15)"> <span style="color:var(--text2);font-weight:500">Saldo c/ juros na próx. fatura</span> <span id="pp-next" style="color:var(--blue);font-family:var(--num-font);font-size:16px;font-weight:700"></span> </div> </div> <div> <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.includes('+')?'▲ Encargos / Estorno':'+ Encargos / Estorno (atraso, multa, mora)'"
@@ -302,7 +302,7 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
 ];
 let S = {
 cards:[],tx:[],payments:[],
-activeCardId:null,tab:'invoice',month:curMonth(),
+activeCardId:null,tab:'dashboard',month:curMonth(),
 editCardId:null,selColor:0,
 delTarget:null,payCtx:null,theme:'light',
 editTxId:null,invSearch:'',invSort:'date-desc',histCard:'',
@@ -617,25 +617,11 @@ if(famNav) famNav.style.display = (isAdmin() && getProfiles().length > 1) ? 'fle
 document.querySelectorAll('.nav-item[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===S.tab));
 const el=document.getElementById('tabContent');
 const c=activeCard();
-if(!c&&S.tab!=='settings'&&S.tab!=='charts'&&S.tab!=='annual'&&S.tab!=='lancamentos'&&S.tab!=='history'&&S.tab!=='budgets'){
-el.innerHTML=`<div style="max-width:400px;margin:32px auto;padding:0 16px;text-align:center">
-<div style="font-size:48px;margin-bottom:16px">💳</div>
-<div style="font-family:var(--display);font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px">Bem-vindo ao Aurum Pro</div>
-<div style="font-size:13px;color:var(--text3);line-height:1.7;margin-bottom:24px">Controle financeiro com segurança, voz e sincronização familiar. Comece adicionando seu primeiro cartão.</div>
-<button onclick="openAddCardModal()" style="display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,98,204,.35)">
-➕ Adicionar primeiro cartão
-</button>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:28px">
-${[['🔐','Criptografia','AES-256 no dispositivo'],['🎤','Voz','Lance por fala natural'],['👨‍👩‍👧','Família','Perfis independentes']].map(function(r){
-return '<div style="background:var(--bg2);border:var(--bw) solid var(--border);border-radius:var(--r);padding:14px 10px">'
-+'<div style="font-size:22px;margin-bottom:6px">'+r[0]+'</div>'
-+'<div style="font-size:11px;font-weight:700;color:var(--text)">'+r[1]+'</div>'
-+'<div style="font-size:10px;color:var(--text3);margin-top:2px">'+r[2]+'</div>'
-+'</div>';}).join('')}
-</div>
-</div>`;return;
+if(!c&&S.tab!=='settings'&&S.tab!=='charts'&&S.tab!=='annual'&&S.tab!=='lancamentos'&&S.tab!=='history'&&S.tab!=='budgets'&&S.tab!=='dashboard'){
+setTab('dashboard');return;
 }
-if(S.tab==='invoice') renderInvoice(el,c);
+if(S.tab==='dashboard') renderDashboard(el);
+else if(S.tab==='invoice') renderInvoice(el,c);
 else if(S.tab==='lancamentos') renderLancamentos(el);
 else if(S.tab==='history') renderHistory(el);
 else if(S.tab==='charts') renderCharts(el);
@@ -646,6 +632,215 @@ else if(S.tab==='future') renderFuture(el,c);
 else if(S.tab==='budgets') renderBudgetsPage(el);
 else renderSettings(el);
 }
+
+function renderDashboard(el){
+// Sem cartões: mostra tela de boas-vindas
+if(S.cards.length===0){
+el.innerHTML=`<div style="max-width:400px;margin:40px auto;padding:0 16px;text-align:center">
+<div style="font-size:52px;margin-bottom:16px">💳</div>
+<div style="font-family:var(--display);font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px">Bem-vindo ao Aurum Pro</div>
+<div style="font-size:13px;color:var(--text3);line-height:1.7;margin-bottom:24px">Controle financeiro com segurança, voz e sincronização familiar.<br>Comece adicionando seu primeiro cartão.</div>
+<button onclick="openAddCardModal()" style="display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,98,204,.35)">
+  ➕ Adicionar primeiro cartão
+</button>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:28px">
+${[['🔐','Criptografia','AES-256 no dispositivo'],['🎤','Voz','Lance por fala natural'],['👨‍👩‍👧','Família','Perfis independentes']].map(function(r){
+return '<div style="background:var(--bg2);border:var(--bw) solid var(--border);border-radius:var(--r);padding:14px 10px">'
++'<div style="font-size:22px;margin-bottom:6px">'+r[0]+'</div>'
++'<div style="font-size:11px;font-weight:700;color:var(--text)">'+r[1]+'</div>'
++'<div style="font-size:10px;color:var(--text3);margin-top:2px">'+r[2]+'</div>'
++'</div>';}).join('')}
+</div>
+</div>`;
+return;
+}
+const cur=curMonth();
+const prev=addM(cur,-1);
+
+// Totais
+const totalDue=S.cards.reduce((s,c)=>{const ms=monthSummary(c.id,cur);return s+(ms.due||0);},0);
+const totalAvail=S.cards.reduce((s,c)=>s+Math.max(0,c.limit-(monthDebits(c.id,cur)+(carriedBalance(c.id,cur)||0))),0);
+const totalPrevDue=S.cards.reduce((s,c)=>{const ms=monthSummary(c.id,prev);return s+(ms.debits||0);},0);
+const momPct=totalPrevDue>0?((totalDue-totalPrevDue)/totalPrevDue*100):0;
+const activeParcelas=S.tx.filter(t=>t.type==='debit'&&t.totalInst>1&&t.instNum<t.totalInst&&t.invoiceMonth>=cur).reduce((ids,t)=>ids.has(t.gid)?ids:ids.add(t.gid),new Set()).size;
+
+// Spark (5 meses)
+const sparkMonths=[];for(let i=4;i>=0;i--) sparkMonths.push(addM(cur,-i));
+const sparkVals=sparkMonths.map(m=>S.cards.reduce((s,c)=>s+monthDebits(c.id,m),0));
+const sparkMax=Math.max(...sparkVals,1);
+
+// Vencimentos
+const dues=[];
+S.cards.forEach(c=>{
+  const todayStr=new Date().toISOString().slice(0,10);
+  const om=invMonth(todayStr,c.close);
+  const ms=monthSummary(c.id,om);
+  if(ms.due<=0) return;
+  dues.push({id:c.id,name:c.name,due:ms.due,dl:ms.daysLeft,colorIdx:c.colorIdx||0,om});
+});
+dues.sort((a,b)=>a.dl-b.dl);
+
+// Top categorias
+const catMap={};
+S.tx.filter(t=>t.type==='debit'&&t.invoiceMonth===cur).forEach(t=>{
+  const cat=t.category||'🛍️ Outros';
+  catMap[cat]=(catMap[cat]||0)+t.amount;
+});
+const topCats=Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+const catMax=topCats[0]?topCats[0][1]:1;
+const catColors=['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
+
+// Alertas
+const alerts=[];
+S.cards.forEach(c=>{
+  const todayStr=new Date().toISOString().slice(0,10);
+  const om=invMonth(todayStr,c.close);
+  const ms=monthSummary(c.id,om);
+  if(ms.due>0){
+    if(ms.daysLeft<0) alerts.push({type:'bad',txt:`<strong>${c.name}</strong> — fatura vencida · ${fmtR(ms.due)}`});
+    else if(ms.daysLeft===0) alerts.push({type:'bad',txt:`<strong>${c.name}</strong> — vence hoje · ${fmtR(ms.due)}`});
+    else if(ms.daysLeft<=3) alerts.push({type:'warn',txt:`<strong>${c.name}</strong> — vence em ${ms.daysLeft} dia${ms.daysLeft>1?'s':''} · ${fmtR(ms.due)}`});
+  }
+});
+const budgets=S.budgets||{};
+Object.entries(budgets).forEach(([cat,lim])=>{
+  if(lim<=0) return;
+  const sp=catMap[cat]||0;
+  const pct=sp/lim*100;
+  if(pct>=100) alerts.push({type:'bad',txt:`<strong>${cat.split(' ').slice(1).join(' ')}</strong> — teto estourado (${pct.toFixed(0)}%)`});
+  else if(pct>=80) alerts.push({type:'warn',txt:`<strong>${cat.split(' ').slice(1).join(' ')}</strong> — ${pct.toFixed(0)}% do teto atingido`});
+});
+// Última parcela
+S.tx.filter(t=>t.type==='debit'&&t.invoiceMonth===cur&&t.totalInst>1&&t.instNum===t.totalInst).slice(0,2).forEach(t=>{
+  alerts.push({type:'ok',txt:`<strong>${t.desc.replace(/ \(\d+\/\d+\)$/,'')}</strong> — última parcela este mês`});
+});
+
+// Família
+const profiles=getProfiles().filter(p=>p.id!==_activeProfile);
+const myDebits=S.cards.reduce((s,c)=>s+monthDebits(c.id,cur),0);
+
+let html='';
+
+// TOTAL BLOCK
+html+=`<div style="background:var(--bg2);border:var(--bw) solid var(--border);border-radius:var(--rl);padding:18px 20px 14px;margin-bottom:10px">
+<div style="font-size:11px;color:var(--text3);margin-bottom:6px">Total a pagar este mês</div>
+<div style="font-family:var(--num-font);font-size:34px;font-weight:800;color:${totalDue>0?'var(--red)':'var(--green)'};letter-spacing:-1px;line-height:1">${fmtR(totalDue)}</div>
+<div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
+  <span style="font-size:11px;color:var(--text3)">${S.cards.length} cartão${S.cards.length!==1?'ões':''}</span>
+  ${totalPrevDue>0?`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:${momPct>0?'var(--red-l)':'var(--green-l)'};color:${momPct>0?'var(--red)':'var(--green)'}">${momPct>0?'↑':'↓'} ${Math.abs(momPct).toFixed(0)}% vs mês ant.</span>`:''}
+  <div style="margin-left:auto;display:flex;align-items:flex-end;gap:2px;height:24px">
+    ${sparkVals.map((v,i)=>`<div style="width:5px;border-radius:2px 2px 0 0;background:${i===4?'var(--blue)':'var(--border2)'};height:${Math.max(3,Math.round(v/sparkMax*22))}px"></div>`).join('')}
+  </div>
+</div>
+</div>`;
+
+// STATS
+html+=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+<div style="background:var(--bg2);border:var(--bw) solid var(--border);border-radius:var(--r);padding:12px 14px">
+  <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Disponível</div>
+  <div style="font-family:var(--num-font);font-size:16px;font-weight:700;color:var(--green)">${fmtR(totalAvail)}</div>
+</div>
+<div style="background:var(--bg2);border:var(--bw) solid var(--border);border-radius:var(--r);padding:12px 14px">
+  <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Próx. vencimento</div>
+  <div style="font-family:var(--num-font);font-size:16px;font-weight:700;color:${dues.length>0&&dues[0].dl<=2?'var(--red)':dues.length>0&&dues[0].dl<=5?'var(--amber)':'var(--text)'}">${dues.length>0?(dues[0].dl<0?'Vencida':dues[0].dl===0?'Hoje':dues[0].dl+'d'):'—'}</div>
+</div>
+<div style="background:var(--bg2);border:var(--bw) solid var(--border);border-radius:var(--r);padding:12px 14px">
+  <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Parcelas ativas</div>
+  <div style="font-family:var(--num-font);font-size:16px;font-weight:700;color:var(--text)">${activeParcelas}</div>
+</div>
+</div>`;
+
+// VENCIMENTOS
+if(dues.length>0){
+html+=`<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Vencimentos</div>
+<div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-bottom:10px">
+${dues.map(d=>{
+  const urgent=d.dl<0||d.dl===0;
+  const soon=d.dl>0&&d.dl<=5;
+  const bg=urgent?'var(--red-l)':soon?'var(--amber-l)':'var(--bg2)';
+  const border=urgent?'rgba(192,57,43,.35)':soon?'rgba(200,120,0,.3)':'var(--border)';
+  const color=urgent?'var(--red)':soon?'var(--amber)':'var(--text2)';
+  const label=d.dl<0?'Vencida':d.dl===0?'Hoje':d.dl+'d';
+  const g=GRADS[d.colorIdx]||GRADS[0];
+  return `<div style="flex-shrink:0;background:${bg};border:1px solid ${border};border-radius:var(--r);padding:10px 14px;min-width:120px;cursor:pointer" onclick="S.activeCardId='${d.id}';setTab('invoice')">
+    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+      <div style="width:7px;height:7px;border-radius:50%;background:${g.a||'var(--gold)'};flex-shrink:0"></div>
+      <span style="font-size:11px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px">${d.name}</span>
+    </div>
+    <div style="font-family:var(--num-font);font-size:15px;font-weight:800;color:${color}">${fmtR(d.due)}</div>
+    <div style="font-size:10px;font-weight:600;color:${color};margin-top:2px">${label}</div>
+    ${(urgent||soon)?`<button onclick="event.stopPropagation();S.activeCardId='${d.id}';S.month='${d.om}';setTab('invoice');setTimeout(openPayModal,80)" style="margin-top:6px;width:100%;padding:4px 0;border-radius:4px;border:none;background:rgba(0,0,0,.12);color:var(--text);font-size:10px;font-weight:700;cursor:pointer">Pagar</button>`:''}
+  </div>`;
+}).join('')}
+</div>`;
+}
+
+// TOP CATEGORIAS
+if(topCats.length>0){
+html+=`<div style="background:var(--bg2);border:var(--bw) solid var(--border);border-radius:var(--rl);padding:14px 16px;margin-bottom:10px">
+<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">Gastos por categoria</div>
+${topCats.map(([cat,amt],i)=>`
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+  <span style="font-size:14px;width:20px;flex-shrink:0">${cat.split(' ')[0]}</span>
+  <span style="font-size:12px;color:var(--text2);width:82px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cat.split(' ').slice(1).join(' ')}</span>
+  <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+    <div style="width:${(amt/catMax*100).toFixed(1)}%;height:100%;border-radius:3px;background:${catColors[i]||'var(--blue)'}"></div>
+  </div>
+  <span style="font-size:12px;color:var(--text2);width:68px;text-align:right;flex-shrink:0;font-family:var(--num-font)">${fmtR(amt)}</span>
+</div>`).join('')}
+</div>`;
+}
+
+// ALERTAS
+if(alerts.length>0){
+html+=`<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Alertas</div>
+<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+${alerts.map(a=>`
+<div style="background:${a.type==='bad'?'var(--red-l)':a.type==='warn'?'var(--amber-l)':'var(--bg2)'};border:var(--bw) solid ${a.type==='bad'?'rgba(192,57,43,.25)':a.type==='warn'?'rgba(200,120,0,.2)':'var(--border)'};border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:12px">
+  <div style="width:6px;height:6px;border-radius:50%;flex-shrink:0;background:${a.type==='bad'?'var(--red)':a.type==='warn'?'var(--amber)':'var(--green)'}"></div>
+  <span style="color:var(--text2)">${a.txt}</span>
+</div>`).join('')}
+</div>`;
+}
+
+// FAMÍLIA
+if(isAdmin()&&profiles.length>0){
+html+=`<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Família</div>
+<div style="background:var(--bg2);border:var(--bw) solid var(--border);border-radius:var(--rl);padding:4px 16px;margin-bottom:10px">
+<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
+  <div style="width:32px;height:32px;border-radius:50%;background:var(--gold-l);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👤</div>
+  <span style="font-size:13px;color:var(--text);flex:1">Você</span>
+  <span style="font-family:var(--num-font);font-size:13px;font-weight:700;color:${myDebits>0?'var(--red)':'var(--green)'}">${fmtR(myDebits)}</span>
+</div>
+${profiles.map(p=>{
+  let pData=null;try{const r=localStorage.getItem('ccp-'+p.id);if(r)pData=JSON.parse(r);}catch(e){}
+  const pDebits=(pData?.tx||[]).filter(t=>t.invoiceMonth===cur&&t.type==='debit').reduce((s,t)=>s+(t.amount||0),0);
+  return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0">
+    <div style="width:32px;height:32px;border-radius:50%;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${p.avatar||'👤'}</div>
+    <span style="font-size:13px;color:var(--text);flex:1">${p.name}</span>
+    <span style="font-family:var(--num-font);font-size:13px;font-weight:700;color:var(--text2)">${fmtR(pDebits)}</span>
+  </div>`;
+}).join('')}
+<div style="border-top:0.5px solid var(--border);padding:8px 0;display:flex;justify-content:space-between;font-size:12px;color:var(--text3)">
+  <span>Total família</span>
+  <span style="font-family:var(--num-font);font-weight:700;color:var(--text)">${fmtR(totalDue)}</span>
+</div>
+</div>`;
+}
+
+// ATALHOS RÁPIDOS
+html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<button onclick="setTab('lancamentos')" style="padding:12px;border:var(--bw) solid var(--border);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-family:var(--body);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center">
+  ➕ Novo lançamento
+</button>
+<button onclick="setTab('charts')" style="padding:12px;border:var(--bw) solid var(--border);border-radius:var(--r);background:var(--bg2);color:var(--text2);font-family:var(--body);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center">
+  📊 Ver gráficos
+</button>
+</div>`;
+
+el.innerHTML=html;
+}
+
 function renderInvoice(el,c){
 const m=S.month;
 const s=monthSummary(c.id,m);
@@ -2934,7 +3129,7 @@ corpReimb:document.getElementById('c-corp-reimb')?.checked||false,
 };
 if(S.editCardId){Object.assign(getCard(S.editCardId),data)}
 else{const id=uid();S.cards.push({id,...data});if(!S.activeCardId)S.activeCardId=id}
-closeModal('card');render();showToast('✓ Cartão salvo','green');
+closeModal('card');render();showToast('✓ Cartão salvo','green');if(S.tab==='dashboard')renderContent();
 }
 function openSimulator(){
 const c=activeCard();if(!c)return;
@@ -3462,12 +3657,12 @@ el.classList.toggle('active', el.dataset.tab===t);
 document.querySelectorAll('.bn-item[data-tab]').forEach(el=>{
 el.classList.toggle('active', el.dataset.tab===t);
 });
-const titles={invoice:'Fatura',lancamentos:'Lançamentos',charts:'Gráficos',annual:'Visão Anual',
+const titles={dashboard:'Início',invoice:'Fatura',lancamentos:'Lançamentos',charts:'Gráficos',annual:'Visão Anual',
 future:'Parcelas Futuras',history:'Histórico',settings:'Configurações',budgets:'Teto de Gastos',faq:'Ajuda & FAQ'};
 const ttEl=document.getElementById('topbarTitle');
 if(ttEl) ttEl.textContent=titles[t]||'Aurum';
 const fab=document.getElementById('fabBtn');
-if(fab) fab.style.display=(t==='lancamentos'||t==='settings')?'none':'flex';
+if(fab) fab.style.display=(t==='lancamentos'||t==='settings'||t==='dashboard')?'none':'flex';
 closeSidebarMobile();
 }
 let _ccTouchX=0,_ccTouchDx=0,_ccTouchActive=false;
