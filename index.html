@@ -3692,7 +3692,7 @@ const tx=S.tx.find(t=>t.id===id);
 if(allInst&&tx&&tx.totalInst>1){
 const count=S.tx.filter(t=>t.gid===tx.gid).length;
 S.tx=S.tx.filter(t=>t.gid!==tx.gid);
-S.delTarget=null;closeModal('del');render();
+S.delTarget=null;save();closeModal('del');render();
 showToast(`🗑 ${count} parcelas excluídas`,'');return;
 }
 S.tx=S.tx.filter(t=>t.id!==id);
@@ -3702,7 +3702,7 @@ S.payments=S.payments.filter(p=>p.cardId!==id);
 S.cards=S.cards.filter(c=>c.id!==id);
 if(S.activeCardId===id)S.activeCardId=S.cards.length>0?S.cards[0].id:null;
 }
-S.delTarget=null;closeModal('del');render();showToast('🗑 Excluído','');
+S.delTarget=null;save();closeModal('del');render();showToast('🗑 Excluído','');
 }
 function selectCard(id){S.activeCardId=id;render();const cs=document.querySelector('.content-scroll');if(cs)cs.scrollTop=0;}
 let _dragCardId=null;
