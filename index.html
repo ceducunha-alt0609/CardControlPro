@@ -83,6 +83,10 @@ lastTap = now;
 }, { passive: true });
 })();</script>
 </head>
+<script>
+var APP_VERSION = '2.1.4';
+var APP_BUILD   = new Date().toISOString().slice(0,10).replace(/-/g,'.');
+</script>
 <script>(function(){
 function makeIcon(size){
 try {
@@ -159,8 +163,7 @@ appleIcon.id = 'pwa-apple-icon';
 document.head.appendChild(appleIcon);
 }
 appleIcon.href = 'icons/apple-touch-icon.png';
-const APP_VERSION = '1.9.1';
-const APP_BUILD   = new Date().toISOString().slice(0,10).replace(/-/g,'.');
+// APP_VERSION e APP_BUILD definidos globalmente
 const isPng = icon192.startsWith('data:image/png');
 const manifest = {
 name: 'Aurum Pro',
@@ -195,9 +198,15 @@ navigator.serviceWorker.getRegistrations()
 .then(regs => regs.forEach(r => r.unregister()))
 .catch(()=>{});
 } else {
-navigator.serviceWorker.register('./sw.js')
-.then(reg => console.log('SW registrado:', reg.scope))
-.catch(err => console.warn('SW erro:', err));
+// Só registra SW no domínio correto (GitHub Pages ou localhost)
+const _swAllowed = location.hostname === 'localhost'
+  || location.hostname.endsWith('.github.io')
+  || location.protocol === 'https:' && !location.hostname.includes('claudeusercontent');
+if(_swAllowed){
+  navigator.serviceWorker.register('./sw.js')
+  .then(reg => console.log('SW registrado:', reg.scope))
+  .catch(err => console.warn('SW erro:', err));
+}
 }
 }
 window._pwaInstallPrompt = null;
@@ -300,6 +309,37 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
     <div style="display:flex;gap:8px">
       <button class="btn btn-secondary" style="flex:1" onclick="closeAddProfile()">Cancelar</button>
       <button class="btn btn-primary" style="flex:1" onclick="createProfile()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div id="editProfileModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border-radius:var(--r-modal);padding:24px;width:90%;max-width:320px;border:1.5px solid var(--border)">
+    <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">Editar Perfil</div>
+    <div id="editProfileId" style="display:none"></div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:16px">Altere nome e avatar do perfil</div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Nome</label>
+      <input type="text" class="fc" id="editProfileName" placeholder="Nome do perfil..." style="margin:0">
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Avatar</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="editAvatarPicker">
+        <button onclick="selectEditAvatar('👤',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--gold);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👤</button>
+        <button onclick="selectEditAvatar('👨',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👨</button>
+        <button onclick="selectEditAvatar('👩',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👩</button>
+        <button onclick="selectEditAvatar('👦',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👦</button>
+        <button onclick="selectEditAvatar('👧',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👧</button>
+        <button onclick="selectEditAvatar('🧑',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">🧑</button>
+        <button onclick="selectEditAvatar('👴',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👴</button>
+        <button onclick="selectEditAvatar('👵',this)" class="av-btn" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--border);background:var(--bg3);cursor:pointer;font-size:20px;touch-action:manipulation">👵</button>
+      </div>
+      <input type="hidden" id="editProfileAvatar" value="👤">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeEditProfile()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveEditProfile()">Salvar</button>
     </div>
   </div>
 </div>
@@ -2019,6 +2059,53 @@ document.getElementById('addProfileModal').style.display = 'flex';
 document.getElementById('newProfileName').value = '';
 _selectedAvatar = '👤';
 }
+// ── EDITAR PERFIL ──
+let _editProfileAvatar = '👤';
+
+function openEditProfile(id){
+  const profiles = getProfiles();
+  const p = profiles.find(x => x.id === id);
+  if(!p) return;
+  document.getElementById('editProfileId').textContent = id;
+  document.getElementById('editProfileName').value = p.name || '';
+  _editProfileAvatar = p.avatar || '👤';
+  // Highlight current avatar
+  document.querySelectorAll('#editAvatarPicker .av-btn').forEach(btn => {
+    btn.style.borderColor = btn.textContent.trim() === _editProfileAvatar
+      ? 'var(--gold)' : 'var(--border)';
+  });
+  document.getElementById('editProfileAvatar').value = _editProfileAvatar;
+  document.getElementById('editProfileModal').style.display = 'flex';
+}
+
+function selectEditAvatar(a, btn){
+  _editProfileAvatar = a;
+  document.getElementById('editProfileAvatar').value = a;
+  document.querySelectorAll('#editAvatarPicker .av-btn').forEach(b => b.style.borderColor = 'var(--border)');
+  if(btn) btn.style.borderColor = 'var(--gold)';
+}
+
+function closeEditProfile(){
+  document.getElementById('editProfileModal').style.display = 'none';
+}
+
+function saveEditProfile(){
+  const id = document.getElementById('editProfileId').textContent;
+  const name = document.getElementById('editProfileName').value.trim();
+  const avatar = document.getElementById('editProfileAvatar').value;
+  if(!name){ showToast('Digite um nome para o perfil','red'); return; }
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(p => p.id === id);
+  if(idx < 0) return;
+  profiles[idx].name = name;
+  profiles[idx].avatar = avatar;
+  saveProfiles(profiles);
+  closeEditProfile();
+  showToast('Perfil atualizado!','green');
+  if(S.tab === 'settings') renderContent();
+}
+
+
 function closeAddProfile(){
 document.getElementById('addProfileModal').style.display = 'none';
 }
@@ -2073,55 +2160,324 @@ if(S.tab==='family') renderContent();
 })
 .catch(()=>showToast('Erro ao carregar — verifique o Bin ID','red'));
 }
+// ── FAMÍLIA — Sync + Lançar pelo perfil dela ──
+
+function familySync(profileId){
+  const binId = localStorage.getItem('ccp-jb-family-binid');
+  const key   = localStorage.getItem('ccp-jb-family-key');
+  if(!binId){ showToast('Configure o Bin ID familiar em Sync → Cofre Familiar','red'); return; }
+  showToast('Sincronizando...','');
+  const headers = {'X-Master-Key': key||''};
+  fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {headers})
+  .then(r=>r.json())
+  .then(data=>{
+    const record = data.record || data;
+    localStorage.setItem('ccp-' + profileId, JSON.stringify(record));
+    showToast('Dados atualizados!','green');
+    if(S.tab==='family') renderContent();
+  })
+  .catch(()=>showToast('Erro ao sincronizar — verifique o Bin ID','red'));
+}
+
+let _familyLaunchProfile = null;
+
+function openFamilyLaunch(profileId){
+  const profiles = getProfiles();
+  const p = profiles.find(x=>x.id===profileId);
+  if(!p) return;
+  _familyLaunchProfile = profileId;
+  // Lê cartões do perfil dela
+  let pData = null;
+  const raw = localStorage.getItem('ccp-' + profileId);
+  if(raw){ try{ pData=JSON.parse(raw); }catch(e){} }
+  const pCards = pData?.cards || [];
+  if(pCards.length === 0){
+    showToast('Sem cartões no perfil de '+p.name+'. Sincronize primeiro.','red');
+    return;
+  }
+  // Preenche select de cartões no modal de lançamento familiar
+  const modal = document.getElementById('familyLaunchModal');
+  if(!modal){ buildFamilyLaunchModal(); }
+  document.getElementById('fl-profile-name').textContent = 'Lançar para ' + p.name;
+  const sel = document.getElementById('fl-card-select');
+  sel.innerHTML = pCards.map(c=>`<option value="${c.id}">${c.name} •••• ${c.last4||'????'}</option>`).join('');
+  document.getElementById('fl-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('fl-amount').value = '';
+  document.getElementById('fl-desc').value = '';
+  document.getElementById('fl-inst').value = '1';
+  document.getElementById('familyLaunchModal').style.display = 'flex';
+}
+
+function buildFamilyLaunchModal(){
+  const div = document.createElement('div');
+  div.id = 'familyLaunchModal';
+  div.style.cssText = 'display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);align-items:center;justify-content:center';
+  div.innerHTML = `
+    <div style="background:var(--bg2);border-radius:var(--r-modal);padding:24px;width:90%;max-width:340px;border:1.5px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div id="fl-profile-name" style="font-size:15px;font-weight:700;color:var(--text)"></div>
+        <button onclick="document.getElementById('familyLaunchModal').style.display='none'" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer">✕</button>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Cartão</label>
+        <select class="fc" id="fl-card-select" style="margin:0"></select>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Descrição</label>
+        <input type="text" class="fc" id="fl-desc" placeholder="Ex: Supermercado..." style="margin:0">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Valor (R$)</label>
+          <input type="number" class="fc" id="fl-amount" placeholder="0,00" style="margin:0">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Parcelas</label>
+          <input type="number" class="fc" id="fl-inst" value="1" min="1" max="48" style="margin:0">
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px">Data</label>
+        <input type="date" class="fc" id="fl-date" style="margin:0">
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" style="flex:1" onclick="document.getElementById('familyLaunchModal').style.display='none'">Cancelar</button>
+        <button class="btn btn-primary" style="flex:1" onclick="saveFamilyLaunch()">Salvar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(div);
+}
+
+function saveFamilyLaunch(){
+  const profileId = _familyLaunchProfile;
+  if(!profileId) return;
+  const cardId  = document.getElementById('fl-card-select').value;
+  const desc    = document.getElementById('fl-desc').value.trim();
+  const amount  = parseFloat(document.getElementById('fl-amount').value);
+  const inst    = parseInt(document.getElementById('fl-inst').value)||1;
+  const date    = document.getElementById('fl-date').value;
+  if(!desc||!amount||!date){ showToast('Preencha todos os campos','red'); return; }
+
+  // Carrega dados do perfil dela
+  let pData = null;
+  const raw = localStorage.getItem('ccp-' + profileId);
+  if(raw){ try{ pData=JSON.parse(raw); }catch(e){} }
+  if(!pData){ showToast('Sincronize o perfil primeiro','red'); return; }
+
+  const card = pData.cards?.find(c=>c.id===cardId);
+  if(!card){ showToast('Cartão não encontrado','red'); return; }
+
+  // Gera transações parceladas
+  const gid = 'fl-'+Date.now();
+  const txs = [];
+  for(let i=0;i<inst;i++){
+    const txDate = new Date(date);
+    txDate.setMonth(txDate.getMonth()+i);
+    const m = txDate.toISOString().slice(0,7);
+    txs.push({
+      id: gid+'-'+i, gid,
+      cardId, desc: inst>1?desc+` (${i+1}/${inst})`:desc,
+      amount: Math.round(amount/inst*100)/100,
+      date: txDate.toISOString().slice(0,10),
+      month: invMonth(txDate.toISOString().slice(0,10), card.close),
+      type:'debit', inst, instNum:i+1
+    });
+  }
+  pData.tx = [...(pData.tx||[]), ...txs];
+  localStorage.setItem('ccp-'+profileId, JSON.stringify(pData));
+  document.getElementById('familyLaunchModal').style.display = 'none';
+  showToast(`${inst>1?inst+'x ':''}R$ ${amount.toFixed(2).replace('.',',')} lançado para ${getProfiles().find(p=>p.id===profileId)?.name||''}`, 'green');
+  if(S.tab==='family') renderContent();
+}
+
+
 function renderFamilyTab(el){
-if(!isAdmin()){ el.innerHTML = '<div class="empty-state">Acesso restrito</div>'; return; }
+if(!isAdmin()){ el.innerHTML='<div class="es-wrap"><p class="es-title">Acesso restrito</p></div>'; return; }
 const profiles = getProfiles().filter(p => p.id !== _activeProfile);
 if(profiles.length === 0){
-el.innerHTML = `<div class="es-wrap">
+el.innerHTML=`<div class="es-wrap">
 <svg class="es-svg" width="64" height="64" viewBox="0 0 56 56" fill="none">
 <circle cx="20" cy="20" r="10" stroke="var(--text3)" stroke-width="1.5" stroke-dasharray="4 2"/>
 <circle cx="36" cy="20" r="10" stroke="var(--text3)" stroke-width="1.5" stroke-dasharray="4 2"/>
 <path d="M6 44c0-8 6-14 14-14s14 6 14 14" stroke="var(--text3)" stroke-width="1.5" stroke-dasharray="4 2" fill="none"/>
 </svg>
 <p class="es-title">Nenhum perfil familiar</p>
-<p class="es-sub">Adicione um perfil para ver os dados aqui</p>
+<p class="es-sub">Adicione um perfil em Configurações → Perfis</p>
 </div>`;
 return;
 }
-el.innerHTML = profiles.map(p => {
-const raw = localStorage.getItem('ccp-' + p.id);
-let summary = null;
-if(raw && !raw.startsWith('data:')){
-try{ summary = JSON.parse(raw); }catch(e){}
-}
-const cards = summary?.cards?.length || 0;
-const txCount = summary?.tx?.length || 0;
-return `<div style="background:var(--bg2);border-radius:var(--r);border:var(--bw) solid var(--border);padding:16px;margin-bottom:12px">
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-<span style="font-size:28px">${p.avatar||'👤'}</span>
-<div>
-<div style="font-size:14px;font-weight:700;color:var(--text)">${p.name}</div>
-<div style="font-size:11px;color:var(--text3)">${cards} cartão(ões) · ${txCount} lançamentos</div>
-</div>
-</div>
-${summary ? `
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-${(summary.cards||[]).map(c => {
-const due = summary.tx?.filter(t=>t.cardId===c.id).reduce((a,b)=>a+(b.amount||0),0)||0;
-return `<div style="background:var(--bg3);border-radius:var(--r);padding:10px 12px">
-<div style="font-size:11px;font-weight:600;color:var(--text2)">${c.name}</div>
-<div style="font-size:14px;font-weight:700;color:var(--gold);font-family:var(--num-font)">${fmtR(due)}</div>
+
+// Dados do admin (perfil ativo)
+const myCards = S.cards || [];
+const cur = curMonth();
+const myTotal = myCards.reduce((s,c)=>{ const ms=monthSummary(c.id,cur); return s+(ms.due||0); },0);
+const myDebits = myCards.reduce((s,c)=>{ const ms=monthSummary(c.id,cur); return s+(ms.debits||0); },0);
+
+let html = '';
+
+profiles.forEach(p => {
+  // Tenta ler dados do perfil — local primeiro
+  let pData = null;
+  const localRaw = localStorage.getItem('ccp-' + p.id);
+  if(localRaw){ try{ pData = JSON.parse(localRaw); }catch(e){} }
+
+  const pCards = pData?.cards || [];
+  const pTx = pData?.tx || [];
+  const pPayments = pData?.payments || [];
+
+  // Calcula faturas reais do perfil dela usando monthSummary adaptado
+  function pMonthSummary(cardId, month){
+    const card = pCards.find(c=>c.id===cardId);
+    if(!card) return {};
+    const debits = pTx.filter(t=>t.cardId===cardId && t.month===month && t.type!=='credit')
+                       .reduce((s,t)=>s+(t.amount||0),0);
+    const paid = pPayments.filter(pm=>pm.cardId===cardId && pm.month===month)
+                          .reduce((s,pm)=>s+(pm.amount||0),0);
+    const due = Math.max(0, debits - paid);
+    const daysLeft = daysUntilDue(month, card.due);
+    return { debits, paid, due, daysLeft, dueDate: dueDateStr(month, card.due) };
+  }
+
+  const pCardSummaries = pCards.map(c => ({
+    card: c,
+    ms: pMonthSummary(c.id, cur)
+  }));
+  const pTotal = pCardSummaries.reduce((s,x)=>s+(x.ms.due||0),0);
+  const pDebits = pCardSummaries.reduce((s,x)=>s+(x.ms.debits||0),0);
+
+  // Alertas de vencimento dela
+  const alerts = pCardSummaries.filter(x => x.ms.due > 0).map(x => {
+    const dl = x.ms.daysLeft;
+    if(dl < 0) return { type:'red', msg:`${x.card.name} venceu há ${Math.abs(dl)} dia${Math.abs(dl)>1?'s':''}`, val: x.ms.due };
+    if(dl === 0) return { type:'red', msg:`${x.card.name} vence HOJE`, val: x.ms.due };
+    if(dl <= 5) return { type:'amber', msg:`${x.card.name} vence em ${dl} dias`, val: x.ms.due };
+    return { type:'green', msg:`${x.card.name} vence em ${dl} dias`, val: x.ms.due };
+  }).filter(Boolean);
+
+  const alertColor = { red:'var(--red)', amber:'var(--amber)', green:'var(--green)' };
+  const alertBg = { red:'var(--red-l)', amber:'var(--amber-l)', green:'var(--green-l)' };
+
+  html += `
+<div style="margin-bottom:16px">
+
+  <!-- Header do perfil -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:28px">${p.avatar||'👤'}</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text)">${p.name}</div>
+        <div style="font-size:11px;color:var(--text3)">${pCards.length} cartão(ões) · ${monthLabel(cur)}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="tool-btn" onclick="familySync('${p.id}')" style="font-size:10px;color:var(--gold);border-color:rgba(200,146,42,.3)">☁ Sync</button>
+      <button class="tool-btn" onclick="openFamilyLaunch('${p.id}')" style="font-size:10px;color:var(--blue);border-color:rgba(58,123,213,.3)">+ Lançar</button>
+    </div>
+  </div>
+
+  ${pData ? `
+  <!-- Alertas -->
+  ${alerts.length > 0 ? `
+  <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+    ${alerts.map(a=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:${alertBg[a.type]};border-radius:var(--r);border:1px solid ${alertColor[a.type]}33">
+      <span style="font-size:12px;color:${alertColor[a.type]};font-weight:600">${a.type==='red'?'🔴':a.type==='amber'?'🟡':'🟢'} ${a.msg}</span>
+      <span style="font-family:var(--num-font);font-size:13px;font-weight:700;color:${alertColor[a.type]}">${fmtR(a.val)}</span>
+    </div>`).join('')}
+  </div>` : ''}
+
+  <!-- Cards de fatura -->
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+    ${pCardSummaries.map(({card,ms})=>{
+      const g = GRADS[card.colorIdx||0];
+      const pct = Math.min(100, card.limit>0?(ms.debits||0)/card.limit*100:0);
+      const barColor = pct>85?'var(--red)':pct>60?'var(--amber)':'var(--green)';
+      return `<div style="background:var(--bg2);border-radius:var(--r);border:var(--bw) solid var(--border);overflow:hidden">
+        <div style="height:3px;background:${g.g}"></div>
+        <div style="padding:10px 14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:8px;height:8px;border-radius:50%;background:${g.a||'var(--gold)'}"></div>
+              <span style="font-size:12px;font-weight:600;color:var(--text)">${card.name}</span>
+              <span style="font-size:10px;color:var(--text3)">•••• ${card.last4||'????'}</span>
+            </div>
+            <span style="font-family:var(--num-font);font-size:15px;font-weight:700;color:${ms.due>0?'var(--text)':'var(--green)'}">${fmtR(ms.due||0)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:6px">
+            <span>Compras: ${fmtR(ms.debits||0)}</span>
+            <span>Pago: ${fmtR(ms.paid||0)}</span>
+            <span>Limite: ${fmtR(card.limit||0)}</span>
+          </div>
+          <div style="height:3px;background:var(--bg3);border-radius:2px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:${barColor};border-radius:2px;transition:width .4s"></div>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <!-- Totais comparativos -->
+  <div style="background:var(--bg2);border-radius:var(--r);border:var(--bw) solid var(--border);padding:12px 16px;margin-bottom:12px">
+    <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Comparativo do mês</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="text-align:center;padding:10px;background:var(--bg3);border-radius:var(--r)">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Você</div>
+        <div style="font-family:var(--num-font);font-size:16px;font-weight:700;color:var(--gold)">${fmtR(myDebits)}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">a pagar: ${fmtR(myTotal)}</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:var(--bg3);border-radius:var(--r)">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">${p.name}</div>
+        <div style="font-family:var(--num-font);font-size:16px;font-weight:700;color:var(--blue-d,#185fa5)">${fmtR(pDebits)}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">a pagar: ${fmtR(pTotal)}</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:11px;color:var(--text3)">Total família</span>
+      <span style="font-family:var(--num-font);font-size:16px;font-weight:800;color:${(myTotal+pTotal)>8000?'var(--red)':'var(--text)'}">${fmtR(myTotal+pTotal)}</span>
+    </div>
+  </div>
+
+  <!-- Mini gráfico comparativo -->
+  <div style="background:var(--bg2);border-radius:var(--r);border:var(--bw) solid var(--border);padding:12px 16px">
+    <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Gastos do mês</div>
+    ${(()=>{
+      const maxVal = Math.max(myDebits, pDebits, 1);
+      const myPct = Math.round(myDebits/maxVal*100);
+      const pPct = Math.round(pDebits/maxVal*100);
+      return `<div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--text2);width:60px;flex-shrink:0">Você</span>
+          <div style="flex:1;height:14px;background:var(--bg3);border-radius:4px;overflow:hidden">
+            <div style="width:${myPct}%;height:100%;background:var(--gold);border-radius:4px;transition:width .6s"></div>
+          </div>
+          <span style="font-family:var(--num-font);font-size:11px;color:var(--text);width:70px;text-align:right">${fmtR(myDebits)}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--text2);width:60px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name.split(' ')[0]}</span>
+          <div style="flex:1;height:14px;background:var(--bg3);border-radius:4px;overflow:hidden">
+            <div style="width:${pPct}%;height:100%;background:#378add;border-radius:4px;transition:width .6s"></div>
+          </div>
+          <span style="font-family:var(--num-font);font-size:11px;color:var(--text);width:70px;text-align:right">${fmtR(pDebits)}</span>
+        </div>
+      </div>`;
+    })()}
+  </div>
+
+  ` : `
+  <!-- Sem dados -->
+  <div style="text-align:center;padding:20px;background:var(--bg2);border-radius:var(--r);border:var(--bw) solid var(--border)">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:8px">Sem dados sincronizados</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.6">
+      Peça para ${p.name} ativar o sync JSONbin e compartilhe o Bin ID dela aqui em<br>
+      <strong>Configurações → Sync → Cofre Familiar</strong>
+    </div>
+    <button class="tool-btn" onclick="familySync('${p.id}')" style="color:var(--gold);border-color:rgba(200,146,42,.3)">☁ Sincronizar agora</button>
+  </div>
+  `}
 </div>`;
-}).join('')}
-</div>
-` : `
-<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Sem dados locais.</div>
-<button class="tool-btn" onclick="loadFamilyData('${p.id}')" style="color:var(--gold);border-color:rgba(200,146,42,.3);background:var(--gold-l)">
-☁️ Carregar da nuvem
-</button>
-`}
-</div>`;
-}).join('');
+});
+
+el.innerHTML = html;
 }
 let _voiceRecog = null;
 let _voiceParsed = null;
@@ -2952,7 +3308,10 @@ ${getProfiles().map(p=>`
 <div style="font-size:12px;font-weight:600;color:var(--text)">${p.name}</div>
 <div style="font-size:10px;color:var(--text3)">${p.isAdmin?'Administrador':'Usuário'} · ${p.id===_activeProfile?'<span style=\"color:var(--green)\">● Ativo</span>':'Inativo'}</div>
 </div>
-${p.id!=='u1'?`<button class="tool-btn" onclick="deleteProfile('${p.id}')" style="color:var(--red);border-color:rgba(192,57,43,.3);padding:6px 10px;font-size:10px">Remover</button>`:''}
+<div style="display:flex;gap:6px">
+          <button class="tool-btn" onclick="openEditProfile('${p.id}')" style="color:var(--blue);border-color:rgba(58,123,213,.3);padding:6px 10px;font-size:10px">Editar</button>
+          ${p.id!=='u1'?`<button class="tool-btn" onclick="deleteProfile('${p.id}')" style="color:var(--red);border-color:rgba(192,57,43,.3);padding:6px 10px;font-size:10px">Remover</button>`:''}
+        </div>
 </div>
 `).join('')}
 </div>
@@ -2985,8 +3344,8 @@ if(sec) container.appendChild(sec);
 </div>
 <div style="display:flex;flex-direction:column;background:var(--bg2);border:var(--bw) solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px">
 ${[
-['Versão',      typeof APP_VERSION!=='undefined'?'v'+APP_VERSION:'v1.0.0',                         'var(--gold)'],
-['Build',       typeof APP_BUILD!=='undefined'?APP_BUILD:'2025.03.21',                              'var(--text)'],
+['Versão',      ('v'+(typeof APP_VERSION!=='undefined'?APP_VERSION:'2.1.1')),                         'var(--gold)'],
+['Build',       (typeof APP_BUILD!=='undefined'?APP_BUILD:'2026.03.21'),                              'var(--text)'],
 ['Dados',       'Armazenados localmente',                                                            'var(--green)'],
 ['Cartões',     S.cards.length+' cadastrado'+(S.cards.length!==1?'s':''),                          'var(--blue)'],
 ['Lançamentos', S.tx.length+' registro'+(S.tx.length!==1?'s':''),                                  'var(--text)'],
@@ -3009,6 +3368,12 @@ style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-ra
 onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)';this.style.background='var(--green-l)'"
 onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)';this.style.background='var(--bg2)'">
 💾 Backup
+</button>
+<button onclick="localStorage.removeItem('ccp-tutorial-done');openTutorial()"
+style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r);border:1.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;transition:all .18s"
+onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)';this.style.background='var(--gold-l)'"
+onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)';this.style.background='var(--bg2)'">
+📖 Ver Tutorial
 </button>
 </div>
 `);
@@ -4068,16 +4433,16 @@ jbAuto:!!S.jbAuto,
 tab:S.tab||'invoice',
 month:S.month||curMonth(),
 compact:!!S.compact,
+lastModified:new Date().toISOString(),
 };
 const storageKey = profileKey('ccp');
+// Salva JSON puro imediatamente (síncrono) — garante persistência mesmo se criptografia demorar
+try{ localStorage.setItem(storageKey, JSON.stringify(payload)); }catch(e){}
+// Se tiver chave, sobrescreve com versão cifrada de forma assíncrona
 if(_cryptoKey){
 encryptData(payload, _cryptoKey).then(enc=>{
 try{ localStorage.setItem(storageKey, enc); }catch(e){}
-}).catch(()=>{
-try{ localStorage.setItem(storageKey, JSON.stringify(payload)); }catch(e){}
-});
-} else {
-try{ localStorage.setItem(storageKey, JSON.stringify(payload)); }catch(e){}
+}).catch(()=>{});
 }
 scheduleSync();
 }
@@ -4091,6 +4456,7 @@ S.jbAuto=!!d.jbAuto;
 if(d.tab && d.tab!=='settings') S.tab=d.tab;
 if(d.month) S.month=d.month;
 if(d.compact) S.compact=d.compact;
+if(d.lastModified) S.lastModified=d.lastModified;
 }
 function load(){
 try{
@@ -4811,9 +5177,17 @@ animation:{duration:600}
 }
 }
 function showStartupAlerts(){
+// Garante que S.cards reflecte o estado atual do localStorage
+try{
+  const raw = localStorage.getItem(profileKey('ccp'));
+  if(raw && !isEncrypted(raw)){
+    const fresh = JSON.parse(raw);
+    if(fresh && fresh.cards) S.cards = fresh.cards;
+  }
+}catch(e){}
 if(!S.cards||S.cards.length===0) return;
 const today=new Date().toDateString();
-if(localStorage.getItem('startup-skip')===today) return;
+if(localStorage.getItem(profileKey('startup-skip'))===today) return;
 const cur=curMonth();
 const items=[];
 S.cards.forEach(c=>{
@@ -4909,8 +5283,8 @@ document.getElementById('startup-body').innerHTML=items.map(it=>`
 ${it.value?`<span style="font-size:12px;font-weight:700;color:${valColor[it.type]||'#174d8a'};font-family:monospace;white-space:nowrap;flex-shrink:0">${it.value}</span>`:''}
 </div>`).join('');
 document.getElementById('startup-skip').onchange=function(){
-if(this.checked)localStorage.setItem('startup-skip',today);
-else localStorage.removeItem('startup-skip');
+if(this.checked)localStorage.setItem(profileKey('startup-skip'),today);
+else localStorage.removeItem(profileKey('startup-skip'));
 };
 openModal('startup');
 }
@@ -5496,8 +5870,15 @@ budgets:S.budgets||{}, cashbacks:S.cashbacks||{},
 jbAuto:!!S.jbAuto,
 };
 }
-function applyJbData(d){
+function applyJbData(d, force=false){
 if(!d || !d.cards) return false;
+// Protege dados locais mais recentes — não sobrescreve com nuvem antiga
+if(!force && S.lastModified && d.lastModified){
+  if(new Date(S.lastModified) > new Date(d.lastModified)){
+    jbLog('⚠️ Dados locais são mais recentes — pull ignorado (use força manual)');
+    return false;
+  }
+}
 S.cards      = d.cards   || [];
 S.tx         = d.tx      || [];
 S.payments   = d.payments|| [];
@@ -5505,6 +5886,7 @@ S.activeCardId = d.activeCardId || (S.cards[0]?.id||null);
 S.budgets    = d.budgets  || {};
 S.cashbacks  = d.cashbacks|| {};
 if(typeof d.jbAuto === 'boolean' && !S.jbAuto) S.jbAuto = d.jbAuto;
+if(d.lastModified) S.lastModified = d.lastModified;
 return true;
 }
 async function jbPush(manual=false){
@@ -5552,7 +5934,8 @@ headers:{'X-Master-Key':JB.key},
 if(!res.ok) throw new Error(`HTTP ${res.status}`);
 const json = await res.json();
 const d = json.record;
-if(applyJbData(d)){
+const isManualPull = manual;
+if(applyJbData(d, isManualPull)){
 save();
 JB.status='ok'; JB.lastSync=new Date().toISOString();
 saveJbConfig();
@@ -7000,6 +7383,8 @@ if(_cryptoKey){
 await loadDecrypted();
 }
 if(S.tab==='invoice') setTimeout(renderDashCharts,100);
+// Mostra alertas só após dados reais carregados e renderizados
+setTimeout(showStartupAlerts, 1200);
 }
 function updatePinDots(error=false){
 for(let i=0;i<4;i++){
@@ -7375,7 +7760,7 @@ if(nextBtn) nextBtn.textContent=_tutStep===6?'Começar! 🚀':'Próximo →';
 if(skipBtn) skipBtn.textContent=_tutStep===2?'Fechar':'Pular';
 }
 function checkFirstUse(){
-if(!localStorage.getItem('ccp-tutorial-done') && S.cards.length===0){
+if(!localStorage.getItem('ccp-tutorial-done')){
 setTimeout(openTutorial, 800);
 }
 }
@@ -7423,12 +7808,15 @@ migrateToProfiles();
 render();
 setTimeout(()=>{ if(window._splashHide) window._splashHide(); }, 5000);
 setTimeout(()=>{
-showStartupAlerts();
 const profiles = getProfiles();
 if(profiles.length > 1){
 showProfileScreen();
 } else {
 lockApp();
+// Se não tem PIN, mostra alertas direto após load
+if(!localStorage.getItem(profileKey('ccp-pin'))){
+  setTimeout(showStartupAlerts, 800);
+}
 }
 loadShapeOverrides();
 loadColorOverrides();
