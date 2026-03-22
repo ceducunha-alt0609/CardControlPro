@@ -82,9 +82,12 @@ curScale = 1; baseScale = 1; applyScale(1, true);
 lastTap = now;
 }, { passive: true });
 })();</script>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 </head>
 <script>
-var APP_VERSION = '2.1.4';
+var APP_VERSION = '2.2.2';
 var APP_BUILD   = new Date().toISOString().slice(0,10).replace(/-/g,'.');
 </script>
 <script>(function(){
@@ -204,8 +207,27 @@ const _swAllowed = location.hostname === 'localhost'
   || location.protocol === 'https:' && !location.hostname.includes('claudeusercontent');
 if(_swAllowed){
   navigator.serviceWorker.register('./sw.js')
-  .then(reg => console.log('SW registrado:', reg.scope))
+  .then(reg => {
+    console.log('[SW] Registrado:', reg.scope);
+    // Detecta nova versão do SW disponível
+    reg.addEventListener('updatefound', () => {
+      const newSW = reg.installing;
+      newSW.addEventListener('statechange', () => {
+        if(newSW.state === 'installed' && navigator.serviceWorker.controller){
+          console.log('[SW] Nova versão disponível — recarregando...');
+          window.location.reload();
+        }
+      });
+    });
+  })
   .catch(err => console.warn('SW erro:', err));
+  // Recebe mensagem do SW para recarregar
+  navigator.serviceWorker.addEventListener('message', e => {
+    if(e.data && e.data.type === 'SW_UPDATED'){
+      console.log('[SW] Atualização aplicada — recarregando...');
+      window.location.reload();
+    }
+  });
 }
 }
 }
@@ -453,6 +475,9 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
         <div class="nav-item" data-tab="family" onclick="setTab('family')" aria-label="Família" id="navFamily" style="display:none">
           <span class="nav-icon">👨‍👩‍👧</span><span class="nav-label">Família</span>
         </div>
+        <div class="nav-item" data-tab="faq" onclick="setTab('faq')" aria-label="Ajuda">
+          <span class="nav-icon">💬</span><span class="nav-label">Ajuda</span>
+        </div>
         <div class="nav-item" data-tab="settings" onclick="setTab('settings')" aria-label="Configurações">
           <span class="nav-icon">⚙️</span><span class="nav-label">Configurações</span>
         </div>
@@ -577,6 +602,10 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
     <div class="bn-item" onclick="cycleTheme()" id="bnTheme">
       <span class="bn-icon" id="bnThemeIcon">🌙</span>
       <span class="bn-label">Tema</span>
+    </div>
+    <div class="bn-item" data-tab="faq" onclick="setTab('faq')">
+      <span class="bn-icon">💬</span>
+      <span class="bn-label">Ajuda</span>
     </div>
     <div class="bn-item" data-tab="settings" onclick="setTab('settings')">
       <span class="bn-icon">⚙️</span>
@@ -1397,6 +1426,7 @@ else if(S.tab==='lancamentos') renderLancamentos(el);
 else if(S.tab==='history')     renderHistory(el);
 else if(S.tab==='charts')      renderCharts(el);
 else if(S.tab==='family')      renderFamilyTab(el);
+else if(S.tab==='faq')         renderFAQ(el);
 else if(S.tab==='annual')      renderAnnual(el);
 else if(S.tab==='future')      renderFuture(el,c);
 else if(S.tab==='budgets')     renderBudgetsPage(el);
@@ -2160,6 +2190,174 @@ if(S.tab==='family') renderContent();
 })
 .catch(()=>showToast('Erro ao carregar — verifique o Bin ID','red'));
 }
+// ================================================================
+// FAQ — Ajuda com busca inteligente
+// ================================================================
+const FAQ_DATA = [
+{cat:'🚀 Começando', items:[
+{q:'Como adiciono meu primeiro cartão?', a:'Vá em Configurações → Cartões → clique em <strong>+ Novo Cartão</strong>. Informe nome, últimos 4 dígitos, limite, dia de fechamento e dia de vencimento. O app calcula automaticamente qual fatura usar para cada compra.', tags:'cartao adicionar novo criar'},
+{q:'O que é dia de fechamento e dia de vencimento?', a:'<strong>Fechamento</strong> é o dia em que a fatura fecha e para de acumular compras. <strong>Vencimento</strong> é o dia em que você deve pagar. Exemplo: fecha dia 10, vence dia 8 do mês seguinte.', tags:'fechamento vencimento data fatura'},
+{q:'Como lanço uma compra?', a:'Clique no botão <strong>＋</strong> no canto inferior direito ou vá na aba Lançamentos. Informe descrição, valor, data e cartão. Para parceladas, informe o número de parcelas — o app distribui automaticamente nos meses seguintes.', tags:'lancamento compra adicionar registro'},
+{q:'Como funciona o lançamento por voz?', a:'Na tela de lançamento, toque no botão do microfone 🎤 e fale naturalmente em português. Exemplos: <em>"Gastei 150 no mercado"</em>, <em>"Trezentos no posto em 2 vezes"</em>, <em>"Netflix 86 reais"</em>. O app detecta valor, categoria e parcelas automaticamente.', tags:'voz microfone falar reconhecimento'},
+]},
+{cat:'💳 Faturas e Pagamentos', items:[
+{q:'Como registro o pagamento de uma fatura?', a:'Na aba Fatura, clique no botão <strong>Pagar</strong>. Informe o valor pago e a data. Se pagou parcialmente, o saldo restante é calculado com juros rotativos no próximo mês automaticamente.', tags:'pagar pagamento fatura registrar'},
+{q:'O que é saldo anterior / carried balance?', a:'Quando você não paga a fatura completa, o saldo que sobra entra na próxima fatura acrescido dos juros rotativos configurados no cartão. No app aparece como <strong>↩ em atraso</strong> nos cards.', tags:'saldo anterior atraso juros rotativos carried'},
+{q:'Por que o valor no card é diferente das compras?', a:'O card mostra o <strong>total real que você deve</strong> — soma das compras do mês atual mais qualquer saldo anterior não pago com juros. O painel da fatura mostra só as compras novas daquele mês.', tags:'valor card diferente compras total'},
+{q:'Como vejo a fatura de meses anteriores?', a:'Na aba Fatura, use as setas ‹ › ao lado do mês para navegar. Ou vá em Visão Anual para uma visão de todos os meses do ano com totais.', tags:'mes anterior fatura historico navegar'},
+{q:'O que é pagamento mínimo?', a:'É 15% do total da fatura. Pagar apenas o mínimo evita negativação mas gera juros rotativos altos sobre o saldo restante. O app sempre mostra o mínimo como referência, mas recomenda quitar o total.', tags:'minimo pagamento 15 juros'},
+]},
+{cat:'🔐 Segurança e PIN', items:[
+{q:'Como crio um PIN para proteger o app?', a:'Vá em Configurações → Segurança → <strong>Criar PIN</strong>. O app usa criptografia AES-256 — seus dados ficam ilegíveis sem o PIN. Ao criar, você receberá um código de recuperação de 12 palavras — <strong>salve-o</strong>.', tags:'pin senha seguranca criar proteger'},
+{q:'Esqueci meu PIN — o que faço?', a:'Na tela de PIN, clique em <strong>"Esqueci meu PIN"</strong>. Se você salvou o código de recuperação de 12 palavras, pode redefinir o PIN sem perder nenhum dado. Sem o código, a única opção é apagar os dados e começar do zero.', tags:'esqueci pin recuperar codigo palavras'},
+{q:'O que é o código de recuperação de 12 palavras?', a:'É gerado automaticamente quando você cria um PIN. São 12 palavras em português que funcionam como chave reserva. Guarde em foto, papel ou app de senhas. <strong>O app não salva essas palavras</strong> — só você tem.', tags:'codigo recuperacao 12 palavras backup pin'},
+{q:'Como funciona a biometria / Face ID?', a:'Após criar um PIN, vá em Configurações → Segurança → <strong>Ativar Biometria</strong>. Em iPhones usa Face ID, em Android usa digital ou reconhecimento facial — depende do hardware do aparelho.', tags:'biometria face id digital impressao digital'},
+{q:'Meus dados são enviados para algum servidor?', a:'Não. Todos os dados ficam <strong>100% no seu dispositivo</strong>, criptografados. A única exceção é se você ativar a sincronização voluntária via JSONbin — mas mesmo assim os dados viajam criptografados.', tags:'dados servidor privacidade seguranca offline'},
+]},
+{cat:'☁️ Sincronização e Backup', items:[
+{q:'Como sincronizo entre celular e PC?', a:'Vá em Configurações → Sincronização. Crie uma conta gratuita em <strong>jsonbin.io</strong>, copie sua API Key e cole no app. O app cria um cofre na nuvem. No outro dispositivo, conecte com a mesma API Key e Bin ID.', tags:'sincronizar sync nuvem pc celular jsonbin'},
+{q:'Como fazer backup dos meus dados?', a:'Vá em Configurações → Sobre o Aurum Pro → <strong>Backup</strong>. Gera um arquivo JSON com todos os seus dados que você pode salvar localmente. Para restaurar, vá na mesma seção → Importar.', tags:'backup exportar importar dados salvar'},
+{q:'O sync automático pode sobrescrever dados deletados?', a:'O app protege seus dados locais — se os dados locais são mais recentes que os da nuvem, o pull automático é ignorado. Você pode forçar um pull manual em Configurações → Sync → Carregar da nuvem.', tags:'sync automatico sobrescrever deletar dados'},
+{q:'Como a esposa / familiar sincroniza os dados dela?', a:'Ela instala o app, vai em Sync, cria o próprio JSONbin e ativa o sync. Você vai em Configurações → Sync → <strong>Cofre Familiar</strong> e cola o Bin ID dela. Os dados dela aparecem na aba Família.', tags:'familiar esposa sync familia dados outro usuario'},
+]},
+{cat:'👨‍👩‍👧 Multi-perfil e Família', items:[
+{q:'Como adiciono um segundo perfil?', a:'Vá em Configurações → Perfis & Família → <strong>+ Novo Perfil</strong>. Cada perfil tem PIN, cartões e dados completamente independentes. Ao abrir o app com 2+ perfis, aparece uma tela de seleção.', tags:'perfil segundo usuario familia adicionar'},
+{q:'O que o admin pode ver do perfil da família?', a:'Na aba <strong>Família</strong>, o admin vê as faturas reais de cada cartão do outro perfil, alertas de vencimento, comparativo de gastos e gráfico do mês. Os dados são lidos via sync JSONbin ou do armazenamento local compartilhado.', tags:'admin familia ver dados fatura outro perfil'},
+{q:'Posso lançar compras pelo perfil da minha esposa?', a:'Sim. Na aba Família, clique em <strong>+ Lançar</strong> ao lado do perfil dela. Você escolhe o cartão dela, informa descrição, valor e parcelas. O lançamento é salvo localmente no perfil dela.', tags:'lancar compra esposa perfil familia lancamento'},
+{q:'Como edito o nome e avatar de um perfil?', a:'Vá em Configurações → Perfis & Família. Clique no botão <strong>Editar</strong> ao lado do perfil. Você pode alterar o nome e escolher um novo avatar entre 8 opções.', tags:'editar perfil nome avatar mudar'},
+]},
+{cat:'📊 Gráficos e Relatórios', items:[
+{q:'Por que os gráficos estão vazios?', a:'Os gráficos precisam de pelo menos 1 mês de lançamentos para mostrar dados. Com 2–3 meses, as projeções ficam muito mais precisas. Continue registrando suas compras!', tags:'graficos vazios dados historico projecao'},
+{q:'O que é a linha de projeção nos gráficos?', a:'As barras mais claras nos gráficos representam os próximos 6 meses <strong>projetados</strong> com base na sua média de gastos dos últimos 3 meses. Compras já lançadas para meses futuros aparecem como confirmadas.', tags:'projecao grafico futuro estimativa previsao'},
+{q:'Como gero um relatório em PDF?', a:'Na aba Fatura, clique no botão <strong>PDF</strong> no topo direito. Gera um extrato completo do cartão e mês selecionados. Também há o Relatório Mensal na Visão Anual, que consolida todos os cartões.', tags:'pdf relatorio exportar gerar fatura'},
+{q:'Como exporto para Excel ou CSV?', a:'Na aba Fatura, use os botões <strong>Excel</strong> ou <strong>CSV</strong>. O Excel inclui 3 abas: fatura do mês, histórico completo e resumo por cartão. O CSV é mais simples para importar em outros sistemas.', tags:'excel csv exportar planilha'},
+]},
+{cat:'⚙️ Configurações e Personalização', items:[
+{q:'Como mudo o tema do app?', a:'Clique no ícone ☀️/🌙 na barra superior, ou em Configurações → Tema. Há 4 opções: Claro, Escuro, Sistema (segue o celular) e Auto (muda automaticamente por horário).', tags:'tema escuro claro dark light mudar'},
+{q:'Como mudo as fontes ou cores?', a:'Vá em Configurações → Personalização. Você pode alterar a fonte do app, a fonte dos números e as cores de destaque usando um seletor RGB. Todas as mudanças são salvas localmente.', tags:'fonte cor personalizar mudar rgb'},
+{q:'Como defino tetos de gastos por categoria?', a:'Vá na aba <strong>Teto de Gastos</strong> ou em Configurações → Orçamento. Clique no ✏️ ao lado de cada categoria e informe o limite mensal. O app alerta quando você atingir 80% e 100% do limite.', tags:'teto orcamento categoria limite gastos'},
+{q:'O app funciona sem internet?', a:'Sim, <strong>100% offline</strong>. Todas as funcionalidades principais — lançamentos, faturas, gráficos, relatórios, PIN — funcionam sem conexão. Apenas sincronização JSONbin e download de fontes externas requerem internet.', tags:'offline internet sem conexao funciona'},
+{q:'Como instalo o app no celular (PWA)?', a:'No Chrome/Safari, acesse o link do app e procure a opção <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar aplicativo"</strong> no menu do navegador. O app fica no seu celular igual a um app normal.', tags:'instalar celular pwa adicionar tela inicial'},
+]},
+];
+
+let _faqQuery = '';
+let _faqCat = 'all';
+let _faqOpen = null;
+
+function renderFAQ(el){
+const cur = curMonth();
+const totalDue = S.cards.reduce((s,c)=>{ const ms=monthSummary(c.id,cur); return s+(ms.due||0); },0);
+const topSpend = (() => {
+  const catMap = {};
+  S.tx.filter(t=>t.invoiceMonth===cur&&t.type==='debit').forEach(t=>{
+    const cat=(t.category||'🛍️ Outros').split(' ').slice(1).join(' ');
+    catMap[cat]=(catMap[cat]||0)+t.amount;
+  });
+  const top = Object.entries(catMap).sort((a,b)=>b[1]-a[1])[0];
+  return top ? top[0] : null;
+})();
+
+const contextTip = S.cards.length > 0 ? `
+<div style="background:var(--bg2);border:var(--bw) solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+  <span style="font-size:22px;flex-shrink:0">💡</span>
+  <div style="font-size:12px;color:var(--text2);line-height:1.6">
+    ${totalDue > 0 ? `Você tem <strong style="color:var(--red)">${fmtR(totalDue)}</strong> a pagar em ${S.cards.length} cartão(ões) em ${monthLabel(cur)}.` : `Tudo em dia em ${monthLabel(cur)}! ✅`}
+    ${topSpend ? ` Sua maior categoria de gastos este mês é <strong>${topSpend}</strong>.` : ''}
+  </div>
+</div>` : '';
+
+const cats = ['all', ...FAQ_DATA.map(c=>c.cat)];
+
+el.innerHTML = `
+<div style="max-width:680px;margin:0 auto;padding:16px">
+
+${contextTip}
+
+<div style="position:relative;margin-bottom:14px">
+  <input type="text" class="fc" id="faq-search"
+    placeholder="🔍  Buscar dúvidas — ex: sync, pin, fatura, voz..."
+    value="${_faqQuery}"
+    oninput="_faqQuery=this.value;renderFAQ(document.getElementById('tabContent'))"
+    style="margin:0;padding-left:16px;font-size:13px">
+</div>
+
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px" id="faq-cats">
+  ${cats.map(c=>`
+  <button onclick="_faqCat='${c}';_faqQuery='';document.getElementById('faq-search').value='';renderFAQ(document.getElementById('tabContent'))"
+    style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;border:1.5px solid ${_faqCat===c?'var(--gold)':'var(--border)'};background:${_faqCat===c?'var(--gold-l)':'var(--bg2)'};color:${_faqCat===c?'var(--gold)':'var(--text3)'}">
+    ${c==='all'?'Tudo':c}
+  </button>`).join('')}
+</div>
+
+<div id="faq-list">
+${renderFAQList()}
+</div>
+
+<div style="margin-top:20px;text-align:center;padding:16px;background:var(--bg2);border-radius:var(--r);border:var(--bw) solid var(--border)">
+  <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Não encontrou o que precisava?</div>
+  <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+    <button onclick="localStorage.removeItem('ccp-tutorial-done');openTutorial()"
+      style="padding:8px 16px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer">
+      📖 Ver Tutorial
+    </button>
+    <button onclick="setTab('settings')"
+      style="padding:8px 16px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer">
+      ⚙️ Configurações
+    </button>
+  </div>
+</div>
+
+</div>`;
+}
+
+function renderFAQList(){
+const q = (_faqQuery||'').toLowerCase().trim();
+let results = [];
+
+FAQ_DATA.forEach(cat => {
+  if(_faqCat !== 'all' && _faqCat !== cat.cat) return;
+  cat.items.forEach(item => {
+    if(!q || item.q.toLowerCase().includes(q) || item.a.toLowerCase().includes(q) || (item.tags||'').includes(q)){
+      results.push({...item, cat: cat.cat});
+    }
+  });
+});
+
+if(results.length === 0){
+  return `<div style="text-align:center;padding:32px 16px;color:var(--text3)">
+    <div style="font-size:28px;margin-bottom:8px">🤔</div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:6px">Nenhum resultado para "${_faqQuery}"</div>
+    <div style="font-size:12px">Tente palavras como: fatura, cartão, pin, sync, voz, backup</div>
+  </div>`;
+}
+
+return results.map((item, i) => {
+  const id = 'faq-' + i;
+  const isOpen = _faqOpen === id;
+  const q2 = _faqQuery.toLowerCase();
+  const highlighted = q2 ? item.q.replace(new RegExp('('+q2+')', 'gi'), '<mark style="background:var(--amber-l);color:var(--amber);border-radius:2px;padding:0 2px">$1</mark>') : item.q;
+  return `
+<div style="border:var(--bw) solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden;transition:border-color .2s;${isOpen?'border-color:var(--gold)':''}">
+  <button onclick="
+    _faqOpen = _faqOpen==='${id}'?null:'${id}';
+    renderFAQ(document.getElementById('tabContent'))"
+    style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:${isOpen?'var(--gold-l)':'var(--bg2)'};border:none;cursor:pointer;gap:12px;text-align:left;transition:background .2s">
+    <div style="display:flex;align-items:center;gap:10px;min-width:0">
+      <span style="font-size:10px;font-weight:600;color:var(--text3);flex-shrink:0;background:var(--bg3);padding:2px 7px;border-radius:10px">${item.cat.split(' ')[0]}</span>
+      <span style="font-size:13px;font-weight:600;color:var(--text);line-height:1.4">${highlighted}</span>
+    </div>
+    <span style="font-size:14px;color:var(--text3);flex-shrink:0;transform:${isOpen?'rotate(180deg)':'rotate(0)'};transition:transform .2s">▼</span>
+  </button>
+  ${isOpen ? `
+  <div style="padding:14px 16px;background:var(--bg3);border-top:var(--bw) solid var(--border);font-size:13px;color:var(--text2);line-height:1.7">
+    ${item.a}
+  </div>` : ''}
+</div>`;
+}).join('');
+}
+
+
 // ── FAMÍLIA — Sync + Lançar pelo perfil dela ──
 
 function familySync(profileId){
@@ -4180,7 +4378,7 @@ document.querySelectorAll('.bn-item[data-tab]').forEach(el=>{
 el.classList.toggle('active', el.dataset.tab===t);
 });
 const titles={invoice:'Fatura',lancamentos:'Lançamentos',charts:'Gráficos',annual:'Visão Anual',
-future:'Parcelas Futuras',history:'Histórico',settings:'Configurações',budgets:'Teto de Gastos'};
+future:'Parcelas Futuras',history:'Histórico',settings:'Configurações',budgets:'Teto de Gastos',faq:'Ajuda & FAQ'};
 const ttEl=document.getElementById('topbarTitle');
 if(ttEl) ttEl.textContent=titles[t]||'Aurum';
 const fab=document.getElementById('fabBtn');
@@ -4481,7 +4679,9 @@ showToast('Erro ao decifrar dados. PIN incorreto?','red');
 }
 }
 function loadSample(){
-if(S.cards.length>0)return;
+// Só carrega demo se nunca houve dados salvos (chave não existe no localStorage)
+if(localStorage.getItem(profileKey('ccp'))) return;
+if(S.cards.length>0) return;
 S.cards=[
 {id:'c1',name:'Nubank',last4:'4521',holder:'Ana Beatriz Silva',limit:8000,close:20,due:8,rate:14.9,brand:'Mastercard',colorIdx:0},
 {id:'c2',name:'Itaú Platinum',last4:'7832',holder:'Ana Beatriz Silva',limit:15000,close:15,due:2,rate:12.5,brand:'Visa',colorIdx:1},
@@ -6538,7 +6738,7 @@ setTab('invoice');
 }
 load();loadTheme();loadJbConfig();loadSample();applyRecurring();
 (function addHistorySamples(){
-if(localStorage.getItem('ccp')) return;
+if(localStorage.getItem(profileKey('ccp'))) return;
 const cm=curMonth();
 const hist=[
 {cid:'c1',amt:890.50,m:-5},{cid:'c2',amt:2100,m:-5},{cid:'c3',amt:340,m:-5},
