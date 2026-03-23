@@ -1298,7 +1298,7 @@ renderTopbarCardDot();
 }
 function renderCarousel(){
 const trayEl=document.querySelector('.cards-tray');
-if(trayEl) trayEl.style.display=(S.tab==='dashboard')?'none':'';
+if(trayEl) trayEl.style.display=(S.tab==='dashboard'||S.tab==='subscriptions')?'none':'';
 const el=document.getElementById('cardsCarousel');
 el.innerHTML=S.cards.map((c,i)=>{
 const used=cardUsed(c.id);
@@ -5362,6 +5362,12 @@ cards:S.cards,tx:S.tx,payments:S.payments,
 activeCardId:S.activeCardId,
 budgets:S.budgets||{},
 cashbacks:S.cashbacks||{},
+monthlyGoal:S.monthlyGoal||0,
+subscriptions:S.subscriptions||[],
+savingsGoals:S.savingsGoals||[],
+travelMode:S.travelMode||false,
+travelCurrency:S.travelCurrency||'USD',
+travelRate:S.travelRate||5.0,
 jbAuto:!!S.jbAuto,
 tab:S.tab||'invoice',
 month:S.month||curMonth(),
@@ -5385,6 +5391,12 @@ S.cards=d.cards||[];S.tx=d.tx||[];S.payments=d.payments||[];
 S.activeCardId=d.activeCardId||null;
 S.budgets=d.budgets||{};
 S.cashbacks=d.cashbacks||{};
+S.monthlyGoal=d.monthlyGoal||0;
+S.subscriptions=d.subscriptions||[];
+S.savingsGoals=d.savingsGoals||[];
+S.travelMode=d.travelMode||false;
+S.travelCurrency=d.travelCurrency||'USD';
+S.travelRate=d.travelRate||5.0;
 S.jbAuto=!!d.jbAuto;
 if(d.tab && d.tab!=='settings') S.tab=d.tab;
 if(d.month) S.month=d.month;
