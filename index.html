@@ -6,7 +6,7 @@
 <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
 <link rel="icon" type="image/png" sizes="96x96" href="icons/icon-96x96.png">
 
-<script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=8x2Na3YDk21HcVFL1Q1MldHOswFJzhA7DzTVHcFC6YFNdvL8bu_YjndSNfvgTu5cIlTWwKPbN5L97vPvIg-_cy5TwKqnLoKY6rb0_3TZCeoKhzNomUm4Rw3n_FWsj8qv8pMj6Jq2PR8SCqXHqAu7RhPYHYWIIoasnAI-dvsWFth6HBhK4lNwDIJAK8J2pFWgdwOSLlH_1b4JhZFOKuE2R_NCTUZYgdYvY8Q4Rz-JcadWqFoqHadIju3-JexVCXxs7k3fk1P3ekTOHoFdDuunkg" charset="UTF-8"></script><script>
+<script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=XxBS0rvYnpltKKUB0TmaxelDRvwLG6Rz4ESa4wsPORx1v62ZeC8jxNum9yyv7Xguz9b0r_JZR4RX0_Ug4ERssf0ClLZ5JggXarbjZ609W6xve7s4V4gG8a0aUwUX7ygs826cCmDk4cq0spkmPg036aEo5ZtY7awcb4oZkezmsKKgl7dXGqmhwWdHEJHyrjNo4HwGjWul6R86f0pt5SFp0t-zD5I7NikwZyPoG7bQ0NVu_Qlt4gNBUmgALMcSTtN_XirELEI9mHLOsnCbHDePKw" charset="UTF-8"></script><script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=8x2Na3YDk21HcVFL1Q1MldHOswFJzhA7DzTVHcFC6YFNdvL8bu_YjndSNfvgTu5cIlTWwKPbN5L97vPvIg-_cy5TwKqnLoKY6rb0_3TZCeoKhzNomUm4Rw3n_FWsj8qv8pMj6Jq2PR8SCqXHqAu7RhPYHYWIIoasnAI-dvsWFth6HBhK4lNwDIJAK8J2pFWgdwOSLlH_1b4JhZFOKuE2R_NCTUZYgdYvY8Q4Rz-JcadWqFoqHadIju3-JexVCXxs7k3fk1P3ekTOHoFdDuunkg" charset="UTF-8"></script><script>
 window.__aurumDiagnostics = window.__aurumDiagnostics || { errors: [], warnings: [] };
 window.addEventListener('error', function(event){
   const details = {
@@ -3467,7 +3467,7 @@ function renderLancamentos(el){
 const cards=S.cards;
 const activeC=activeCard();
 const recentCardId=S.activeCardId||S.cards[0]?.id||'';
-const recentAll=sortTxList(S.tx.filter(t=>t.cardId===recentCardId),'date-desc').slice(0,60);
+const recentAll=sortTxList(S.tx.filter(t=>t.cardId===recentCardId),'date-desc').slice(0,200);
 const catOpts=getCats().map(c=>`<option value="${c}">${c}</option>`).join('');
 const cardOpts=cards.map(c=>`<option value="${c.id}" ${c.id===S.activeCardId?'selected':''}>${c.name} ···· ${c.last4}</option>`).join('');
 el.innerHTML=`
@@ -3606,9 +3606,27 @@ ${catOpts}
 <div>
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap">
 <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)">Lançamentos recentes</div>
-<div style="display:flex;gap:8px">
+<div style="display:flex;gap:8px;flex-wrap:wrap">
 <select class="sort-sel" id="lt-card-filter" onchange="ltFilter()" style="height:32px;font-size:11px;padding:4px 8px">
 ${cards.map(c=>`<option value="${c.id}" ${c.id===S.activeCardId?'selected':''}>${c.name}</option>`).join('')}
+</select>
+<select class="sort-sel" id="lt-month-filter" onchange="ltFilter()" style="height:32px;font-size:11px;padding:4px 8px">
+<option value="">📅 Todos os meses</option>
+${(()=>{
+const months=[];
+const seen=new Set();
+sortTxList(S.tx,'date-desc').forEach(t=>{
+  if(!t.date) return;
+  const ym=t.date.substring(0,7);
+  if(!seen.has(ym)){
+    seen.add(ym);
+    const [y,m]=ym.split('-');
+    const label=new Date(parseInt(y),parseInt(m)-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    months.push(`<option value="${ym}">${label.charAt(0).toUpperCase()+label.slice(1)}</option>`);
+  }
+});
+return months.join('');
+})()}
 </select>
 <input class="search-input" id="lt-search" placeholder="🔍 Buscar..." oninput="ltFilter()" style="width:160px;height:32px;padding:5px 12px;font-size:12px">
 </div>
@@ -3632,7 +3650,8 @@ const cr=t.type==='credit';
 const em=t.category?t.category.split(' ')[0]:'💳';
 const ib=t.totalInst>1?`<span class="inst-badge">${t.instNum}/${t.totalInst}</span>`:'';
 const safeDesc=t.desc.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
-return `<div class="tx-item" data-cardid="${t.cardId}">
+const txMonth=(t.date||'').substring(0,7);
+return `<div class="tx-item" data-cardid="${t.cardId}" data-month="${txMonth}">
 <div class="tx-icon">${em}</div>
 <div class="tx-info">
 <div class="tx-name">${t.desc}</div>
@@ -3787,11 +3806,33 @@ prev.innerHTML='';
 function ltFilter(){
 const q=(document.getElementById('lt-search')?.value||'').toLowerCase();
 const cardId=document.getElementById('lt-card-filter')?.value||document.getElementById('lt-card')?.value||S.activeCardId||'';
+const monthFilter=document.getElementById('lt-month-filter')?.value||'';
 document.querySelectorAll('#lt-recent-list .tx-item').forEach(el=>{
 const txt=el.textContent.toLowerCase();
 const matchQ=!q||txt.includes(q);
 const matchC=el.dataset.cardid===cardId;
-el.style.display=(matchQ&&matchC)?'':'none';
+const matchM=!monthFilter||el.dataset.month===monthFilter;
+el.style.display=(matchQ&&matchC&&matchM)?'':'none';
+});
+// Mostra agrupador de mês quando filtro ativo
+const list=document.getElementById('lt-recent-list');
+if(!list) return;
+let prevMonth='';
+list.querySelectorAll('.lt-month-divider').forEach(d=>d.remove());
+if(monthFilter) return; // sem divisores quando mês fixo
+const visibleItems=[...list.querySelectorAll('.tx-item')].filter(el=>el.style.display!=='none');
+visibleItems.forEach(el=>{
+const m=el.dataset.month||'';
+if(m && m!==prevMonth){
+prevMonth=m;
+const [y,mo]=m.split('-');
+const label=new Date(parseInt(y),parseInt(mo)-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+const div=document.createElement('div');
+div.className='lt-month-divider';
+div.style.cssText='font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding:10px 4px 4px;margin-top:4px;border-top:1px solid var(--border)';
+div.textContent=label.charAt(0).toUpperCase()+label.slice(1);
+list.insertBefore(div,el);
+}
 });
 }
 function ltClear(){
@@ -4727,7 +4768,24 @@ if(!listEl) return;
 const formSel=document.getElementById('lt-card');
 const currentCardId=formSel?.value||S.activeCardId||'';
 syncLtCardFilter();
-const recent=sortTxList(S.tx.filter(t=>t.cardId===currentCardId),'date-desc').slice(0,60);
+const recent=sortTxList(S.tx.filter(t=>t.cardId===currentCardId),'date-desc').slice(0,200);
+// Atualiza options do select de mês mantendo seleção atual
+const monthSel=document.getElementById('lt-month-filter');
+if(monthSel){
+const curVal=monthSel.value;
+const seen=new Set();
+const opts=['<option value="">📅 Todos os meses</option>'];
+sortTxList(S.tx,'date-desc').forEach(t=>{
+  const ym=(t.date||'').substring(0,7);
+  if(ym && !seen.has(ym)){
+    seen.add(ym);
+    const [y,m]=ym.split('-');
+    const label=new Date(parseInt(y),parseInt(m)-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    opts.push(`<option value="${ym}" ${ym===curVal?'selected':''}>${label.charAt(0).toUpperCase()+label.slice(1)}</option>`);
+  }
+});
+monthSel.innerHTML=opts.join('');
+}
 if(recent.length===0){
 listEl.innerHTML=`<div class="es-wrap">
 <svg class="es-svg" width="64" height="64" viewBox="0 0 56 56" fill="none">
@@ -4749,7 +4807,8 @@ const em=t.category?t.category.split(' ')[0]:'💳';
 const ib=t.totalInst>1?`<span class="inst-badge">${t.instNum}/${t.totalInst}</span>`:'';
 const portBadge=t.portador?`<span style="background:var(--purple-l);color:var(--purple);padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700">👤 ${t.portador}</span>`:'';
 const safeDesc=t.desc.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
-return `<div class="tx-item" data-cardid="${t.cardId}">
+const txMonth=(t.date||'').substring(0,7);
+return `<div class="tx-item" data-cardid="${t.cardId}" data-month="${txMonth}">
 <div class="tx-icon">${em}</div>
 <div class="tx-info">
 <div class="tx-name">${t.desc}</div>
