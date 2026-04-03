@@ -1,67 +1,28 @@
-const CACHE = 'aurum-pro-v2.2.1';
+const CACHE_NAME = 'aurum-pro-v1';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon-192x192.png',
-  './icons/icon-512x512.png',
+  './icons/favicon.ico',
+  './icons/icon-96x96.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/apple-touch-icon.png',
+  './screenshots/screenshot-mobile-dark.png',
+  './screenshots/screenshot-mobile-light.png',
+  './screenshots/screenshot-desktop.png'
 ];
-
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE)
-      .then(cache => cache.addAll(ASSETS).catch(() => {}))
-      .then(() => self.skipWaiting())
-  );
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
-
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(k => k !== CACHE).map(k => {
-          console.log('[SW] Deletando cache antigo:', k);
-          return caches.delete(k);
-        })
-      ))
-      .then(() => self.clients.claim())
-      .then(() => {
-        // Notifica todos os clientes para recarregar
-        return self.clients.matchAll({ type: 'window' });
-      })
-      .then(clients => {
-        clients.forEach(client => client.postMessage({ type: 'SW_UPDATED' }));
-      })
-  );
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
-
-self.addEventListener('fetch', e => {
-  if (!e.request.url.startsWith(self.location.origin)) return;
-  // Network first para index.html — garante sempre versão mais recente
-  if (e.request.url.endsWith('/') || e.request.url.endsWith('index.html')) {
-    e.respondWith(
-      fetch(e.request)
-        .then(resp => {
-          if (resp && resp.status === 200) {
-            const clone = resp.clone();
-            caches.open(CACHE).then(cache => cache.put(e.request, clone));
-          }
-          return resp;
-        })
-        .catch(() => caches.match(e.request))
-    );
-    return;
-  }
-  // Cache first para outros assets
-  e.respondWith(
-    caches.match(e.request)
-      .then(cached => cached || fetch(e.request).then(resp => {
-        if (resp && resp.status === 200) {
-          const clone = resp.clone();
-          caches.open(CACHE).then(cache => cache.put(e.request, clone));
-        }
-        return resp;
-      }))
-      .catch(() => caches.match('./index.html'))
-  );
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(resp => {
+    const copy = resp.clone();
+    caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+    return resp;
+  }).catch(() => caches.match('./index.html'))));
 });
