@@ -2548,6 +2548,7 @@ return Math.ceil((tgt-today)/(864e5));
 }
 function monthTx(cardId,month){return S.tx.filter(t=>t.cardId===cardId&&t.invoiceMonth===month)}
 function monthDebits(cardId,month){return monthTx(cardId,month).filter(t=>t.type==='debit').reduce((s,t)=>s+t.amount,0)}
+function monthCredits(cardId,month){return monthTx(cardId,month).filter(t=>t.type==='credit').reduce((s,t)=>s+t.amount,0)}
 function monthPaidGross(cardId,month){return (S.payments||[]).filter(p=>p.cardId===cardId&&p.invoiceMonth===month).reduce((s,p)=>s+(p.amount||0),0)}
 function monthRefunds(cardId,month){return (S.payments||[]).filter(p=>p.cardId===cardId&&p.invoiceMonth===month).reduce((s,p)=>s+(p.estorno||0),0)}
 function monthPaidNet(cardId,month){return monthPaidGross(cardId,month)+monthRefunds(cardId,month)}
@@ -2572,7 +2573,8 @@ const pCarried=carriedBalance(cardId,prev,depth+1);
 const pTotal=pDebits+pCarried;
 if(pTotal<=0) return 0;
 const pPaid=monthPaidNet(cardId,prev);
-const unpaid=Math.max(0,pTotal-pPaid);
+const pTxCredits=monthCredits(cardId,prev);
+const unpaid=Math.max(0,pTotal-pPaid-pTxCredits);
 if(unpaid<=0) return 0;
 const card=getCard(cardId);
 if(!card) return 0;
@@ -2582,6 +2584,7 @@ function monthSummary(cardId,month){
 const card=getCard(cardId);
 if(!card) return {};
 const debits=monthDebits(cardId,month);
+const txCredits=monthCredits(cardId,month);
 const carried=carriedBalance(cardId,month);
 const prevBal=carried>0?carried/(1+card.rate/100):0;
 const interest=carried-prevBal;
@@ -2589,11 +2592,11 @@ const total=debits+carried;
 const paidGross=monthPaidGross(cardId,month);
 const refunds=monthRefunds(cardId,month);
 const paid=paidGross+refunds;
-const due=Math.max(0,total-paid);
+const due=Math.max(0,total-paid-txCredits);
 const minPay=due*0.15;
 const dd=dueDateStr(month,card.due,card);
 const daysLeft=daysUntilDue(month,card.due,card);
-return{debits,carried,prevBal,interest,total,paid,paidGross,refunds,due,minPay,dueDate:dd,daysLeft};
+return{debits,carried,prevBal,interest,total,paid,paidGross,refunds,txCredits,due,minPay,dueDate:dd,daysLeft};
 }
 
 function holderUsageData(cardId,month){
@@ -3365,7 +3368,7 @@ ${dueBadge}
 <div class="pay-row"><span class="pr-label">Total de compras</span><span class="pr-val">${fmtR(s.debits)}</span></div>
 ${s.carried>0?`<div class="pay-row"><span class="pr-label">Saldo anterior c/ juros</span><span class="pr-val" style="color:var(--red)">${fmtR(s.carried)}</span></div>`:''}
 ${s.paidGross>0?`<div class="pay-row"><span class="pr-label">Pagamentos realizados</span><span class="pr-val ok">− ${fmtR(s.paidGross)}</span></div>`:'<div class="pay-row"><span class="pr-label">Pagamentos realizados</span><span class="pr-val" style="color:var(--text3)">− R$ 0,00</span></div>'}
-${s.refunds>0?`<div class="pay-row"><span class="pr-label">Abatimentos / Estornos</span><span class="pr-val ok">− ${fmtR(s.refunds)}</span></div>`:'<div class="pay-row"><span class="pr-label">Abatimentos / Estornos</span><span class="pr-val" style="color:var(--text3)">− R$ 0,00</span></div>'}
+${(()=>{const _abat=(s.refunds||0)+(s.txCredits||0);return _abat>0?`<div class="pay-row"><span class="pr-label">Abatimentos / Estornos</span><span class="pr-val ok">− ${fmtR(_abat)}</span></div>`:'<div class="pay-row"><span class="pr-label">Abatimentos / Estornos</span><span class="pr-val" style="color:var(--text3)">− R$ 0,00</span></div>'})()}
 <div class="pay-row"><span class="pr-label">Pagamento mínimo (15%)</span><span class="pr-val min">${fmtR(s.minPay)}</span></div>
 <div class="pay-row"><span class="pr-label">Total a pagar</span><span class="pr-val big">${fmtR(s.due)}</span></div>
 <div style="margin-top:16px">
