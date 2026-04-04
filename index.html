@@ -6,7 +6,7 @@
 <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
 <link rel="icon" type="image/png" sizes="96x96" href="icons/icon-96x96.png">
 
-<script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=YrMNo4eAizCJ8b4oJZYhGoDtfgy74yTv7VqSeUpRwTohVRrDJyfuqHjl-QmoWOJcfP9HRST_Kn2w7Y8gsLid6QxH6j1U1LmyjsmbLHJqRrGKHPy5TGQ26BrhMwYP075fanaE-fu9MnuOutQr573u1MABc5GtHJF6Ml8L83G35SFZ-zVxv8K9TPhptjSFJ1HnOj5i8mjRJvLGiZnS_TBY93m4baAAV3NFshrSoCvSLSa62XZu9sKs3qlDxMHpkOl8g1adB2qlTZcB0akkYLHOig" charset="UTF-8"></script><script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=XxBS0rvYnpltKKUB0TmaxelDRvwLG6Rz4ESa4wsPORx1v62ZeC8jxNum9yyv7Xguz9b0r_JZR4RX0_Ug4ERssf0ClLZ5JggXarbjZ609W6xve7s4V4gG8a0aUwUX7ygs826cCmDk4cq0spkmPg036aEo5ZtY7awcb4oZkezmsKKgl7dXGqmhwWdHEJHyrjNo4HwGjWul6R86f0pt5SFp0t-zD5I7NikwZyPoG7bQ0NVu_Qlt4gNBUmgALMcSTtN_XirELEI9mHLOsnCbHDePKw" charset="UTF-8"></script><script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=8x2Na3YDk21HcVFL1Q1MldHOswFJzhA7DzTVHcFC6YFNdvL8bu_YjndSNfvgTu5cIlTWwKPbN5L97vPvIg-_cy5TwKqnLoKY6rb0_3TZCeoKhzNomUm4Rw3n_FWsj8qv8pMj6Jq2PR8SCqXHqAu7RhPYHYWIIoasnAI-dvsWFth6HBhK4lNwDIJAK8J2pFWgdwOSLlH_1b4JhZFOKuE2R_NCTUZYgdYvY8Q4Rz-JcadWqFoqHadIju3-JexVCXxs7k3fk1P3ekTOHoFdDuunkg" charset="UTF-8"></script><script>
+<script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=XxBS0rvYnpltKKUB0TmaxelDRvwLG6Rz4ESa4wsPORx1v62ZeC8jxNum9yyv7Xguz9b0r_JZR4RX0_Ug4ERssf0ClLZ5JggXarbjZ609W6xve7s4V4gG8a0aUwUX7ygs826cCmDk4cq0spkmPg036aEo5ZtY7awcb4oZkezmsKKgl7dXGqmhwWdHEJHyrjNo4HwGjWul6R86f0pt5SFp0t-zD5I7NikwZyPoG7bQ0NVu_Qlt4gNBUmgALMcSTtN_XirELEI9mHLOsnCbHDePKw" charset="UTF-8"></script><script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=8x2Na3YDk21HcVFL1Q1MldHOswFJzhA7DzTVHcFC6YFNdvL8bu_YjndSNfvgTu5cIlTWwKPbN5L97vPvIg-_cy5TwKqnLoKY6rb0_3TZCeoKhzNomUm4Rw3n_FWsj8qv8pMj6Jq2PR8SCqXHqAu7RhPYHYWIIoasnAI-dvsWFth6HBhK4lNwDIJAK8J2pFWgdwOSLlH_1b4JhZFOKuE2R_NCTUZYgdYvY8Q4Rz-JcadWqFoqHadIju3-JexVCXxs7k3fk1P3ekTOHoFdDuunkg" charset="UTF-8"></script><script>
 window.__aurumDiagnostics = window.__aurumDiagnostics || { errors: [], warnings: [] };
 window.addEventListener('error', function(event){
   const details = {
@@ -41,7 +41,7 @@ window.addEventListener('unhandledrejection', function(event){
   console.error('[Aurum promise]', details);
 });
 </script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
 <title>Aurum Pro</title>
 <!-- manifest injected by JS when not file:// -->
 <meta name="theme-color" content="#0d1829">
@@ -2546,32 +2546,13 @@ const t2=new Date(today.getFullYear(),today.getMonth()+1,closeDay);
 const tgt=t1>=today?t1:t2;
 return Math.ceil((tgt-today)/(864e5));
 }
-function monthTx(cardId,month){return (S.tx||[]).filter(t=>t.cardId===cardId&&t.invoiceMonth===month)}
-function monthDebitsRaw(cardId,month){return monthTx(cardId,month).filter(t=>t.type==='debit').reduce((s,t)=>s+(Number(t.amount)||0),0)}
-function monthCreditsRaw(cardId,month){return monthTx(cardId,month).filter(t=>t.type==='credit').reduce((s,t)=>s+(Number(t.amount)||0),0)}
-function monthCredits(cardId,month){
-const txCredits=monthCreditsRaw(cardId,month);
-const payRefunds=(S.payments||[]).filter(p=>p.cardId===cardId&&p.invoiceMonth===month&&(Number(p.estorno)||0)>0);
-if(payRefunds.length===0) return txCredits;
-const creditTxs=monthTx(cardId,month).filter(t=>t.type==='credit');
-const matched=new Set();
-let unmatchedPay=0;
-payRefunds.forEach(p=>{
-  const idx=creditTxs.findIndex((t,i)=>!matched.has(i)
-    && Math.abs((Number(t.amount)||0)-(Number(p.estorno)||0))<0.01
-    && (!p.date || !t.date || t.date===p.date)
-    && /estorno|abatimento|crédito|credito/i.test(`${t.category||''} ${t.desc||''}`));
-  if(idx>=0) matched.add(idx);
-  else unmatchedPay += (Number(p.estorno)||0);
-});
-return txCredits+unmatchedPay;
-}
-function monthDebits(cardId,month){return monthDebitsRaw(cardId,month)}
-function monthNet(cardId,month){return Math.max(0,monthDebitsRaw(cardId,month)-monthCredits(cardId,month))}
-function monthPaidGross(cardId,month){return (S.payments||[]).filter(p=>p.cardId===cardId&&p.invoiceMonth===month).reduce((s,p)=>s+(Number(p.amount)||0),0)}
-function monthRefunds(cardId,month){return monthCredits(cardId,month)}
-function monthPaidNet(cardId,month){return monthPaidGross(cardId,month)}
-function monthPaid(cardId,month){return monthPaidGross(cardId,month)+monthRefunds(cardId,month)}
+function monthTx(cardId,month){return S.tx.filter(t=>t.cardId===cardId&&t.invoiceMonth===month)}
+function monthDebits(cardId,month){return monthTx(cardId,month).filter(t=>t.type==='debit').reduce((s,t)=>s+t.amount,0)}
+function monthCredits(cardId,month){return monthTx(cardId,month).filter(t=>t.type==='credit').reduce((s,t)=>s+t.amount,0)}
+function monthPaidGross(cardId,month){return (S.payments||[]).filter(p=>p.cardId===cardId&&p.invoiceMonth===month).reduce((s,p)=>s+(p.amount||0),0)}
+function monthRefunds(cardId,month){return (S.payments||[]).filter(p=>p.cardId===cardId&&p.invoiceMonth===month).reduce((s,p)=>s+(p.estorno||0),0)}
+function monthPaidNet(cardId,month){return monthPaidGross(cardId,month)+monthRefunds(cardId,month)}
+function monthPaid(cardId,month){return monthPaidNet(cardId,month)}
 function futureCommitted(cardId,fromMonth){
 const futDebits=(S.tx||[]).filter(t=>t.cardId===cardId&&t.invoiceMonth>fromMonth&&t.type==='debit').reduce((s,t)=>s+t.amount,0);
 const futCredits=(S.tx||[]).filter(t=>t.cardId===cardId&&t.invoiceMonth>fromMonth&&t.type==='credit').reduce((s,t)=>s+t.amount,0);
@@ -2584,21 +2565,19 @@ const today=new Date().toISOString().slice(0,10);
 const openMonth=invMonth(today,card.close);
 const current=monthSummary(cardId,openMonth);
 const future=futureCommitted(cardId,openMonth);
-// Usa valor líquido do ciclo aberto (já com créditos/estornos), abatendo apenas o pagamento em dinheiro
-const currentUsed=Math.max(0,(current.netCharges||0)-(current.paidGross||0));
+const currentUsed=Math.max(0,(current.debits||0)-(current.txCredits||0)-(current.paid||0));
 return currentUsed+future;
 }
 function carriedBalance(cardId,month,depth=0){
 if(depth>24) return 0;
 const prev=addM(month,-1);
 const pDebits=monthDebits(cardId,prev);
-const pCredits=monthCredits(cardId,prev);
-const pNet=Math.max(0,pDebits-pCredits);
 const pCarried=carriedBalance(cardId,prev,depth+1);
-const pTotal=pNet+pCarried;
+const pTotal=pDebits+pCarried;
 if(pTotal<=0) return 0;
-const pPaid=monthPaidGross(cardId,prev);
-const unpaid=Math.max(0,pTotal-pPaid);
+const pPaid=monthPaidNet(cardId,prev);
+const pTxCredits=monthCredits(cardId,prev);
+  const unpaid=Math.max(0,pTotal-pPaid-pTxCredits);
 if(unpaid<=0) return 0;
 const card=getCard(cardId);
 if(!card) return 0;
@@ -2609,19 +2588,18 @@ const card=getCard(cardId);
 if(!card) return {};
 const debits=monthDebits(cardId,month);
 const txCredits=monthCredits(cardId,month);
-const netCharges=Math.max(0,debits-txCredits);
 const carried=carriedBalance(cardId,month);
 const prevBal=carried>0?carried/(1+card.rate/100):0;
 const interest=carried-prevBal;
-const total=netCharges+carried;
+const total=debits+carried;
 const paidGross=monthPaidGross(cardId,month);
-const refunds=txCredits;
+const refunds=monthRefunds(cardId,month);
 const paid=paidGross+refunds;
-const due=Math.max(0,total-paidGross);
+const due=Math.max(0,total-paid-txCredits);
 const minPay=due*0.15;
 const dd=dueDateStr(month,card.due,card);
 const daysLeft=daysUntilDue(month,card.due,card);
-return{debits,txCredits,netCharges,carried,prevBal,interest,total,paid,paidGross,refunds,due,minPay,dueDate:dd,daysLeft};
+return{debits,carried,prevBal,interest,total,paid,paidGross,refunds,txCredits,due,minPay,dueDate:dd,daysLeft};
 }
 
 function holderUsageData(cardId,month){
@@ -2864,13 +2842,15 @@ ondragend="cardDragEnd(event)">
     <div style="font-size:8px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:2px">Vencimento</div>
     <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.92);text-shadow:0 1px 2px rgba(0,0,0,.4)">${dueLabel}${dueAlert}</div>
   </div>
-  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:96px">
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
     <div style="font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)">Limite disponível</div>
-    <span class="card-thumb-limit" style="font-size:10px;font-weight:800;color:rgba(255,255,255,.82);font-family:var(--mono);letter-spacing:-.3px;white-space:nowrap">${_limiteDisp}</span>
-    <div style="width:72px;height:5px;border-radius:99px;background:rgba(0,0,0,.28);overflow:hidden;position:relative;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)">
-      <div style="height:100%;width:${Math.round(_barFillPct)}%;border-radius:99px;background:${_barGrad};box-shadow:0 0 6px ${_barGlow};transition:width .9s cubic-bezier(.16,1,.3,1);position:relative">
-        <div style="position:absolute;top:0;left:0;right:0;height:50%;background:rgba(255,255,255,.28);border-radius:99px 99px 0 0"></div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div style="width:72px;height:5px;border-radius:99px;background:rgba(0,0,0,.28);overflow:hidden;position:relative;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)">
+        <div style="height:100%;width:${Math.round(_barFillPct)}%;border-radius:99px;background:${_barGrad};box-shadow:0 0 6px ${_barGlow};transition:width .9s cubic-bezier(.16,1,.3,1);position:relative">
+          <div style="position:absolute;top:0;left:0;right:0;height:50%;background:rgba(255,255,255,.28);border-radius:99px 99px 0 0"></div>
+        </div>
       </div>
+      <span class="card-thumb-limit" style="font-size:10px;font-weight:800;color:rgba(255,255,255,.82);font-family:var(--mono);letter-spacing:-.3px">${_limiteDisp}</span>
     </div>
   </div>
 </div>
@@ -2958,7 +2938,7 @@ ${totalCards>1&&totalDebt>0?`
       const cms=monthSummary(card.id,cur);
       const cdue=cms.due||0;
       if(cdue<=0) return '';
-      const cpct=Math.min(100,card.limit>0?((cms.debits||0)+(cms.carried||0))/card.limit*100:0);
+      const cpct=Math.min(100,card.limit>0?(Math.max(0,(cms.debits||0)-(cms.txCredits||0))+(cms.carried||0))/card.limit*100:0);
       const ccarried=cms.carried||0;
       const ccolor=GRADS[card.colorIdx||0].a||'var(--gold)';
       const ctxt=cdue>3000?'var(--red)':'var(--text)';
@@ -2993,9 +2973,7 @@ el.innerHTML=`<div class="es-wrap">
 </svg>
 <p class="es-title">Nenhum cartão</p>
 <p class="es-sub">Adicione seu primeiro cartão para começar</p>
-</div>`;
-try{ if(typeof renderCarousel==='function') renderCarousel(); }catch(e){}
-return;
+</div>`;return;
 }
 if(S.tab==='dashboard')        renderDashboard(el);
 else if(S.tab==='planejamento'){
@@ -3013,11 +2991,10 @@ else if(S.tab==='future')      renderFuture(el,c);
 else if(S.tab==='budgets')     renderBudgetsPage(el);
 else if(S.tab==='subscriptions') renderSubscriptionsPage(el);
 else                           renderSettings(el);
-try{ if(typeof renderCarousel==='function') renderCarousel(); }catch(e){ console.error('[Aurum] renderCarousel sync', e && e.message || String(e)); }
 }
 // ── FEATURE 3: Comparativo mês anterior ──
 function monthTotalDebits(month){
-return S.tx.filter(t=>t.invoiceMonth===month).reduce((s,t)=>s+((t.type==='credit'?-1:1)*(Number(t.amount)||0)),0);
+return S.tx.filter(t=>t.invoiceMonth===month&&t.type==='debit').reduce((s,t)=>s+t.amount,0);
 }
 function diffPct(cur,prev){
 if(!prev||prev===0) return null;
@@ -3215,8 +3192,7 @@ const dl=s.daysLeft;
 // Limite comprometido = fatura atual em aberto + parcelas futuras já lançadas
 const _invMs=monthSummary(c.id,m);
 const _futureCommitted=futureCommitted(c.id,m);
-// Limite bloqueado = compras do mês - créditos - pagamentos + parcelas futuras (sem juros/carried)
-const _totalUsed=Math.max(0,(_invMs.netCharges||0)-(_invMs.paidGross||0))+_futureCommitted;
+const _totalUsed=Math.max(0,(_invMs.debits||0)-(_invMs.txCredits||0)-(_invMs.paid||0))+_futureCommitted;
 const avail=Math.max(0,c.limit-_totalUsed);
 const usedPct=c.limit>0?Math.min(100,Math.round((_totalUsed/c.limit)*100)):0;
 el.innerHTML=`
@@ -3235,9 +3211,9 @@ ${dueBadge}
 <div class="inv-panel-fin">
 <div class="inv-pf-item">
 <div class="inv-pf-accent" style="background:var(--text3)"></div>
-<div class="inv-pf-label">Fatura líquida ${momBadge}</div>
-<div class="inv-pf-val">${fmtR(s.netCharges||s.debits)}</div>
-<div class="inv-pf-sub">${(s.txCredits||0)>0?'já com estornos':'neste mês'}</div>
+<div class="inv-pf-label">Compras ${momBadge}</div>
+<div class="inv-pf-val">${fmtR(s.debits)}</div>
+<div class="inv-pf-sub">neste mês</div>
 </div>
 <div class="inv-pf-item">
 <div class="inv-pf-accent" style="background:var(--green)"></div>
@@ -3300,19 +3276,24 @@ ${s.carried>0?`<div class="prev-bal">
 <div class="prev-bal-val">${fmtR(s.carried)}</div>
 </div>`:''}
 <div class="sec-collapsible" id="sec-txpreview">
-<div class="sec-collapse-btn" onclick="toggleSection('sec-txpreview')">
-<span style="font-size:13px;font-weight:700;color:var(--text)">🧾 Fatura · ${debits.length} compra${debits.length!==1?'s':''} · ${fmtR(s.netCharges||s.debits)}</span>
-<div style="display:flex;gap:6px;margin-left:auto;margin-right:8px;flex-wrap:wrap" onclick="event.stopPropagation()">
-<button class="pdf-btn" onclick="genPDF()">📄 PDF</button>
-<button class="pdf-btn" onclick="genMonthlyReport()" style="color:var(--blue)">📊 Relatório</button>
-<button class="pdf-btn" onclick="printInvoice()" style="color:var(--blue)">🖨️ Imprimir</button>
-<button class="pdf-btn" onclick="exportCSV()">📊 CSV</button>
-<button class="pdf-btn" onclick="exportXLSX()" style="color:var(--green)">📗 Excel</button>
-<button class="pdf-btn" onclick="shareWhatsApp()" style="color:#25d366">💬 WhatsApp</button>
-<button class="pdf-btn" onclick="shareEmail()" style="color:#639bdc">✉️ E-mail</button>
-<button class="pdf-btn" onclick="openEncerramentoModal()" style="color:var(--gold);font-weight:700">✦ Encerrar mês</button>
+<div class="sec-collapse-btn" onclick="toggleSection('sec-txpreview')" style="padding:10px 14px;gap:8px">
+<div style="display:flex;align-items:center;gap:10px;flex-shrink:0" onclick="event.stopPropagation()">
+<span style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px;font-family:var(--num-font)">${fmtR(s.debits)}</span>
+<span style="font-size:12px;color:var(--text3);white-space:nowrap">${debits.length} compra${debits.length!==1?'s':''}</span>
 </div>
-<span class="sec-arrow">▼</span>
+<div style="width:1px;height:20px;background:var(--border);flex-shrink:0" onclick="event.stopPropagation()"></div>
+<div style="display:flex;gap:4px;align-items:center;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none" onclick="event.stopPropagation()">
+<button class="pdf-btn" style="flex-shrink:0;padding:6px 11px;font-size:12px;border-radius:7px" onclick="genPDF()">PDF</button>
+<button class="pdf-btn" style="flex-shrink:0;padding:6px 11px;font-size:12px;border-radius:7px" onclick="exportXLSX()">Excel</button>
+<button class="pdf-btn" style="flex-shrink:0;padding:6px 11px;font-size:12px;border-radius:7px" onclick="exportCSV()">CSV</button>
+<button class="pdf-btn" style="flex-shrink:0;padding:6px 11px;font-size:12px;border-radius:7px" onclick="genMonthlyReport()">Relatório</button>
+<button class="pdf-btn" style="flex-shrink:0;padding:6px 11px;font-size:12px;border-radius:7px" onclick="printInvoice()">Imprimir</button>
+<button class="pdf-btn" style="flex-shrink:0;padding:6px 11px;font-size:12px;border-radius:7px" onclick="shareWhatsApp()">WhatsApp</button>
+<button class="pdf-btn" style="flex-shrink:0;padding:6px 11px;font-size:12px;border-radius:7px" onclick="shareEmail()">E-mail</button>
+<div style="width:1px;height:16px;background:var(--border);flex-shrink:0;margin:0 2px"></div>
+<button class="pdf-btn" style="flex-shrink:0;padding:6px 14px;font-size:12px;border-radius:7px;background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700" onclick="openEncerramentoModal()">Encerrar mês</button>
+</div>
+<span class="sec-arrow" style="flex-shrink:0;margin-left:4px">▼</span>
 </div>
 <div class="sec-collapse-body">
 ${debits.length>0?`
@@ -3395,7 +3376,7 @@ ${dueBadge}
 <div class="pay-row"><span class="pr-label">Total de compras</span><span class="pr-val">${fmtR(s.debits)}</span></div>
 ${s.carried>0?`<div class="pay-row"><span class="pr-label">Saldo anterior c/ juros</span><span class="pr-val" style="color:var(--red)">${fmtR(s.carried)}</span></div>`:''}
 ${s.paidGross>0?`<div class="pay-row"><span class="pr-label">Pagamentos realizados</span><span class="pr-val ok">− ${fmtR(s.paidGross)}</span></div>`:'<div class="pay-row"><span class="pr-label">Pagamentos realizados</span><span class="pr-val" style="color:var(--text3)">− R$ 0,00</span></div>'}
-${s.refunds>0?`<div class="pay-row"><span class="pr-label">Abatimentos / Estornos</span><span class="pr-val ok">− ${fmtR(s.refunds)}</span></div>`:'<div class="pay-row"><span class="pr-label">Abatimentos / Estornos</span><span class="pr-val" style="color:var(--text3)">− R$ 0,00</span></div>'}
+${(()=>{const _abat=(s.refunds||0)+(s.txCredits||0);return _abat>0?`<div class="pay-row"><span class="pr-label">Abatimentos / Estornos</span><span class="pr-val ok">− ${fmtR(_abat)}</span></div>`:'<div class="pay-row"><span class="pr-label">Abatimentos / Estornos</span><span class="pr-val" style="color:var(--text3)">− R$ 0,00</span></div>'})()}
 <div class="pay-row"><span class="pr-label">Pagamento mínimo (15%)</span><span class="pr-val min">${fmtR(s.minPay)}</span></div>
 <div class="pay-row"><span class="pr-label">Total a pagar</span><span class="pr-val big">${fmtR(s.due)}</span></div>
 <div style="margin-top:16px">
@@ -3418,7 +3399,7 @@ const txCard=S.cards.find(cc=>cc.id===t.cardId);
 const reembBadge=(txCard?.cardType==='corp'&&txCard?.corpReimb)?`<span style="background:var(--corp-l);color:var(--corp);padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;border:0.5px solid rgba(29,80,170,.2)">↩ reimb.</span>`:'';
 const corpBadge=(txCard?.cardType==='corp'&&!txCard?.corpReimb)?`<span style="background:var(--corp-l);color:var(--corp);padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;border:0.5px solid rgba(29,80,170,.2)">💼 corp</span>`:'';
 const portadorBadge=t.portador?`<span style="background:var(--purple-l);color:var(--purple);padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;border:0.5px solid rgba(80,32,136,.2)">👤 ${t.portador}</span>`:'';
-const safeDesc=t.desc.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+const safeDesc=(t.desc||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
 const cat=t.category||'🛍️ Outros';
 const rowBorder=isEstorno?'border-left:3px solid var(--green);padding-left:9px;background:var(--green-l);border-radius:0 var(--r) var(--r) 0;':isEncargo?'border-left:3px solid var(--red);padding-left:9px;':cr?'border-left:3px solid var(--green);padding-left:9px;':'';
 return `<div class="tx-item" data-cat="${cat}" style="${rowBorder}">
@@ -3724,7 +3705,7 @@ const cardName=S.cards.find(c=>c.id===t.cardId)?.name||'';
 const cr=t.type==='credit';
 const em=t.category?t.category.split(' ')[0]:'💳';
 const ib=t.totalInst>1?`<span class="inst-badge">${t.instNum}/${t.totalInst}</span>`:'';
-const safeDesc=t.desc.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+const safeDesc=(t.desc||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
 const txMonth=(t.date||'').substring(0,7);
 return `<div class="tx-item" data-cardid="${t.cardId}" data-month="${txMonth}">
 <div class="tx-icon">${em}</div>
@@ -4808,6 +4789,7 @@ if(t) Object.assign(t,{desc,amount:amt,type,category:cat,date,note,recurring,car
 save();
 renderCarousel();
 renderDetail();
+renderContent();
 showToast('✓ Transação atualizada','green');
 ltLearnCategory();
 ltClear();
@@ -4827,6 +4809,7 @@ S.tx.push({id:uid(),cardId,desc:eff>1?`${desc} (${i+1}/${eff})`:desc,amount:amt/
 save();
 renderCarousel();
 renderDetail();
+renderContent();
 showToast(`✔ ${eff>1?eff+'× parcelas adicionadas':'Lançamento adicionado'}`,'green');
 ltLearnCategory();
 ltClear();
@@ -4881,7 +4864,7 @@ const cr=t.type==='credit';
 const em=t.category?t.category.split(' ')[0]:'💳';
 const ib=t.totalInst>1?`<span class="inst-badge">${t.instNum}/${t.totalInst}</span>`:'';
 const portBadge=t.portador?`<span style="background:var(--purple-l);color:var(--purple);padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700">👤 ${t.portador}</span>`:'';
-const safeDesc=t.desc.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+const safeDesc=(t.desc||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
 const txMonth=(t.date||'').substring(0,7);
 return `<div class="tx-item" data-cardid="${t.cardId}" data-month="${txMonth}">
 <div class="tx-icon">${em}</div>
@@ -4909,16 +4892,7 @@ const sortH=S.histSort||'date-desc';
 const filterCard=S.histCard||'';
 const filterCat=S.histCat||'';
 const filterPeriod=S.histPeriod||'all';
-let all=(Array.isArray(S.tx)?S.tx:[])
-.map(t=>({
-  ...t,
-  desc:String(t?.desc||'Lançamento'),
-  category:String(t?.category||'🛍️ Outros'),
-  note:String(t?.note||''),
-  type:t?.type==='credit'?'credit':'debit',
-  amount:Number(t?.amount)||0,
-  invoiceMonth:(typeof t?.invoiceMonth==='string'&&/^\d{4}-\d{2}$/.test(t.invoiceMonth))?t.invoiceMonth:(String(t?.date||'').slice(0,7)||new Date().toISOString().slice(0,7))
-}));
+let all=[...S.tx];
 const cur=curMonth();
 if(filterPeriod==='thismonth') all=all.filter(t=>t.invoiceMonth===cur);
 else if(filterPeriod==='lastmonth') all=all.filter(t=>t.invoiceMonth===addM(cur,-1));
@@ -4948,7 +4922,7 @@ const periodOpts=[
 {v:'6months',l:'Últimos 6 meses'},
 {v:'year',l:'Último ano'},
 ].map(o=>`<option value="${o.v}" ${filterPeriod===o.v?'selected':''}>${o.l}</option>`).join('');
-const totalShown=all.reduce((s,t)=>s+((t.type==='credit'?-1:1)*(Number(t.amount)||0)),0);
+const totalShown=all.filter(t=>t.type==='debit').reduce((s,t)=>s+t.amount,0);
 const searchBar=`
 <div class="search-bar">
 <input class="search-input" placeholder="🔍  Buscar..." oninput="S.histSearch=this.value;renderContent()" value="${S.histSearch||''}">
@@ -4963,7 +4937,7 @@ const searchBar=`
 <option value="name-asc"  ${sortH==='name-asc'?'selected':''}>A→Z</option>
 </select>
 </div>
-${all.length>0?`<div style="font-size:11px;color:var(--text3);margin-bottom:10px;padding:0 2px">${all.length} lançamento${all.length!==1?'s':''} · Total líquido: <strong style="color:var(--text2)">${fmtR(totalShown)}</strong></div>`:''}`;
+${all.length>0?`<div style="font-size:11px;color:var(--text3);margin-bottom:10px;padding:0 2px">${all.length} lançamento${all.length!==1?'s':''} · Total débitos: <strong style="color:var(--text2)">${fmtR(totalShown)}</strong></div>`:''}`;
 if(all.length===0){
 el.innerHTML=searchBar+`<div class="es-wrap">
 <svg class="es-svg" width="64" height="64" viewBox="0 0 56 56" fill="none">
@@ -4978,15 +4952,22 @@ return;
 }
 const byM={};
 all.forEach(t=>{if(!byM[t.invoiceMonth])byM[t.invoiceMonth]=[];byM[t.invoiceMonth].push(t)});
+try{
 el.innerHTML=searchBar+Object.keys(byM).sort((a,b)=>b.localeCompare(a)).map(m=>{
-const debitTotal=byM[m].reduce((s,t)=>s+((t.type==='credit'?-1:1)*(Number(t.amount)||0)),0);
+const debitTotal=byM[m].filter(t=>t.type==='debit').reduce((s,t)=>s+(t.amount||0),0);
+const creditTotal=byM[m].filter(t=>t.type==='credit').reduce((s,t)=>s+(t.amount||0),0);
 return `<div style="margin-bottom:24px">
-<div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;justify-content:space-between">
-<span>${monthLabel(m)}</span><span>${fmtR(debitTotal)}</span>
+<div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+<span>${monthLabel(m)}</span>
+<span style="display:flex;gap:10px">
+${creditTotal>0?`<span style="color:var(--green)">− ${fmtR(creditTotal)} créditos</span>`:''}
+<span>${fmtR(debitTotal-creditTotal)}</span>
+</span>
 </div>
 <div class="tx-list">${byM[m].map(txHTML).join('')}</div>
 </div>`;
 }).join('');
+}catch(e){el.innerHTML=searchBar+`<div class="es-wrap"><p class="es-title">Erro ao carregar histórico</p><p class="es-sub">${e.message}</p></div>`;}
 }
 let _cfgDragId=null;
 function cfgDragStart(e,id){
@@ -5684,11 +5665,11 @@ document.getElementById('lt-desc')?.focus();
 }
 function sortTxList(list,mode){
 const s=[...list];
-if(mode==='date-desc') return s.sort((a,b)=>b.date.localeCompare(a.date));
-if(mode==='date-asc')  return s.sort((a,b)=>a.date.localeCompare(b.date));
-if(mode==='amt-desc')  return s.sort((a,b)=>b.amount-a.amount);
-if(mode==='amt-asc')   return s.sort((a,b)=>a.amount-b.amount);
-if(mode==='name-asc')  return s.sort((a,b)=>a.desc.localeCompare(b.desc));
+if(mode==='date-desc') return s.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+if(mode==='date-asc')  return s.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+if(mode==='amt-desc')  return s.sort((a,b)=>(b.amount||0)-(a.amount||0));
+if(mode==='amt-asc')   return s.sort((a,b)=>(a.amount||0)-(b.amount||0));
+if(mode==='name-asc')  return s.sort((a,b)=>(a.desc||'').localeCompare(b.desc||''));
 if(mode==='cat')       return s.sort((a,b)=>(a.category||'').localeCompare(b.category||''));
 return s;
 }
@@ -6359,7 +6340,7 @@ t.desc.toLowerCase().includes(q)||
 (t.category||'').toLowerCase().includes(q)||
 (t.note||'').toLowerCase().includes(q)||
 fmt(t.amount).includes(q)
-).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,50);
+).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,50);
 if(!results.length){
 el.innerHTML=`<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Nenhum resultado para "<strong>${q}</strong>"</div>`;
 return;
@@ -6373,7 +6354,7 @@ ${results.map(t=>{
 const card=S.cards.find(c=>c.id===t.cardId);
 const cr=t.type==='credit';
 const em=t.category?t.category.split(' ')[0]:'💳';
-const safeDesc=t.desc.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+const safeDesc=(t.desc||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
 return `<div class="tx-item" style="cursor:pointer" onclick="closeGlobalSearch();S.month='${t.invoiceMonth}';setTab('history')">
 <div class="tx-icon">${em}</div>
 <div class="tx-info">
@@ -7163,7 +7144,7 @@ t.note||''
 const ws1=XLSX.utils.aoa_to_sheet(rows1);
 ws1['!cols']=[{wch:12},{wch:32},{wch:20},{wch:10},{wch:14},{wch:24}];
 XLSX.utils.book_append_sheet(wb,ws1,'Fatura');
-const allTx=[...S.tx].sort((a,b)=>b.date.localeCompare(a.date));
+const allTx=[...S.tx].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
 const rows2=[
 ['Data','Cartão','Descrição','Categoria','Tipo','Parcela','Valor (R$)','Mês Fatura','Observação'],
 ...allTx.map(t=>{
@@ -7795,7 +7776,7 @@ items.push({icon:'🟡',title:`${c.name} — Vence em ${dl} dia${dl>1?'s':''}`,d
 const dc=daysUntilClose(c.close);
 if(dc<=3){
 const lbl=dc===0?'HOJE':`em ${dc} dia${dc>1?'s':''}`;
-items.push({icon:'📅',title:`${c.name} — Fatura fecha ${lbl}`,detail:`Dia de fechamento: ${c.close} · Fatura atual: <strong>${fmtR(monthNet(c.id,cur))}</strong>`,type:'info'});
+items.push({icon:'📅',title:`${c.name} — Fatura fecha ${lbl}`,detail:`Dia de fechamento: ${c.close} · Fatura atual: <strong>${fmtR(monthDebits(c.id,cur))}</strong>`,type:'info'});
 }
 });
 S.cards.forEach(c=>{
@@ -7815,7 +7796,7 @@ items.push({icon:'⏳',title:`${c.name} — Cartão vence em breve`,detail:`Vali
 const nextM=addM(cur,1);
 const byDue={};
 S.cards.forEach(c=>{
-const total=monthNet(c.id,nextM);
+const total=monthDebits(c.id,nextM);
 if(total<=0) return;
 const dueDate=dueDateStr(nextM,c.due,c);
 const[dy,dm]=nextM.split('-').map(Number);
@@ -7841,9 +7822,9 @@ if(items.length===0){
 items.push({icon:'✅',title:'Tudo em ordem!',detail:'Nenhum vencimento ou fechamento urgente. Continue monitorando seus gastos.',type:'ok'});
 }
 const colors={danger:'var(--red)',warning:'var(--amber)',info:'var(--blue)',ok:'var(--green)'};
-const curTotal=S.cards.reduce((s,c)=>s+monthNet(c.id,cur),0);
+const curTotal=S.cards.reduce((s,c)=>s+monthDebits(c.id,cur),0);
 const nextM2=addM(cur,1);
-const nextTotal2=S.cards.reduce((s,c)=>s+monthNet(c.id,nextM2),0);
+const nextTotal2=S.cards.reduce((s,c)=>s+monthDebits(c.id,nextM2),0);
 const nCards=S.cards.length;
 document.getElementById('startup-summary').innerHTML=`
 <div style="display:flex;gap:6px;padding:8px 14px">
@@ -7884,7 +7865,7 @@ const selYear=S.annualYear||(new Date().getFullYear());
 S.annualYear=selYear;
 const months=[];
 for(let m=1;m<=12;m++) months.push(`${selYear}-${String(m).padStart(2,'0')}`);
-const monthTotals=months.map(m=>S.cards.reduce((s,c)=>s+monthNet(c.id,m),0));
+const monthTotals=months.map(m=>S.cards.reduce((s,c)=>s+monthDebits(c.id,m),0));
 const grandTotal=monthTotals.reduce((s,v)=>s+v,0);
 const maxMonth=Math.max(...monthTotals,1);
 const avgMonth=grandTotal/12;
@@ -7892,7 +7873,7 @@ const paidTotal=months.reduce((s,m)=>s+S.cards.reduce((cs,c)=>cs+monthPaid(c.id,
 const curM=curMonth();
 const cardTotals=S.cards.map(c=>({
 card:c,
-total:months.reduce((s,m)=>s+monthNet(c.id,m),0),
+total:months.reduce((s,m)=>s+monthDebits(c.id,m),0),
 })).filter(x=>x.total>0).sort((a,b)=>b.total-a.total);
 const bestIdx=monthTotals.indexOf(Math.min(...monthTotals.filter(v=>v>0)));
 const worstIdx=monthTotals.indexOf(Math.max(...monthTotals));
@@ -10232,7 +10213,7 @@ if(dl<daysMin){daysMin=dl;urgente={name:c.name,due,daysLeft:dl};}
 totalDisp=totalLimite-totalGasto;
 const goalPct=S.monthlyGoal>0?Math.min(100,Math.round(totalGasto/S.monthlyGoal*100)):null;
 const goalColor=goalPct>=100?'#e05a4e':goalPct>=80?'#e6a830':'#3db97a';
-const recentTx=[...S.tx].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+const recentTx=[...S.tx].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3);
 // cria overlay
 const existing=document.getElementById('widget-overlay');
 if(existing)existing.remove();
@@ -10837,36 +10818,14 @@ if(JB.key && JB.binId){ jbPull(false); }</script>
         ...c,
         name: c.name || 'Cartão',
         limit: safeNum(c.limit),
-        due: safeNum(c.due || c.dueDay || c.vencimento),
-        close: safeNum(c.close || c.closeDay || c.closing || c.fechamento),
-        closing: safeNum(c.closing || c.close || c.closeDay || c.fechamento)
+        due: safeNum(c.due),
+        closing: safeNum(c.closing)
       })) : [];
-      const cardMap = new Map((S.cards||[]).map(c => [c.id, c]));
-      S.tx = Array.isArray(S.tx) ? S.tx.filter(t => t && t.cardId).map(t => {
-        const card = cardMap.get(t.cardId) || {};
-        const safeDate = t.date || new Date().toISOString().slice(0,10);
-        const derivedMonth = (() => {
-          try{
-            if(typeof t.invoiceMonth === 'string' && /^\d{4}-\d{2}$/.test(t.invoiceMonth)) return t.invoiceMonth;
-            if(typeof window.invMonth === 'function' && safeDate && card && (card.close || card.closeDay || card.fechamento)) return invMonth(safeDate, card.close || card.closeDay || card.fechamento);
-          }catch(e){}
-          return String(safeDate).slice(0,7) || curMonth();
-        })();
-        const totalInst = Math.max(1, parseInt(t.totalInst)||1);
-        const instNum = Math.min(totalInst, Math.max(1, parseInt(t.instNum)||1));
-        return {
-          ...t,
-          desc: String(t.desc || 'Lançamento'),
-          category: String(t.category || '🛍️ Outros'),
-          note: String(t.note || ''),
-          amount: safeNum(t.amount),
-          type: t.type === 'credit' ? 'credit' : 'debit',
-          date: safeDate,
-          invoiceMonth: derivedMonth,
-          totalInst,
-          instNum
-        };
-      }) : [];
+      S.tx = Array.isArray(S.tx) ? S.tx.filter(t => t && t.cardId).map(t => ({
+        ...t,
+        amount: safeNum(t.amount),
+        date: t.date || new Date().toISOString().slice(0,10)
+      })) : [];
     }catch(e){ console.error('[Aurum] sanitizeCardsAndTx', e && e.message || String(e)); }
   }
 
@@ -13436,22 +13395,21 @@ function renderDashboard(el){
   const m = S.month || (today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0'));
 
   // KPIs
-  let totalInvoice=0, totalLimit=0, totalDue=0, cardsVenc=0, totalCommitted=0;
+  let totalUsed=0, totalLimit=0, totalVenc=0, cardsVenc=0;
   cards.forEach(c=>{
-    const invoiceVal = monthNet(c.id, m);
-    totalInvoice += invoiceVal;
+    const _msDash = monthSummary(c.id, m);
+    const used = Math.max(0, (_msDash.debits||0) - (_msDash.txCredits||0));
+    totalUsed += used;
     totalLimit += (c.limit||0);
-    totalCommitted += (typeof cardCommitted==='function' ? cardCommitted(c.id) : invoiceVal);
-    const due = monthSummary(c.id, m).due || 0;
-    if(due>0){ totalDue+=due; cardsVenc++; }
+    const due = _msDash.due || 0;
+    if(due>0){ totalVenc+=due; cardsVenc++; }
   });
-  const realPctTotal = (totalLimit>0?Math.round(totalCommitted/totalLimit*100):0);
 
   const kpis = [
-    {label:'Fatura Atual', val:fmtR(totalInvoice), sub:'mês selecionado', color:'#c8922a'},
-    {label:'A Pagar', val:fmtR(totalDue), sub:`${cardsVenc} fatura${cardsVenc!==1?'s':''}`, color:'#e05a4e'},
-    {label:'Comprometido Real', val:fmtR(totalCommitted), sub:'limite ocupado agora', color:'#3a7bd5'},
-    {label:'Uso Real', val:realPctTotal+'%', sub:`de ${fmtR(totalLimit)} de limite`, color:'#3db97a'},
+    {label:'Gasto Total', val:fmtR(totalUsed), sub:`de ${fmtR(totalLimit)} de limite`, color:'#c8922a'},
+    {label:'Cartões', val:cards.length, sub:`${cardsVenc} com saldo devedor`, color:'#3a7bd5'},
+    {label:'A Pagar', val:fmtR(totalVenc), sub:`${cardsVenc} fatura${cardsVenc!==1?'s':''}`, color:'#e05a4e'},
+    {label:'Uso Médio', val:(totalLimit>0?Math.round(totalUsed/totalLimit*100):0)+'%', sub:'do limite total', color:'#3db97a'},
   ];
 
   const kpiHTML = kpis.map(k=>`
@@ -13536,13 +13494,10 @@ function buildCycleTimeline(cards, compact){
     const daysAfterClose = Math.ceil((today-closeDate)/86400000);
     const inNextBill     = today > closeDate;
 
-    const usedVal  = (typeof monthNet==='function') ? monthNet(c.id, typeof S!=='undefined'?S.month:'') : ((typeof monthDebits==='function') ? monthDebits(c.id, typeof S!=='undefined'?S.month:'') : 0);
-    const realCommitted = (typeof cardCommitted==='function') ? cardCommitted(c.id) : usedVal;
-    const futureOnly = Math.max(0, realCommitted - usedVal);
+    const usedVal  = (typeof monthSummary==='function') ? (()=>{const _msp=monthSummary(c.id,typeof S!=='undefined'?S.month:'');return Math.max(0,(_msp.debits||0)-(_msp.txCredits||0));})() : 0;
     const limitVal = c.limit||0;
     const usedPct  = limitVal>0 ? Math.min(100,Math.round(usedVal/limitVal*100)) : 0;
-    const realPct  = limitVal>0 ? Math.min(100,Math.round(realCommitted/limitVal*100)) : 0;
-    const barColor = realPct>=90?'var(--red)':realPct>=70?'var(--amber)':'var(--green)';
+    const barColor = usedPct>=90?'var(--red)':usedPct>=70?'var(--amber)':'var(--green)';
 
     let badgeHtml, adviceText, adviceIcon;
     if(!inNextBill && daysToClose===0){
@@ -13626,7 +13581,7 @@ function buildCycleTimeline(cards, compact){
     <span style="font-size:13px;flex-shrink:0">${adviceIcon}</span>
     <span>${adviceText}</span>
   </div>
-  ${limitVal>0?`<div class="dcc-limit-wrap"><div class="dcc-limit-head"><span>Uso real do limite</span><span>${(typeof fmtR==='function'?fmtR(realCommitted):realCommitted)+' / '+(typeof fmtR==='function'?fmtR(limitVal):limitVal)+' · '+realPct+'%'}</span></div><div class="dcc-limit-track"><div style="height:100%;width:${realPct}%;background:${barColor};border-radius:99px;transition:width .4s"></div></div><div style="font-size:9px;color:var(--text3);margin-top:4px">Fatura atual: ${(typeof fmtR==='function'?fmtR(usedVal):usedVal)}${futureOnly>0?` · Futuro/saldo: ${(typeof fmtR==='function'?fmtR(futureOnly):futureOnly)}`:''}</div></div>`:''}
+  ${limitVal>0?`<div class="dcc-limit-wrap"><div class="dcc-limit-head"><span>Uso do limite</span><span>${(typeof fmtR==='function'?fmtR(usedVal):usedVal)+' / '+(typeof fmtR==='function'?fmtR(limitVal):limitVal)+' · '+usedPct+'%'}</span></div><div class="dcc-limit-track"><div style="height:100%;width:${usedPct}%;background:${barColor};border-radius:99px;transition:width .4s"></div></div></div>`:''}
 </div>`;
   }).join('');
 
@@ -13679,19 +13634,33 @@ function buildPlanCard(c, today){
     advice=`Compras agora vão para a próxima fatura (vence ${fmt(nextDue)})`;
   }
 
-  const m = S.month;
-  const used = (typeof monthNet==='function') ? monthNet(c.id,m) : ((typeof monthDebits==='function') ? monthDebits(c.id,m) : 0);
-  // Próxima fatura: mês seguinte ao mês de fatura atual
-  const nextInvoiceMonth = (typeof addM==='function') ? addM(m,1) : '';
-  const nextBillTotal = (nextInvoiceMonth && typeof monthNet==='function') ? monthNet(c.id, nextInvoiceMonth) : ((nextInvoiceMonth && typeof monthDebits==='function') ? monthDebits(c.id, nextInvoiceMonth) : 0);
+  // Mês da fatura que já fechou (a pagar agora)
+  const todayStr = today.toISOString().slice(0,10);
+  const closedInvMonth = (typeof invMonth==='function') ? invMonth(todayStr, close) : S.month;
+  // Se estamos pós-fechamento, a fatura fechada é o mês anterior ao aberto
+  const currentInvMonth = inNextBill ? (typeof addM==='function' ? addM(closedInvMonth,-1) : closedInvMonth) : closedInvMonth;
+  // Mês aberto = compras acumulando agora (próxima fatura)
+  const openInvMonth = closedInvMonth;
+
+  // Fatura atual (fechada, a pagar)
+  const msCurrentRaw = (typeof monthSummary==='function') ? monthSummary(c.id, currentInvMonth) : {};
+  const usedCurrent = Math.max(0,(msCurrentRaw.debits||0)-(msCurrentRaw.txCredits||0)-(msCurrentRaw.paid||0));
+  const usedCurrentDue = msCurrentRaw.due || 0;
+  const currentIsPaid = usedCurrentDue <= 0 && (msCurrentRaw.paid||0) > 0;
+
+  // Próxima fatura (aberta, acumulando)
+  const msNext = (typeof monthSummary==='function') ? monthSummary(c.id, openInvMonth) : {};
+  const nextBillDebits = Math.max(0,(msNext.debits||0)-(msNext.txCredits||0));
+  // Parcelas futuras além do mês aberto
+  const extraFuture = (typeof futureCommitted==='function') ? futureCommitted(c.id, openInvMonth) : 0;
+  const nextBillTotal = nextBillDebits + extraFuture;
+
   const nextFaturaVence = new Date(nextDue.getFullYear(), nextDue.getMonth()+1, due).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-  const realCommitted = (typeof cardCommitted==='function') ? cardCommitted(c.id) : used;
-  const futureOnly = Math.max(0, realCommitted - used);
   const limitVal = c.limit||0;
+  // Barra usa valor atual (fechado)
+  const used = inNextBill ? usedCurrent : Math.max(0,(msCurrentRaw.debits||0)-(msCurrentRaw.txCredits||0));
   const usedPct = limitVal>0?Math.min(100,Math.round(used/limitVal*100)):0;
-  const realPct = limitVal>0?Math.min(100,Math.round(realCommitted/limitVal*100)):0;
   const barColor = usedPct>=90?'var(--red)':usedPct>=70?'var(--amber)':'var(--green)';
-  const realBarColor = realPct>=90?'var(--red)':realPct>=70?'var(--amber)':'var(--green)';
 
   const cardColor = getCardColor(c);
   const uid = 'pcc-'+(c.id||Math.random().toString(36).slice(2,8));
@@ -13709,9 +13678,10 @@ function buildPlanCard(c, today){
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
           ${statusChip}
           <span class="plan-badge plan-badge-blue">💳 Vence dia ${due}</span>
-          ${limitVal>0?'<span class="plan-badge" style="background:var(--bg4);color:var(--text2);border:1px solid var(--border)">'+fmtR(used)+' na fatura</span>':''}
+          ${inNextBill&&!currentIsPaid?`<span class="plan-badge" style="background:var(--red-l);color:var(--red);border:1px solid rgba(192,57,43,.2)">${fmtR(usedCurrentDue)} a pagar</span>`:limitVal>0?'<span class="plan-badge" style="background:var(--bg4);color:var(--text2);border:1px solid var(--border)">'+fmtR(used)+' usado</span>':''}
+          ${nextBillTotal>0?`<span class="plan-badge" style="background:var(--blue-l);color:var(--blue);border:1px solid rgba(74,139,224,.2)">Próx: ${fmtR(nextBillTotal)}</span>`:''}
         </div>
-        ${limitVal>0?`<div style="margin-top:8px"><div style="height:4px;background:var(--bg4);border-radius:99px;overflow:hidden"><div style="height:100%;width:${realPct}%;background:${realBarColor};border-radius:99px;transition:width .5s"></div></div><div style="font-size:9px;color:var(--text3);margin-top:3px">Comprometido real · ${fmtR(realCommitted)} / ${fmtR(limitVal)} (${realPct}%)</div>${futureOnly>0?`<div style="font-size:9px;color:var(--text3);margin-top:2px">Inclui ${fmtR(futureOnly)} em parcelas futuras / saldo carregado</div>`:''}</div>`:''}
+        ${limitVal>0?`<div style="margin-top:8px"><div style="height:4px;background:var(--bg4);border-radius:99px;overflow:hidden"><div style="height:100%;width:${usedPct}%;background:${barColor};border-radius:99px;transition:width .5s"></div></div><div style="font-size:9px;color:var(--text3);margin-top:3px">${usedPct}% do limite · ${fmtR(used)} / ${fmtR(limitVal)}</div></div>`:''}
         <div class="plan-cycle-front-hint">Clique para ver o ciclo completo →</div>
       </div>
       <div class="plan-cycle-flip-icon">↻</div>
@@ -13737,11 +13707,11 @@ function buildPlanCard(c, today){
     <div class="pctl">
       <div class="pctl-region-label" style="left:0;width:${closePct}%;transform:none">
         <div class="pctl-region-title" style="color:var(--amber)">FATURA ATUAL</div>
-        <div class="pctl-region-sub">${fmtR(used)} na fatura · vence ${fmt(nextDue)}</div>
+        <div class="pctl-region-sub">${inNextBill?(currentIsPaid?'✓ Paga':'A pagar: '+fmtR(usedCurrentDue)):fmtR(used)+' · vence '+fmt(nextDue)}</div>
       </div>
       <div class="pctl-region-label" style="left:${closePct}%;right:0;width:${100-closePct}%;transform:none">
         <div class="pctl-region-title" style="color:#4ade80">PRÓXIMA FATURA</div>
-        <div class="pctl-region-sub">Vencem em ${nextFaturaVence}</div>
+        <div class="pctl-region-sub">${fmtR(nextBillTotal)} · vence ${nextFaturaVence}</div>
       </div>
       <div class="pctl-track">
         <div class="pctl-seg past" style="left:0;width:${closePct}%"></div>
@@ -13789,28 +13759,11 @@ function buildPlanCard(c, today){
       <div class="plan-info-item" style="border-color:rgba(99,179,237,.3);background:rgba(99,179,237,.06)">
         <div class="plan-info-icon">📦</div>
         <div class="plan-info-label" style="color:var(--blue)">Próxima fatura</div>
-        <div class="plan-info-val" style="color:var(--blue)">${(typeof fmtR==='function')?fmtR(nextBillTotal):'R$ 0,00'}</div>
-        <div class="plan-info-sub">${nextBillTotal>0?'próximo ciclo já projetado':'Nenhum lançamento previsto'}</div>
+        <div class="plan-info-val" style="color:var(--blue)">${fmtR(nextBillTotal)}</div>
+        <div class="plan-info-sub">${nextBillTotal>0?'Compras + parcelas já lançadas':'Nenhum lançamento previsto'}</div>
       </div>
     </div>
-    ${limitVal>0?`<div style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
-      <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:10px 12px">
-        <div style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)">Fatura atual</div>
-        <div style="font-size:15px;font-weight:800;color:var(--text);font-family:var(--num-font);margin-top:2px">${fmtR(used)}</div>
-        <div style="font-size:8px;color:var(--text3);margin-top:2px">mês selecionado</div>
-      </div>
-      <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:10px 12px">
-        <div style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)">Comprometido real</div>
-        <div style="font-size:15px;font-weight:800;color:var(--blue);font-family:var(--num-font);margin-top:2px">${fmtR(realCommitted)}</div>
-        <div style="font-size:8px;color:var(--text3);margin-top:2px">limite ocupado agora</div>
-      </div>
-      <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:10px 12px">
-        <div style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)">Parcelas / saldo futuro</div>
-        <div style="font-size:15px;font-weight:800;color:var(--amber);font-family:var(--num-font);margin-top:2px">${fmtR(futureOnly)}</div>
-        <div style="font-size:8px;color:var(--text3);margin-top:2px">além da fatura atual</div>
-      </div>
-    </div>
-    <div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-bottom:3px"><span>Uso real do limite</span><span>${fmtR(realCommitted)} / ${fmtR(limitVal)} (${realPct}%)</span></div><div style="height:5px;background:var(--bg4);border-radius:99px;overflow:hidden"><div style="height:100%;width:${realPct}%;background:${realBarColor};border-radius:99px;transition:width .5s"></div></div></div>`:''}
+    ${limitVal>0?'<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-bottom:3px"><span>Uso do limite</span><span>'+fmtR(used)+' / '+fmtR(limitVal)+' ('+usedPct+'%)</span></div><div style="height:5px;background:var(--bg4);border-radius:99px;overflow:hidden"><div style="height:100%;width:'+usedPct+'%;background:'+barColor+';border-radius:99px;transition:width .5s"></div></div></div>':''}
     <div class="plan-cycle-back-hint">← Clique para fechar</div>
     </div>
   </div>`;
@@ -14307,5 +14260,6 @@ function clearDueChange(){
 }
 </script>
 
+<script id="aurum-bottomnav-fix">(function(){var nav=document.getElementById('bottomNav');if(!nav)return;function fixNav(){var vv=window.visualViewport;if(!vv||vv.scale<=1.01){nav.style.cssText='';return;}nav.style.transform='translateY('+(-vv.offsetTop)+'px) scale('+(1/vv.scale)+')';nav.style.transformOrigin='bottom left';nav.style.width=vv.width+'px';nav.style.left=vv.offsetLeft+'px';nav.style.bottom=(window.innerHeight-vv.height-vv.offsetTop)+'px';}if(window.visualViewport){window.visualViewport.addEventListener('resize',fixNav);window.visualViewport.addEventListener('scroll',fixNav);}window.addEventListener('resize',fixNav);})();</script>
 </body>
 </html>
