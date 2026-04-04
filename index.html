@@ -1995,6 +1995,33 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
         <input type="number" class="fc" id="c-rate" placeholder="14.9" step="0.1" min="0">
       </div>
     </div>
+    <!-- NOVO VENCIMENTO COM DATA DE CORTE -->
+    <div id="due-change-wrap" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label class="fl" style="margin-bottom:0">Alteração de Vencimento</label>
+        <button type="button" id="btn-toggle-due-change" onclick="toggleDueChange()"
+          style="font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer">
+          + Registrar mudança
+        </button>
+      </div>
+      <div id="due-change-panel" style="display:none;background:var(--blue-l);border:1.5px solid var(--blue-m);border-radius:var(--r);padding:12px 14px">
+        <div style="font-size:10px;color:var(--blue-d);margin-bottom:10px;line-height:1.5">
+          ⚙️ Informe o <strong>novo dia de vencimento</strong> e a partir de qual <strong>mês/ano</strong> ele passa a valer. Faturas anteriores usarão o vencimento original.
+        </div>
+        <div class="fr">
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl">Novo Dia Vencimento</label>
+            <input type="number" class="fc" id="c-due2" min="1" max="31" placeholder="15" oninput="updateDueChangePreview()">
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl">A partir de (MM/AAAA)</label>
+            <input type="text" class="fc" id="c-due2-from" placeholder="05/2025" maxlength="7" oninput="fmtDueFrom(this);updateDueChangePreview()">
+          </div>
+        </div>
+        <div id="due-change-preview" style="margin-top:8px;font-size:11px;color:var(--blue-d);font-weight:500;min-height:16px"></div>
+        <button type="button" onclick="clearDueChange()" style="margin-top:8px;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;border:1px solid rgba(192,57,43,.3);background:var(--red-l);color:var(--red);cursor:pointer">✕ Remover mudança</button>
+      </div>
+    </div>
     <div class="fg">
       <label class="fl">Cor do Cartão</label>
       <div class="color-opts" id="colorOpts"></div>
@@ -2486,13 +2513,29 @@ if(d.getDate()<closeDay) return dateStr.substring(0,7);
 const nx=new Date(d.getFullYear(),d.getMonth()+1,1);
 return `${nx.getFullYear()}-${pad(nx.getMonth()+1)}`;
 }
-function dueDateStr(im,dueDay){
-const[y,m]=im.split('-').map(Number);
-return new Date(y,m-1,dueDay).toLocaleDateString('pt-BR');
+// Retorna o dia de vencimento efetivo para um dado mês de fatura (YYYY-MM).
+// Se o cartão tiver due2 + due2From e o mês de fatura for >= due2From, usa due2.
+function effectiveDue(card, invoiceMonth) {
+  const d2 = parseInt(card && card.due2);
+  const from = card && card.due2From; // formato "MM/AAAA"
+  if (d2 && from && invoiceMonth) {
+    const parts = from.split('/');
+    if (parts.length === 2) {
+      const fromYM = parts[1] + '-' + parts[0].padStart(2,'0');
+      if (invoiceMonth >= fromYM) return d2;
+    }
+  }
+  return parseInt(card && (card.due ?? card.dueDay)) || 5;
 }
-function daysUntilDue(im,dueDay){
+function dueDateStr(im,dueDay,card){
+const day = card ? effectiveDue(card, im) : (dueDay||5);
 const[y,m]=im.split('-').map(Number);
-const due=new Date(y,m-1,dueDay);
+return new Date(y,m-1,day).toLocaleDateString('pt-BR');
+}
+function daysUntilDue(im,dueDay,card){
+const day = card ? effectiveDue(card, im) : (dueDay||5);
+const[y,m]=im.split('-').map(Number);
+const due=new Date(y,m-1,day);
 const today=new Date();today.setHours(0,0,0,0);
 return Math.ceil((due-today)/(864e5));
 }
@@ -2548,8 +2591,8 @@ const refunds=monthRefunds(cardId,month);
 const paid=paidGross+refunds;
 const due=Math.max(0,total-paid);
 const minPay=due*0.15;
-const dd=dueDateStr(month,card.due);
-const daysLeft=daysUntilDue(month,card.due);
+const dd=dueDateStr(month,card.due,card);
+const daysLeft=daysUntilDue(month,card.due,card);
 return{debits,carried,prevBal,interest,total,paid,paidGross,refunds,due,minPay,dueDate:dd,daysLeft};
 }
 
@@ -2733,20 +2776,20 @@ if(tray){
 el.style.display='flex';
 el.innerHTML=S.cards.map((c,i)=>{
 const used=cardUsed(c.id);
-// Limite real inclui saldo anterior carregado
-const _today2=new Date().toISOString().slice(0,10);
-const _om2=invMonth(_today2,c.close);
-const _ms2=monthSummary(c.id,_om2);
-const _realUsed=cardCommitted(c.id);
-const pct=Math.min(100,c.limit>0?_realUsed/c.limit*100:0);
+// Fatura do mês selecionado (S.month) — mostrar valor da fatura do mês escolhido
+const _selMs = monthSummary(c.id, S.month);
+const _invoiceVal = _selMs.total || 0;
+const _selMonthLabel = (()=>{ const [y,m]=S.month.split('-').map(Number); return new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'numeric'}); })();
+// Barra: limite disponível = limite - comprometido total
+const _realUsed = cardCommitted(c.id);
+const _availPct = Math.min(100, c.limit > 0 ? Math.max(0, (c.limit - _realUsed) / c.limit * 100) : 100);
+const _barFillPct = Math.min(100, c.limit > 0 ? _realUsed / c.limit * 100 : 0);
+const _barGrad = _barFillPct > 85 ? 'linear-gradient(90deg,#f97316,#ef4444)' : _barFillPct > 60 ? 'linear-gradient(90deg,#fbbf24,#f97316)' : 'linear-gradient(90deg,#4ade80,#22c55e)';
+const _barGlow = _barFillPct > 85 ? 'rgba(239,68,68,.6)' : _barFillPct > 60 ? 'rgba(251,191,36,.5)' : 'rgba(74,222,128,.4)';
+const _limiteDisp = c.limit > 0 ? fmtR(Math.max(0, c.limit - _realUsed)) : '—';
+const _holderShort = (c.holder||'').split(' ')[0] || '';
+// Variáveis de estilo/glow
 const g=GRADS[c.colorIdx||0];
-const barColor=pct>85?'rgba(239,68,68,.85)':pct>60?'rgba(251,191,36,.85)':'rgba(134,239,172,.85)';
-const _today=new Date().toISOString().slice(0,10);const _openM=invMonth(_today,c.close);const dl=daysUntilDue(_openM,c.due);
-const _cardUsed=cardUsed(c.id);
-const _cMs=monthSummary(c.id,_openM);
-const _cCarried=_cMs.carried||0;
-const _cDebits=_cMs.debits||0;
-const dueLabel=_cardUsed<=0&&dl<0?'Em dia':dl<0?'Vencida':dl===0?'Vence hoje':`Vence em ${dl}d`;
 const isActive=c.id===S.activeCardId;
 const glowColor=g.a||"#c9a84c";
 const isCorp=c.cardType==='corp';
@@ -2759,9 +2802,10 @@ const activeStyle=isActive ? '--card-glow:rgba('+cr2+',.55);--card-edge:rgba('+c
 const glowRingBg=isCorp
 ? 'radial-gradient(ellipse at 50% 80%,rgba(74,128,212,.55) 0%,rgba(74,128,212,.15) 60%,transparent 80%)'
 : 'radial-gradient(ellipse at 50% 80%,rgba('+gr+','+gg+','+gb+',.6) 0%,rgba('+gr+','+gg+','+gb+',.18) 60%,transparent 80%)';
-
-const pctColor = pct>80?'#fca5a5':pct>60?'#fde68a':'rgba(255,255,255,.82)';
-const dueLabelShort = _cardUsed<=0&&dl<0?'Em dia':dl<0?'Vencida':dl===0?'Hoje':`${dl}d`;
+// Vencimento
+const _today=new Date().toISOString().slice(0,10);const _openM=invMonth(_today,c.close);const dl=daysUntilDue(_openM,c.due,c);
+const _cardUsed=cardUsed(c.id);
+const dueLabel=_cardUsed<=0&&dl<0?'Em dia':dl<0?'Vencida':dl===0?'Vence hoje':`Vence em ${dl}d`;
 const dueAlert = dl>=0&&dl<=5&&_cardUsed>0 ? `<span style="color:#f87171;font-size:9px;margin-left:3px">⚑ ${dl}d</span>` : '';
 const brandSvg = isCorp ? '<span class="corp-badge" style="font-size:9px;font-weight:800;letter-spacing:.06em;color:rgba(255,255,255,.9)">💼 CORP</span>' : brandLogo(c.brand, false);
 return `<div class="card-thumb ${isActive?"active":"" }"
@@ -2777,28 +2821,30 @@ ondragend="cardDragEnd(event)">
 <div class="card-thumb-glass-bottom"></div>
 <div class="card-thumb-edge-top"></div>
 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;position:relative;z-index:3">
-  <div style="font-size:15px;font-weight:800;letter-spacing:.02em;color:rgba(255,255,255,.95);font-family:var(--display);line-height:1.1;text-shadow:0 1px 4px rgba(0,0,0,.5)">${c.name}</div>
+  <div>
+    <div style="font-size:15px;font-weight:800;letter-spacing:.02em;color:rgba(255,255,255,.95);font-family:var(--display);line-height:1.1;text-shadow:0 1px 4px rgba(0,0,0,.5)">${c.name}</div>
+    ${_holderShort?`<div style="font-size:9px;font-weight:500;color:rgba(255,255,255,.5);margin-top:1px;letter-spacing:.04em;text-transform:uppercase">${_holderShort}</div>`:''}
+  </div>
   <div style="flex-shrink:0;margin-top:1px">${brandSvg}</div>
 </div>
 <div style="position:relative;z-index:3">
-  <div style="font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:2px">Fatura atual</div>
-  <div class="card-thumb-used" style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-.5px;font-family:var(--mono);line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.5)">${fmtR(used)}</div>
-  ${_cCarried>0?`<div class="card-thumb-limit" style="font-size:9px;color:rgba(255,255,255,.55);margin-top:1px;line-height:1.3"><span style="color:rgba(251,191,36,.85)">↩${fmtR(_cCarried)}</span> + ${fmtR(_cDebits)}</div>`:''}
+  <div style="font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:2px">Fatura ${_selMonthLabel}</div>
+  <div class="card-thumb-used" style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-.5px;font-family:var(--mono);line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.5)">${fmtR(_invoiceVal)}</div>
 </div>
 <div style="display:flex;align-items:flex-end;justify-content:space-between;position:relative;z-index:3">
   <div>
     <div style="font-size:8px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:2px">Vencimento</div>
     <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.92);text-shadow:0 1px 2px rgba(0,0,0,.4)">${dueLabel}${dueAlert}</div>
   </div>
-  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
-    <div style="font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)">Limite</div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+    <div style="font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)">Limite disponível</div>
     <div style="display:flex;align-items:center;gap:6px">
       <div style="width:72px;height:5px;border-radius:99px;background:rgba(0,0,0,.28);overflow:hidden;position:relative;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)">
-        <div style="height:100%;width:${Math.round(pct)}%;border-radius:99px;background:${pct>85?'linear-gradient(90deg,#f97316,#ef4444)':pct>60?'linear-gradient(90deg,#fbbf24,#f97316)':'linear-gradient(90deg,#4ade80,#22c55e)'};box-shadow:0 0 6px ${pct>85?'rgba(239,68,68,.6)':pct>60?'rgba(251,191,36,.5)':'rgba(74,222,128,.4)'};transition:width .9s cubic-bezier(.16,1,.3,1);position:relative">
+        <div style="height:100%;width:${Math.round(_barFillPct)}%;border-radius:99px;background:${_barGrad};box-shadow:0 0 6px ${_barGlow};transition:width .9s cubic-bezier(.16,1,.3,1);position:relative">
           <div style="position:absolute;top:0;left:0;right:0;height:50%;background:rgba(255,255,255,.28);border-radius:99px 99px 0 0"></div>
         </div>
       </div>
-      <span class="card-thumb-limit" style="font-size:10px;font-weight:800;color:${pctColor};font-family:var(--mono);letter-spacing:-.3px">${Math.round(pct)}%</span>
+      <span class="card-thumb-limit" style="font-size:10px;font-weight:800;color:rgba(255,255,255,.82);font-family:var(--mono);letter-spacing:-.3px">${_limiteDisp}</span>
     </div>
   </div>
 </div>
@@ -3318,9 +3364,8 @@ ${dueBadge}
 </div>
 <div class="pay-row"><span class="pr-label">Total de compras</span><span class="pr-val">${fmtR(s.debits)}</span></div>
 ${s.carried>0?`<div class="pay-row"><span class="pr-label">Saldo anterior c/ juros</span><span class="pr-val" style="color:var(--red)">${fmtR(s.carried)}</span></div>`:''}
-${s.refunds>0?`<div class="pay-row"><span class="pr-label">Estornos</span><span class="pr-val ok">− ${fmtR(s.refunds)}</span></div>`:''}
-<div class="pay-row"><span class="pr-label">Pagamentos realizados</span><span class="pr-val ok">− ${fmtR(s.paidGross||0)}</span></div>
-<div class="pay-row"><span class="pr-label">Abatimento total</span><span class="pr-val ok">− ${fmtR(s.paid)}</span></div>
+${s.paidGross>0?`<div class="pay-row"><span class="pr-label">Pagamentos realizados</span><span class="pr-val ok">− ${fmtR(s.paidGross)}</span></div>`:'<div class="pay-row"><span class="pr-label">Pagamentos realizados</span><span class="pr-val" style="color:var(--text3)">− R$ 0,00</span></div>'}
+${s.refunds>0?`<div class="pay-row"><span class="pr-label">Abatimentos / Estornos</span><span class="pr-val ok">− ${fmtR(s.refunds)}</span></div>`:'<div class="pay-row"><span class="pr-label">Abatimentos / Estornos</span><span class="pr-val" style="color:var(--text3)">− R$ 0,00</span></div>'}
 <div class="pay-row"><span class="pr-label">Pagamento mínimo (15%)</span><span class="pr-val min">${fmtR(s.minPay)}</span></div>
 <div class="pay-row"><span class="pr-label">Total a pagar</span><span class="pr-val big">${fmtR(s.due)}</span></div>
 <div style="margin-top:16px">
@@ -3441,7 +3486,7 @@ return `<div class="fut-card">
 <div class="fut-header" onclick="toggleFut('${m}')">
 <div>
 <div class="fut-name">${monthLabel(m)}</div>
-<div style="font-size:10px;color:var(--text3);margin-top:2px">${txs.length} lançamento${txs.length>1?'s':''} · Vence ${dueDateStr(m,c.due)}</div>
+<div style="font-size:10px;color:var(--text3);margin-top:2px">${txs.length} lançamento${txs.length>1?'s':''} · Vence ${dueDateStr(m,c.due,c)}</div>
 </div>
 <div style="display:flex;align-items:center;gap:10px">
 ${hasLast?`<span class="badge badge-green" style="font-size:9px">✓ Encerra parcela</span>`:''}
@@ -4386,8 +4431,8 @@ profiles.forEach(p => {
     const paid = pPayments.filter(pm=>pm.cardId===cardId && pm.month===month)
                           .reduce((s,pm)=>s+(pm.amount||0),0);
     const due = Math.max(0, debits - paid);
-    const daysLeft = daysUntilDue(month, card.due);
-    return { debits, paid, due, daysLeft, dueDate: dueDateStr(month, card.due) };
+    const daysLeft = daysUntilDue(month, card.due, card);
+    return { debits, paid, due, daysLeft, dueDate: dueDateStr(month, card.due, card) };
   }
 
   const pCardSummaries = pCards.map(c => ({
@@ -5478,7 +5523,7 @@ return `<div class="set-card" draggable="true"
 <div class="set-details">
 <span>Limite: ${fmtR(c.limit)}</span>
 <span>Fecha: dia ${c.close}</span>
-<span>Vence: dia ${c.due}</span>
+<span>Vence: dia ${c.due}${c.due2&&c.due2From?` <span style="color:var(--blue-m);font-size:9px">→ dia ${c.due2} a partir de ${c.due2From}</span>`:''}</span>
 <span style="color:var(--blue)">Juros: ${c.rate}% a.m.</span>
 <span>${c.brand}</span>
 </div>
@@ -5841,7 +5886,10 @@ function openAddCardModal(){
 S.editCardId=null;S.selColor=0;S._cardType='personal';S._portadores=[];
 document.getElementById('cardModalTitle').textContent='Novo Cartão';
 document.getElementById('cardSaveBtn').textContent='Salvar Cartão';
-['c-name','c-last4','c-holder','c-expiry','c-limit','c-close','c-due','c-rate'].forEach(id=>document.getElementById(id).value='');
+['c-name','c-last4','c-holder','c-expiry','c-limit','c-close','c-due','c-rate','c-due2','c-due2-from'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+if(document.getElementById('due-change-panel'))document.getElementById('due-change-panel').style.display='none';
+if(document.getElementById('due-change-preview'))document.getElementById('due-change-preview').textContent='';
+if(document.getElementById('btn-toggle-due-change'))document.getElementById('btn-toggle-due-change').textContent='+ Registrar mudança';
 document.getElementById('c-brand').value='Visa';
 document.getElementById('c-rate').value='14.9';
 ['c-name'].forEach(id=>document.getElementById(id).classList.remove('err'));
@@ -5867,6 +5915,13 @@ document.getElementById('c-limit').value=c.limit;
 document.getElementById('c-close').value=c.close;
 document.getElementById('c-due').value=c.due;
 document.getElementById('c-rate').value=c.rate;
+// Mudança de vencimento
+const hasDue2 = c.due2 && c.due2From;
+if(document.getElementById('c-due2')) document.getElementById('c-due2').value = hasDue2 ? c.due2 : '';
+if(document.getElementById('c-due2-from')) document.getElementById('c-due2-from').value = hasDue2 ? c.due2From : '';
+if(document.getElementById('due-change-panel')) document.getElementById('due-change-panel').style.display = hasDue2 ? 'block' : 'none';
+if(document.getElementById('btn-toggle-due-change')) document.getElementById('btn-toggle-due-change').textContent = hasDue2 ? '− Ocultar' : '+ Registrar mudança';
+if(hasDue2) { try{ updateDueChangePreview(); }catch(e){} }
 document.getElementById('c-brand').value=c.brand;
 if(document.getElementById('c-corp-name')) document.getElementById('c-corp-name').value=c.corpName||'';
 if(document.getElementById('c-corp-reimb')) document.getElementById('c-corp-reimb').checked=c.corpReimb||false;
@@ -5892,6 +5947,9 @@ due:parseInt(document.getElementById('c-due').value)||5,
 rate:parseFloat(document.getElementById('c-rate').value)||14.9,
 brand:document.getElementById('c-brand').value,
 colorIdx:S.selColor,
+// Mudança de vencimento com data de corte
+due2: parseInt(document.getElementById('c-due2')?.value)||null,
+due2From: document.getElementById('c-due2-from')?.value.trim()||null,
 cardType:S._cardType||'personal',
 corpName:document.getElementById('c-corp-name')?.value.trim()||'',
 corpReimb:document.getElementById('c-corp-reimb')?.checked||false,
@@ -7720,9 +7778,10 @@ const byDue={};
 S.cards.forEach(c=>{
 const total=monthDebits(c.id,nextM);
 if(total<=0) return;
-const dueDate=dueDateStr(nextM,c.due);
+const dueDate=dueDateStr(nextM,c.due,c);
 const[dy,dm]=nextM.split('-').map(Number);
-const dueTs=new Date(dy,dm-1,c.due).getTime();
+const effDay=effectiveDue(c,nextM);
+const dueTs=new Date(dy,dm-1,effDay).getTime();
 if(!byDue[dueDate]) byDue[dueDate]={cards:[],total:0,ts:dueTs};
 byDue[dueDate].cards.push({name:c.name,total});
 byDue[dueDate].total+=total;
@@ -10123,9 +10182,10 @@ const paid=S.payments.filter(p=>p.cardId===c.id&&p.invoiceMonth===cur).reduce((s
 const due=Math.max(0,gasto-paid);
 totalGasto+=gasto; totalLimite+=(c.limit||0);
 const today=new Date();today.setHours(0,0,0,0);
-if(c.dueDay&&due>0){
-let v=new Date(today.getFullYear(),today.getMonth(),c.dueDay);
-if(v<today)v=new Date(today.getFullYear(),today.getMonth()+1,c.dueDay);
+if(due>0){
+const effDay=effectiveDue(c,cur);
+let v=new Date(today.getFullYear(),today.getMonth(),effDay);
+if(v<today)v=new Date(today.getFullYear(),today.getMonth()+1,effDay);
 const dl=Math.round((v-today)/(1000*60*60*24));
 if(dl<daysMin){daysMin=dl;urgente={name:c.name,due,daysLeft:dl};}
 }
@@ -14117,6 +14177,47 @@ body.theme-dark .tx-item:hover, body.theme-system.is-dark .tx-item:hover{
   document.addEventListener('DOMContentLoaded', polishStates);
   setTimeout(polishStates, 300);
 })();
+</script>
+
+<script id="aurum-due-change-helpers">
+// ---- Helpers para painel de Alteração de Vencimento ----
+function toggleDueChange(){
+  const panel = document.getElementById('due-change-panel');
+  const btn   = document.getElementById('btn-toggle-due-change');
+  if(!panel) return;
+  const open = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '− Ocultar' : '+ Registrar mudança';
+  if(open) updateDueChangePreview();
+}
+function fmtDueFrom(el){
+  let v = el.value.replace(/\D/g,'');
+  if(v.length > 2) v = v.slice(0,2) + '/' + v.slice(2,6);
+  el.value = v;
+}
+function updateDueChangePreview(){
+  const d2   = parseInt(document.getElementById('c-due2')?.value);
+  const from = document.getElementById('c-due2-from')?.value.trim();
+  const prev = document.getElementById('due-change-preview');
+  if(!prev) return;
+  if(d2 && from && /^\d{2}\/\d{4}$/.test(from)){
+    const [mm,yyyy] = from.split('/');
+    const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    const nome = meses[parseInt(mm)-1] || mm;
+    prev.innerHTML = `✅ A partir de <strong>${nome}/${yyyy}</strong> o vencimento será dia <strong>${d2}</strong>. Faturas anteriores usam o vencimento original.`;
+  } else {
+    prev.textContent = from ? '⚠️ Informe o mês no formato MM/AAAA' : '';
+  }
+}
+function clearDueChange(){
+  ['c-due2','c-due2-from'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const prev = document.getElementById('due-change-preview');
+  if(prev) prev.textContent='';
+  const panel = document.getElementById('due-change-panel');
+  if(panel) panel.style.display='none';
+  const btn = document.getElementById('btn-toggle-due-change');
+  if(btn) btn.textContent='+ Registrar mudança';
+}
 </script>
 
 </body>
