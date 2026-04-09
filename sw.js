@@ -1,28 +1,70 @@
+// Aurum Pro — Service Worker
+// Estratégia: Cache-first para assets estáticos, Network-first para dados
+
 const CACHE_NAME = 'aurum-pro-v1';
-const ASSETS = [
+const CACHE_ASSETS = [
   './',
   './index.html',
-  './manifest.json',
-  './icons/favicon.ico',
-  './icons/icon-96x96.png',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/apple-touch-icon.png',
-  './screenshots/screenshot-mobile-dark.png',
-  './screenshots/screenshot-mobile-light.png',
-  './screenshots/screenshot-desktop.png'
+  './manifest.json'
 ];
-self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
+
+// Instala e pré-cacheia os assets principais
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(CACHE_ASSETS);
+    }).then(() => self.skipWaiting())
+  );
 });
-self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+
+// Limpa caches antigos ao ativar
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+      )
+    ).then(() => self.clients.claim())
+  );
 });
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(resp => {
-    const copy = resp.clone();
-    caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-    return resp;
-  }).catch(() => caches.match('./index.html'))));
+
+// Intercepta requests
+self.addEventListener('fetch', e => {
+  const { request } = e;
+  const url = new URL(request.url);
+
+  // Fontes do Google: cache agressivo
+  if (url.hostname.includes('fonts.g')) {
+    e.respondWith(
+      caches.open(CACHE_NAME).then(cache =>
+        cache.match(request).then(cached => {
+          if (cached) return cached;
+          return fetch(request).then(response => {
+            cache.put(request, response.clone());
+            return response;
+          });
+        })
+      )
+    );
+    return;
+  }
+
+  // App principal: network-first com fallback para cache
+  if (url.pathname.endsWith('.html') || url.pathname === '/') {
+    e.respondWith(
+      fetch(request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(c => c.put(request, clone));
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Demais assets: cache-first
+  e.respondWith(
+    caches.match(request).then(cached => cached || fetch(request))
+  );
 });
