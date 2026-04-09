@@ -1568,27 +1568,32 @@ const _swAllowed = location.hostname === 'localhost'
   || location.hostname.endsWith('.github.io')
   || location.protocol === 'https:' && !location.hostname.includes('claudeusercontent');
 if(_swAllowed){
-  navigator.serviceWorker.register('./sw.js')
-  .then(reg => {
-    console.log('[SW] Registrado:', reg.scope);
-    // Detecta nova versão do SW disponível
-    reg.addEventListener('updatefound', () => {
-      const newSW = reg.installing;
-      newSW.addEventListener('statechange', () => {
-        if(newSW.state === 'installed' && navigator.serviceWorker.controller){
-          console.log('[SW] Nova versão disponível — recarregando...');
-          window.location.reload();
-        }
+  fetch('./sw.js', { method: 'HEAD' })
+  .then(function(res){
+    if(!res.ok) return;
+    navigator.serviceWorker.register('./sw.js')
+    .then(reg => {
+      console.log('[SW] Registrado:', reg.scope);
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing;
+        newSW.addEventListener('statechange', () => {
+          if(newSW.state === 'installed' && navigator.serviceWorker.controller){
+            console.log('[SW] Nova versão disponível — recarregando...');
+            window.location.reload();
+          }
+        });
       });
+    })
+    .catch(err => console.warn('SW erro:', err));
+    navigator.serviceWorker.addEventListener('message', e => {
+      if(e.data && e.data.type === 'SW_UPDATED'){
+        console.log('[SW] Atualização aplicada — recarregando...');
+        window.location.reload();
+      }
     });
   })
-  .catch(err => console.warn('SW erro:', err));
-  // Recebe mensagem do SW para recarregar
-  navigator.serviceWorker.addEventListener('message', e => {
-    if(e.data && e.data.type === 'SW_UPDATED'){
-      console.log('[SW] Atualização aplicada — recarregando...');
-      window.location.reload();
-    }
+  .catch(function(){
+    /* sw.js não encontrado neste ambiente — ignora silenciosamente */
   });
 }
 }
@@ -8299,7 +8304,7 @@ el.innerHTML=dataWarning+`
 <div class="chart-wrap" id="chart-usuario">
 <div class="chart-title">Gastos por Usuário</div>
 <div class="chart-sub">Distribuição de gastos entre usuários no mês atual</div>
-<div class="chart-canvas-wrap" style="height:180px"><canvas id="gastosChart"></canvas></div>
+<div class="chart-canvas-wrap" style="height:120px"><canvas id="gastosChart"></canvas></div>
 </div>
 ${catEntries.length>0?`
 <div class="chart-wrap">
@@ -8330,7 +8335,9 @@ ${catEntries.map(([cat,amt])=>`
 <div id="projSummary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px"></div>
 </div>`;
 if(typeof Chart==='undefined'){el.innerHTML+='<div style="padding:20px;text-align:center;color:var(--text3);font-size:var(--fs-sm)">Gráficos indisponíveis — conecte-se à internet</div>';return;}
-if(_chartInst){try{_chartInst.forEach(ch=>ch.destroy())}catch(e){}}_chartInst=[];
+if(_chartInst){try{_chartInst.forEach(ch=>{if(ch&&typeof ch.destroy==='function')ch.destroy();})}catch(e){}}_chartInst=[];
+/* Destrói qualquer instância Chart.js residual nos canvas para evitar "canvas already in use" */
+['mainChart','lineChart','projChart','donutChart','gastosChart'].forEach(id=>{const cv=document.getElementById(id);if(cv){const prev=Chart.getChart(cv);if(prev)try{prev.destroy()}catch(e){}}});
 const gridColor=text3+'22';
 const tickColor=text3;
 const numFont=cs.getPropertyValue('--num-font').trim().replace(/^'|'$/g,'')||'Merriweather';
@@ -8368,13 +8375,16 @@ const numFont=cs.getPropertyValue('--num-font').trim().replace(/^'|'$/g,'')||'Me
     return;
   }
 
-  // paleta de cores cíclica alinhada ao design system
-  const palette = [
-    'rgba(200,146,42,.78)', 'rgba(74,139,224,.78)', 'rgba(74,207,138,.78)',
-    'rgba(160,112,224,.78)','rgba(58,176,224,.78)', 'rgba(240,104,88,.78)'
-  ];
-  const barColors = usuarioData.map((_,i) => palette[i % palette.length]);
-  const _max = Math.max(...usuarioData.map(d=>d.total));
+  // cores em gradiente de calor: amarelo → laranja → vermelho proporcional ao valor
+  const _usuarioMax = Math.max(...usuarioData.map(d=>d.total));
+  const barColors = usuarioData.map((d) => {
+    const frac = _usuarioMax > 0 ? d.total / _usuarioMax : 0.5;
+    let r, g, b;
+    if(frac < 0.5){ const t=frac*2; r=Math.round(245+(240-245)*t); g=Math.round(208+(112-208)*t); b=Math.round(120+(48-120)*t); }
+    else { const t=(frac-0.5)*2; r=Math.round(240+(224-240)*t); g=Math.round(112+(32-112)*t); b=Math.round(48+(32-48)*t); }
+    return `rgba(${r},${g},${b},0.90)`;
+  });
+  const _max = _usuarioMax;
 
   // plugin: iniciais dentro da barra — registrado uma vez
   const _iniciaisId = 'aurum-iniciais';
@@ -8382,6 +8392,7 @@ const numFont=cs.getPropertyValue('--num-font').trim().replace(/^'|'$/g,'')||'Me
     Chart.register({
       id: _iniciaisId,
       afterDatasetsDraw(chart) {
+        if(chart.canvas.id !== 'gastosChart') return;
         const {ctx, data, scales} = chart;
         if(!scales.x || !scales.y) return;
         ctx.save();
@@ -8399,6 +8410,38 @@ const numFont=cs.getPropertyValue('--num-font').trim().replace(/^'|'$/g,'')||'Me
           ctx.textBaseline = 'middle';
           ctx.textAlign    = 'left';
           ctx.fillText(iniciais, barLeft + 7, barTop + barH / 2);
+        });
+        ctx.restore();
+      }
+    });
+  }
+
+  // plugin gloss: sobreposição branca na metade superior de cada barra
+  const _glossId = 'aurum-bar-gloss';
+  if(!Chart.registry.plugins.get(_glossId)){
+    Chart.register({
+      id: _glossId,
+      afterDatasetsDraw(chart) {
+        if(chart.canvas.id !== 'gastosChart') return;
+        const {ctx, scales} = chart;
+        if(!scales.x || !scales.y) return;
+        const meta = chart.getDatasetMeta(0);
+        if(!meta) return;
+        ctx.save();
+        meta.data.forEach((bar) => {
+          const barLeft = scales.x.getPixelForValue(0);
+          const barW = bar.x - barLeft;
+          const barTop = bar.y - bar.height / 2;
+          const glossH = bar.height * 0.42;
+          if(barW < 2) return;
+          const grd = ctx.createLinearGradient(0, barTop, 0, barTop + glossH);
+          grd.addColorStop(0,   'rgba(255,255,255,0.30)');
+          grd.addColorStop(0.5, 'rgba(255,255,255,0.10)');
+          grd.addColorStop(1,   'rgba(255,255,255,0)');
+          ctx.fillStyle = grd;
+          ctx.beginPath();
+          ctx.roundRect(barLeft, barTop, barW, glossH, [5, 5, 0, 0]);
+          ctx.fill();
         });
         ctx.restore();
       }
@@ -8453,18 +8496,22 @@ const xScale=chart.scales.x;
 if(!xScale) return;
 const x=xScale.getPixelForValue(idx);
 const ctx2=chart.ctx;
+const {top,bottom,left,right}=chart.chartArea;
 ctx2.save();
+ctx2.beginPath();
+ctx2.rect(left,top,right-left,bottom-top);
+ctx2.clip();
 ctx2.beginPath();
 ctx2.setLineDash([4,3]);
 ctx2.strokeStyle=amber+'99';
 ctx2.lineWidth=1.2;
-ctx2.moveTo(x,chart.chartArea.top);
-ctx2.lineTo(x,chart.chartArea.bottom);
+ctx2.moveTo(x,top);
+ctx2.lineTo(x,bottom);
 ctx2.stroke();
 ctx2.setLineDash([]);
 ctx2.font='9px system-ui';
 ctx2.fillStyle=amber;
-ctx2.fillText('hoje',x+4,chart.chartArea.top+10);
+ctx2.fillText('hoje',x+4,top+10);
 ctx2.restore();
 }
 };
@@ -8515,6 +8562,7 @@ const projDatasets=datasets.map((d,i)=>{
 const col=cardRgba(i,1);
 const rgb=col.match(/[\d.]+/g);
 return{...d,
+type:'bar',
 backgroundColor:d.data.map((_,idx)=>idx<nHist?`rgba(${rgb[0]},${rgb[1]},${rgb[2]},.85)`:`rgba(${rgb[0]},${rgb[1]},${rgb[2]},.18)`),
 stack:'s'};
 });
@@ -8528,6 +8576,7 @@ segment:{borderDash:ctx=>ctx.p0DataIndex>=nHist-1?[5,3]:[]},
 order:0,yAxisID:'y',
 };
 _chartInst.push(new Chart(projEl.getContext('2d'),{
+type:'bar',
 data:{labels:allLabels,datasets:[...projDatasets,totalLine]},
 options:{...chartDefaults,
 scales:{x:{...chartDefaults.scales.x,stacked:true},y:{...chartDefaults.scales.y,stacked:true}}},
@@ -15813,11 +15862,19 @@ function clearDueChange(){
 </script>
 
 <script>
-if('serviceWorker' in navigator){
+if('serviceWorker' in navigator && !location.hostname.includes('claudeusercontent')){
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('[Aurum SW] Registered:', reg.scope))
-      .catch(err => console.warn('[Aurum SW] Failed:', err));
+    fetch('./sw.js', { method: 'HEAD' })
+      .then(function(res){
+        if(res.ok){
+          return navigator.serviceWorker.register('./sw.js')
+            .then(function(reg){ console.log('[Aurum SW] Registered:', reg.scope); })
+            .catch(function(err){ console.warn('[Aurum SW] Failed:', err); });
+        }
+      })
+      .catch(function(){
+        /* sw.js não encontrado neste ambiente — ignora silenciosamente */
+      });
   });
 }
 </script>
@@ -16333,6 +16390,11 @@ body.fpanel-focus-mode .sidebar {
       /* Skeleton rápido só em abas com muito conteúdo */
       const heavyTabs = ['invoice','charts','annual','history','lancamentos','future','budgets','dashboard'];
       if(tc && heavyTabs.includes(t)){
+        /* Destroi charts ANTES de o skeleton limpar o DOM */
+        if(t === 'charts' && window._chartInst){
+          try{ window._chartInst.forEach(function(ch){ if(ch && typeof ch.destroy==='function') ch.destroy(); }); }catch(e){}
+          window._chartInst = [];
+        }
         tc.style.opacity = '0';
         tc.style.transform = 'translateY(6px)';
         tc.style.transition = 'opacity .15s ease, transform .15s ease';
@@ -16343,6 +16405,12 @@ body.fpanel-focus-mode .sidebar {
           requestAnimationFrame(()=>{
             tc.style.opacity = '1';
             tc.style.transform = 'translateY(0)';
+            /* Força re-render dos gráficos após o canvas estar visível */
+            if(t === 'charts'){
+              requestAnimationFrame(()=>{
+                if(window._chartInst) window._chartInst.forEach(function(ch){ if(ch && typeof ch.resize==='function') ch.resize(); });
+              });
+            }
             setTimeout(()=>{ tc.style.transition=''; tc.style.opacity=''; tc.style.transform=''; }, 320);
           });
           setTimeout(animateCarousel, 80);
