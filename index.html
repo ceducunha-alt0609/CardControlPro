@@ -2446,33 +2446,30 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
         <input type="number" class="fc" id="c-rate" placeholder="14.9" step="0.1" min="0">
       </div>
     </div>
-    <!-- NOVO VENCIMENTO COM DATA DE CORTE -->
-    <div id="due-change-wrap" style="margin-bottom:14px">
+    <!-- HISTORICO DE VENCIMENTOS E LIMITES -->
+    <div id="due-history-wrap" style="margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <label class="fl" style="margin-bottom:0">Alteração de Vencimento</label>
-        <button type="button" id="btn-toggle-due-change" onclick="toggleDueChange()"
+        <label class="fl" style="margin-bottom:0">Historico de Vencimentos</label>
+        <button type="button" onclick="addDueHistoryEntry()"
           style="font-size:var(--fs-micro);font-weight:700;padding:2px 10px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer">
-          + Registrar mudança
+          + Registrar mudanca
         </button>
       </div>
-      <div id="due-change-panel" style="display:none;background:var(--blue-l);border:1.5px solid var(--blue-m);border-radius:var(--r);padding:12px 14px">
-        <div style="font-size:var(--fs-micro);color:var(--blue-d);margin-bottom:10px;line-height:1.5">
-          ⚙️ Informe o <strong>novo dia de vencimento</strong> e a partir de qual <strong>mês/ano</strong> ele passa a valer. Faturas anteriores usarão o vencimento original.
-        </div>
-        <div class="fr">
-          <div class="fg" style="margin-bottom:0">
-            <label class="fl">Novo Dia Vencimento</label>
-            <input type="number" class="fc" id="c-due2" min="1" max="31" placeholder="15" oninput="updateDueChangePreview()">
-          </div>
-          <div class="fg" style="margin-bottom:0">
-            <label class="fl">A partir de (MM/AAAA)</label>
-            <input type="text" class="fc" id="c-due2-from" placeholder="05/2025" maxlength="7" oninput="fmtDueFrom(this);updateDueChangePreview()">
-          </div>
-        </div>
-        <div id="due-change-preview" style="margin-top:8px;font-size:var(--fs-xs);color:var(--blue-d);font-weight:500;min-height:16px"></div>
-        <button type="button" onclick="clearDueChange()" style="margin-top:8px;font-size:var(--fs-micro);font-weight:700;padding:2px 10px;border-radius:20px;border:1px solid rgba(192,57,43,.3);background:var(--red-l);color:var(--red);cursor:pointer">✕ Remover mudança</button>
-      </div>
+      <div id="due-history-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div id="due-history-empty" style="font-size:var(--fs-xs);color:var(--text3);padding:4px 0">Nenhuma mudanca registrada. O dia de vencimento acima e o atual.</div>
     </div>
+    <div id="limit-history-wrap" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label class="fl" style="margin-bottom:0">Historico de Limites</label>
+        <button type="button" onclick="addLimitHistoryEntry()"
+          style="font-size:var(--fs-micro);font-weight:700;padding:2px 10px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer">
+          + Registrar mudanca
+        </button>
+      </div>
+      <div id="limit-history-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div id="limit-history-empty" style="font-size:var(--fs-xs);color:var(--text3);padding:4px 0">Nenhuma mudanca registrada. O limite acima e o atual.</div>
+    </div>
+    <input type="hidden" id="c-due2"><input type="hidden" id="c-due2-from">
     <div class="fg">
       <label class="fl">Cor do Cartão</label>
       <div class="color-opts" id="colorOpts"></div>
@@ -2972,8 +2969,22 @@ return `${nx.getFullYear()}-${pad(nx.getMonth()+1)}`;
 // Retorna o dia de vencimento efetivo para um dado mês de fatura (YYYY-MM).
 // Se o cartão tiver due2 + due2From e o mês de fatura for >= due2From, usa due2.
 function effectiveDue(card, invoiceMonth) {
-  const d2 = parseInt(card && card.due2);
-  const from = card && card.due2From; // formato "MM/AAAA"
+  if (!card) return 5;
+  if (Array.isArray(card.dueHistory) && card.dueHistory.length > 0 && invoiceMonth) {
+    const sorted = [...card.dueHistory].sort((a, b) => {
+      const toYM = s => { const p = s.split('/'); return p[1] + '-' + p[0].padStart(2,'0'); };
+      return toYM(b.from) > toYM(a.from) ? 1 : -1;
+    });
+    for (const entry of sorted) {
+      const parts = entry.from.split('/');
+      if (parts.length === 2) {
+        const fromYM = parts[1] + '-' + parts[0].padStart(2,'0');
+        if (invoiceMonth >= fromYM) return parseInt(entry.day);
+      }
+    }
+  }
+  const d2 = parseInt(card.due2);
+  const from = card.due2From;
   if (d2 && from && invoiceMonth) {
     const parts = from.split('/');
     if (parts.length === 2) {
@@ -2981,7 +2992,25 @@ function effectiveDue(card, invoiceMonth) {
       if (invoiceMonth >= fromYM) return d2;
     }
   }
-  return parseInt(card && (card.due ?? card.dueDay)) || 5;
+  return parseInt(card.due ?? card.dueDay) || 5;
+}
+
+function effectiveLimit(card, invoiceMonth) {
+  if (!card) return 0;
+  if (Array.isArray(card.limitHistory) && card.limitHistory.length > 0 && invoiceMonth) {
+    const sorted = [...card.limitHistory].sort((a, b) => {
+      const toYM = s => { const p = s.split('/'); return p[1] + '-' + p[0].padStart(2,'0'); };
+      return toYM(b.from) > toYM(a.from) ? 1 : -1;
+    });
+    for (const entry of sorted) {
+      const parts = entry.from.split('/');
+      if (parts.length === 2) {
+        const fromYM = parts[1] + '-' + parts[0].padStart(2,'0');
+        if (invoiceMonth >= fromYM) return parseFloat(entry.limit);
+      }
+    }
+  }
+  return parseFloat(card.limit) || 0;
 }
 function dueDateStr(im,dueDay,card){
 const day = card ? effectiveDue(card, im) : (dueDay||5);
@@ -3278,8 +3307,9 @@ const _invoiceVal = _selMs.total || 0;
 const _selMonthLabel = (()=>{ const [y,m]=S.month.split('-').map(Number); return new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'short',year:'numeric'}); })();
 // Barra: limite disponível = limite - comprometido total
 const _realUsed = cardCommitted(c.id);
-const _availPct = Math.min(100, c.limit > 0 ? Math.max(0, (c.limit - _realUsed) / c.limit * 100) : 100);
-const _barFillPct = Math.min(100, c.limit > 0 ? _realUsed / c.limit * 100 : 0);
+const _effLimit = effectiveLimit(c, S.month||curMonth());
+const _availPct = Math.min(100, _effLimit > 0 ? Math.max(0, (_effLimit - _realUsed) / _effLimit * 100) : 100);
+const _barFillPct = Math.min(100, _effLimit > 0 ? _realUsed / _effLimit * 100 : 0);
 const _barGrad = _barFillPct > 85 ? 'linear-gradient(90deg,#f97316,#ef4444)' : _barFillPct > 60 ? 'linear-gradient(90deg,#fbbf24,#f97316)' : 'linear-gradient(90deg,#4ade80,#22c55e)';
 const _barGlow = _barFillPct > 85 ? 'rgba(239,68,68,.6)' : _barFillPct > 60 ? 'rgba(251,191,36,.5)' : 'rgba(74,222,128,.4)';
 const _limiteDisp = c.limit > 0 ? fmtR(Math.max(0, c.limit - _realUsed)) : '—';
@@ -3685,8 +3715,9 @@ const _invMs=monthSummary(c.id,m);
 const _futureCommitted=futureCommitted(c.id,m);
 // Limite bloqueado = compras do mês - créditos - pagamentos + parcelas futuras (sem juros/carried)
 const _totalUsed=Math.max(0,(_invMs.netCharges||0)-(_invMs.paidGross||0))+_futureCommitted;
-const avail=Math.max(0,c.limit-_totalUsed);
-const usedPct=c.limit>0?Math.min(100,Math.round((_totalUsed/c.limit)*100)):0;
+const _invLimit=effectiveLimit(c,S.month||curMonth());
+const avail=Math.max(0,_invLimit-_totalUsed);
+const usedPct=_invLimit>0?Math.min(100,Math.round((_totalUsed/_invLimit)*100)):0;
 el.innerHTML=`
 <!-- ── PAINEL UNIFICADO (mobile-first) ── -->
 <div class="inv-panel">
@@ -6636,12 +6667,101 @@ if(document.getElementById('chip-corp')) document.getElementById('chip-corp').cl
 renderPortadoresList();
 initColorPicker();openModal('card');
 }
+// ── Historico de vencimentos e limites (estado temporario no modal) ──
+window._dueHistory = [];
+window._limitHistory = [];
+
+function renderDueHistoryList() {
+  const list = document.getElementById('due-history-list');
+  const empty = document.getElementById('due-history-empty');
+  if (!list) return;
+  if (!window._dueHistory.length) { list.innerHTML = ''; if(empty) empty.style.display='block'; return; }
+  if (empty) empty.style.display = 'none';
+  const sorted = [...window._dueHistory].sort((a,b)=>{
+    const toYM=s=>{const p=s.split('/');return p[1]+'-'+p[0].padStart(2,'0');};
+    return toYM(b.from)>toYM(a.from)?1:-1;
+  });
+  list.innerHTML = sorted.map((e,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;background:var(--blue-l);border:1px solid var(--blue-m);border-radius:var(--r);padding:8px 12px">
+      <span style="font-size:var(--fs-xs);color:var(--blue-d);flex:1">
+        A partir de <strong>${e.from}</strong> &rarr; Dia <strong>${e.day}</strong>
+      </span>
+      <button type="button" onclick="removeDueHistoryEntry(${window._dueHistory.indexOf(e)})"
+        style="font-size:var(--fs-micro);padding:2px 8px;border-radius:20px;border:1px solid rgba(192,57,43,.3);background:var(--red-l);color:var(--red);cursor:pointer">x</button>
+    </div>`).join('');
+}
+
+function addDueHistoryEntry() {
+  const now = new Date();
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const yyyy = now.getFullYear();
+  const from = prompt('Valido a partir de qual mes? (MM/AAAA)', mm+'/'+yyyy);
+  if (!from || !/^[0-9]{2}\/[0-9]{4}$/.test(from)) { if(from!==null) showToast('Formato invalido. Use MM/AAAA','error'); return; }
+  const day = parseInt(document.getElementById('c-due').value)||5;
+  const newDay = parseInt(prompt('Novo dia de vencimento (1-31):', day));
+  if (!newDay || newDay<1 || newDay>31) { if(!isNaN(newDay)) showToast('Dia invalido','error'); return; }
+  window._dueHistory.push({day:newDay, from});
+  renderDueHistoryList();
+  showToast('Mudanca de vencimento adicionada','green');
+}
+
+function removeDueHistoryEntry(idx) {
+  window._dueHistory.splice(idx,1);
+  renderDueHistoryList();
+}
+
+function renderLimitHistoryList() {
+  const list = document.getElementById('limit-history-list');
+  const empty = document.getElementById('limit-history-empty');
+  if (!list) return;
+  if (!window._limitHistory.length) { list.innerHTML=''; if(empty) empty.style.display='block'; return; }
+  if (empty) empty.style.display='none';
+  const sorted = [...window._limitHistory].sort((a,b)=>{
+    const toYM=s=>{const p=s.split('/');return p[1]+'-'+p[0].padStart(2,'0');};
+    return toYM(b.from)>toYM(a.from)?1:-1;
+  });
+  list.innerHTML = sorted.map((e,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;background:var(--green-l);border:1px solid rgba(0,122,106,.25);border-radius:var(--r);padding:8px 12px">
+      <span style="font-size:var(--fs-xs);color:var(--green-d);flex:1">
+        A partir de <strong>${e.from}</strong> &rarr; Limite <strong>${Number(e.limit).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</strong>
+      </span>
+      <button type="button" onclick="removeLimitHistoryEntry(${window._limitHistory.indexOf(e)})"
+        style="font-size:var(--fs-micro);padding:2px 8px;border-radius:20px;border:1px solid rgba(192,57,43,.3);background:var(--red-l);color:var(--red);cursor:pointer">x</button>
+    </div>`).join('');
+}
+
+function addLimitHistoryEntry() {
+  const now = new Date();
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const yyyy = now.getFullYear();
+  const from = prompt('Valido a partir de qual mes? (MM/AAAA)', mm+'/'+yyyy);
+  if (!from || !/^[0-9]{2}\/[0-9]{4}$/.test(from)) { if(from!==null) showToast('Formato invalido. Use MM/AAAA','error'); return; }
+  const curLimit = parseFloat(document.getElementById('c-limit').value)||0;
+  const rawLimit = prompt('Novo limite (R$):', curLimit);
+  if (rawLimit===null) return;
+  const newLimit = parseFloat(String(rawLimit).replace(',','.'));
+  if (isNaN(newLimit)||newLimit<0) { showToast('Limite invalido','error'); return; }
+  window._limitHistory.push({limit:newLimit, from});
+  renderLimitHistoryList();
+  showToast('Mudanca de limite adicionada','green');
+}
+
+function removeLimitHistoryEntry(idx) {
+  window._limitHistory.splice(idx,1);
+  renderLimitHistoryList();
+}
+
 function editCard(id){
 const c=getCard(id);if(!c)return;
 S.editCardId=id;S.selColor=c.colorIdx||0;S._cardType=c.cardType||'personal';
 S._portadores=[...(c.holders||[])];
-document.getElementById('cardModalTitle').textContent='Editar Cartão';
-document.getElementById('cardSaveBtn').textContent='Salvar Alterações';
+window._dueHistory = Array.isArray(c.dueHistory) ? JSON.parse(JSON.stringify(c.dueHistory)) : [];
+if (!window._dueHistory.length && c.due2 && c.due2From) {
+  window._dueHistory.push({day:c.due2, from:c.due2From});
+}
+window._limitHistory = Array.isArray(c.limitHistory) ? JSON.parse(JSON.stringify(c.limitHistory)) : [];
+document.getElementById('cardModalTitle').textContent='Editar Cartao';
+document.getElementById('cardSaveBtn').textContent='Salvar Alteracoes';
 document.getElementById('c-name').value=c.name;
 document.getElementById('c-last4').value=c.last4;
 document.getElementById('c-holder').value=c.holder;
@@ -6650,13 +6770,6 @@ document.getElementById('c-limit').value=c.limit;
 document.getElementById('c-close').value=c.close;
 document.getElementById('c-due').value=c.due;
 document.getElementById('c-rate').value=c.rate;
-// Mudança de vencimento
-const hasDue2 = c.due2 && c.due2From;
-if(document.getElementById('c-due2')) document.getElementById('c-due2').value = hasDue2 ? c.due2 : '';
-if(document.getElementById('c-due2-from')) document.getElementById('c-due2-from').value = hasDue2 ? c.due2From : '';
-if(document.getElementById('due-change-panel')) document.getElementById('due-change-panel').style.display = hasDue2 ? 'block' : 'none';
-if(document.getElementById('btn-toggle-due-change')) document.getElementById('btn-toggle-due-change').textContent = hasDue2 ? '− Ocultar' : '+ Registrar mudança';
-if(hasDue2) { try{ updateDueChangePreview(); }catch(e){} }
 document.getElementById('c-brand').value=c.brand;
 if(document.getElementById('c-corp-name')) document.getElementById('c-corp-name').value=c.corpName||'';
 if(document.getElementById('c-corp-reimb')) document.getElementById('c-corp-reimb').checked=c.corpReimb||false;
@@ -6665,6 +6778,8 @@ if(document.getElementById('corp-extra')) document.getElementById('corp-extra').
 if(document.getElementById('chip-personal')) document.getElementById('chip-personal').classList.toggle('active',!isCorp);
 if(document.getElementById('chip-corp')) document.getElementById('chip-corp').classList.toggle('active',isCorp);
 renderPortadoresList();
+renderDueHistoryList();
+renderLimitHistoryList();
 initColorPicker();openModal('card');
 }
 window.__aurumAfterSaveCard = function(){ try{ renderCarousel(); }catch(e){ console.error('[Aurum] rerender after saveCard', e && e.message || String(e));} };
@@ -6682,9 +6797,12 @@ due:parseInt(document.getElementById('c-due').value)||5,
 rate:parseFloat(document.getElementById('c-rate').value)||14.9,
 brand:document.getElementById('c-brand').value,
 colorIdx:S.selColor,
-// Mudança de vencimento com data de corte
-due2: parseInt(document.getElementById('c-due2')?.value)||null,
-due2From: document.getElementById('c-due2-from')?.value.trim()||null,
+// Historico de vencimentos e limites
+dueHistory: (window._dueHistory||[]).filter(e=>e.day&&e.from),
+limitHistory: (window._limitHistory||[]).filter(e=>e.limit!=null&&e.from),
+// Legado (mantido por compatibilidade)
+due2: null,
+due2From: null,
 cardType:S._cardType||'personal',
 corpName:document.getElementById('c-corp-name')?.value.trim()||'',
 corpReimb:document.getElementById('c-corp-reimb')?.checked||false,
