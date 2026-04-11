@@ -40,6 +40,24 @@ window.addEventListener('unhandledrejection', function(event){
   window.__aurumDiagnostics.errors.push(details);
   console.error('[Aurum promise]', details);
 });
+// Salva dados ao fechar/recarregar a página para evitar perda de lançamentos em edição
+window.addEventListener('beforeunload', function(){
+  try{
+    if(typeof window.save === 'function' && typeof window.S !== 'undefined' && window.S && window.S.tx){
+      window.save();
+    }
+  }catch(e){}
+});
+// Salva dados ao app ir para background no mobile (visibilitychange)
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'hidden'){
+    try{
+      if(typeof window.save === 'function' && typeof window.S !== 'undefined' && window.S && window.S.tx){
+        window.save();
+      }
+    }catch(e){}
+  }
+});
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Aurum Pro</title>
@@ -7883,12 +7901,26 @@ compact:!!S.compact,
 lastModified:new Date().toISOString(),
 };
 const storageKey = profileKey('ccp');
+// Contador de versão global para evitar race condition na criptografia assíncrona
+if(typeof window._saveVersion === 'undefined') window._saveVersion = 0;
+const myVersion = ++window._saveVersion;
 // Salva JSON puro imediatamente (síncrono) — garante persistência mesmo se criptografia demorar
-try{ localStorage.setItem(storageKey, JSON.stringify(payload)); }catch(e){}
-// Se tiver chave, sobrescreve com versão cifrada de forma assíncrona
+const jsonPayload = JSON.stringify(payload);
+try{ localStorage.setItem(storageKey, jsonPayload); }catch(e){}
+// Backup de emergência rotativo (protege contra corrompimento do dado principal)
+try{
+  if(payload.tx && payload.tx.length > 0){
+    localStorage.setItem(storageKey + '-bkp', jsonPayload);
+    localStorage.setItem(storageKey + '-bkp-ts', payload.lastModified);
+  }
+}catch(e){}
+// Se tiver chave, sobrescreve com versão cifrada — mas SOMENTE se não houver save mais recente
 if(_cryptoKey){
 encryptData(payload, _cryptoKey).then(enc=>{
-try{ localStorage.setItem(storageKey, enc); }catch(e){}
+  // Só sobrescreve se esta ainda for a versão mais recente
+  if(myVersion === window._saveVersion){
+    try{ localStorage.setItem(storageKey, enc); }catch(e){}
+  }
 }).catch(()=>{});
 }
 scheduleSync();
@@ -7921,9 +7953,17 @@ try{
 const raw=localStorage.getItem(profileKey('ccp'));
 if(!raw) return;
 if(!isEncrypted(raw)){
-applyLoadedData(JSON.parse(raw));
+  try{
+    const parsed = JSON.parse(raw);
+    if(parsed && typeof parsed === 'object') applyLoadedData(parsed);
+  }catch(parseErr){
+    console.error('[Aurum] Erro ao parsear dados locais:', parseErr);
+    // Tenta backup de emergência
+    const bkp = localStorage.getItem(profileKey('ccp') + '-bkp');
+    if(bkp){ try{ applyLoadedData(JSON.parse(bkp)); }catch(e){} }
+  }
 }
-}catch(e){}
+}catch(e){ console.error('[Aurum] load() error:', e); }
 }
 async function loadDecrypted(){
 try{
@@ -16077,8 +16117,8 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
    Sync em tempo real a cada lançamento, por perfil
    ============================================================ */
 (function(){
-  const SB_URL  = 'https://azvvfvjefkusapawuunf.supabase.co';
-  const SB_KEY  = 'sb_publishable_Sl1z3c5-5ZIQ3I_SjY3Ikw_-YDKllrC';
+  const SB_URL  = 'https://lwldroopbooeocchgngg.supabase.co';
+  const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3bGRyb29wYm9vZW9jY2hnbmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDY3MDUsImV4cCI6MjA5MDI4MjcwNX0.fDWYV4yVLqf4j8Bce_o7denInTvJUxWhqcexND4UOyc';
   const TABLE   = 'aurum_data';
   let _sbTimer  = null;
   let _sbStatus = 'idle'; // idle | syncing | ok | error
