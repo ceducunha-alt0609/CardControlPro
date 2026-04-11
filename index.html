@@ -9888,21 +9888,28 @@ openModal('startup');
 
 function exportBackupJSON(){
   try{
-    const pid = activeProfileId ? activeProfileId() : (localStorage.getItem('ccp-active-profile')||'u1');
-    const raw = localStorage.getItem('ccp-'+pid) || localStorage.getItem('ccp-u1');
-    if(!raw){ showToast('Nenhum dado para exportar','error'); return; }
+    const pid = (typeof _activeProfile !== 'undefined' ? _activeProfile : null) || localStorage.getItem('ccp-active-profile') || 'u1';
+    // Usa S (estado em memória) — garante dados legíveis mesmo com PIN/criptografia ativa
+    if(!S || !(S.cards||[]).length){ showToast('Nenhum dado para exportar','error'); return; }
 
-    // Monta payload completo com metadados
-    let data;
-    try{ data = JSON.parse(raw); }catch(e){ data = { _raw: raw }; }
+    const data = {
+      cards: S.cards||[],
+      tx: S.tx||[],
+      payments: S.payments||[],
+      budgets: S.budgets||{},
+      cashbacks: S.cashbacks||{},
+      monthlyGoal: S.monthlyGoal||0,
+      subscriptions: S.subscriptions||[],
+      savingsGoals: S.savingsGoals||[],
+    };
 
     const backup = {
       _aurum_backup: true,
       _version: '1.0',
       _exportedAt: new Date().toISOString(),
       _profile: pid,
-      _cards: (data.cards||[]).length,
-      _transactions: (data.tx||[]).length,
+      _cards: data.cards.length,
+      _transactions: data.tx.length,
       data: data
     };
 
