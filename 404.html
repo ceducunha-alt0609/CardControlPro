@@ -1,13 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <title>Aurum Pro</title>
-  <script>
-    // GitHub Pages SPA redirect
-    var l = window.location;
-    l.replace(l.protocol+'//'+l.hostname+(l.port?':'+l.port:'')+l.pathname.split('/').slice(0,1).join('/')+'/?/'+l.pathname.slice(1).replace(/&/g,'~and~')+(l.search?'&'+l.search.slice(1).replace(/&/g,'~and~'):'')+(l.hash||''));
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1829">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d1829;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid rgba(200,146,42,.25);
+      border-top-color: #c8922a;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    p { color: rgba(245,208,120,.6); font-size: 13px; margin-top: 8px; }
+  </style>
 </head>
-<body></body>
+<body>
+  <div>
+    <div class="spinner"></div>
+    <p>Carregando Aurum Pro…</p>
+  </div>
+  <script>
+    /* ─────────────────────────────────────────────────────────────
+       GitHub Pages — SPA Redirect
+       Redireciona qualquer 404 de volta para index.html
+       preservando o path/query como parâmetro.
+    ───────────────────────────────────────────────────────────── */
+    (function() {
+      var l = window.location;
+      // Reconstrói a URL como query string para o index.html conseguir ler
+      var redirect = l.pathname.slice(1).split('/').slice(1).join('/');
+      var query    = l.search.slice(1);
+      var hash     = l.hash.slice(1);
+
+      var newUrl = l.protocol + '//' + l.hostname
+        + (l.port ? ':' + l.port : '')
+        + l.pathname.split('/').slice(0, 2).join('/')
+        + '/?p=/' + redirect
+        + (query ? '&q=' + query : '')
+        + (hash  ? '&h=' + encodeURIComponent(hash) : '');
+
+      // Redireciona instantaneamente
+      l.replace(newUrl);
+    })();
+  </script>
+</body>
 </html>

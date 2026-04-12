@@ -1,70 +1,105 @@
-// Aurum Pro — Service Worker
-// Estratégia: Cache-first para assets estáticos, Network-first para dados
+/* ═══════════════════════════════════════════════════════════════
+   Aurum Pro — Service Worker
+   Estratégia: Cache-First (app funciona 100% offline após 1ª carga)
+   ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'aurum-pro-v1';
-const CACHE_ASSETS = [
+const APP_VERSION  = 'aurum-pro-v1.1';
+const CACHE_NAME   = APP_VERSION;
+
+/* Arquivos essenciais que ficam em cache na instalação */
+const PRECACHE = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icons/icon-192x192.png',
+  './icons/icon-512x512.png',
+  './icons/apple-touch-icon.png',
+  './icons/favicon.ico',
 ];
 
-// Instala e pré-cacheia os assets principais
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(CACHE_ASSETS);
-    }).then(() => self.skipWaiting())
+/* ── Install: pré-carrega recursos essenciais ── */
+self.addEventListener('install', event => {
+  console.log('[SW] Instalando versão:', APP_VERSION);
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(PRECACHE))
+      .then(() => {
+        console.log('[SW] Cache inicial preenchido');
+        return self.skipWaiting();  // Ativa imediatamente
+      })
   );
 });
 
-// Limpa caches antigos ao ativar
-self.addEventListener('activate', e => {
-  e.waitUntil(
+/* ── Activate: remove caches antigos ── */
+self.addEventListener('activate', event => {
+  console.log('[SW] Ativando versão:', APP_VERSION);
+  event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => {
+            console.log('[SW] Removendo cache antigo:', key);
+            return caches.delete(key);
+          })
       )
-    ).then(() => self.clients.claim())
+    ).then(() => {
+      console.log('[SW] Pronto — controlando todos os clientes');
+      return self.clients.claim();
+    })
   );
 });
 
-// Intercepta requests
-self.addEventListener('fetch', e => {
-  const { request } = e;
-  const url = new URL(request.url);
+/* ── Fetch: Cache-First com fallback para rede ── */
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
 
-  // Fontes do Google: cache agressivo
-  if (url.hostname.includes('fonts.g')) {
-    e.respondWith(
-      caches.open(CACHE_NAME).then(cache =>
-        cache.match(request).then(cached => {
-          if (cached) return cached;
-          return fetch(request).then(response => {
-            cache.put(request, response.clone());
-            return response;
-          });
+  // Ignora requisições que não sejam do próprio domínio
+  if (url.origin !== location.origin) return;
+
+  // Ignora métodos não-GET
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) {
+        // Retorna cache e atualiza em background (stale-while-revalidate)
+        const fetchPromise = fetch(event.request)
+          .then(networkResp => {
+            if (networkResp && networkResp.status === 200) {
+              caches.open(CACHE_NAME)
+                .then(cache => cache.put(event.request, networkResp.clone()));
+            }
+            return networkResp;
+          })
+          .catch(() => { /* offline — cache já foi retornado */ });
+
+        return cached;
+      }
+
+      // Não está no cache: busca na rede e armazena
+      return fetch(event.request)
+        .then(networkResp => {
+          if (!networkResp || networkResp.status !== 200 || networkResp.type === 'opaque') {
+            return networkResp;
+          }
+          const toCache = networkResp.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, toCache));
+          return networkResp;
         })
-      )
-    );
-    return;
-  }
-
-  // App principal: network-first com fallback para cache
-  if (url.pathname.endsWith('.html') || url.pathname === '/') {
-    e.respondWith(
-      fetch(request)
-        .then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(c => c.put(request, clone));
-          return response;
-        })
-        .catch(() => caches.match(request))
-    );
-    return;
-  }
-
-  // Demais assets: cache-first
-  e.respondWith(
-    caches.match(request).then(cached => cached || fetch(request))
+        .catch(() => {
+          // Offline e sem cache: retorna index.html como fallback
+          if (event.request.destination === 'document') {
+            return caches.match('./index.html');
+          }
+        });
+    })
   );
+});
+
+/* ── Message: força atualização quando solicitado ── */
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

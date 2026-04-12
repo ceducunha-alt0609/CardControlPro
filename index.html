@@ -2803,42 +2803,117 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
       <span class="bn-icon">🏠</span><span class="bn-label">Dashboard</span>
     </div>
     <div class="bn-item" data-tab="planejamento" onclick="setTab('planejamento')">
-      <span class="bn-icon">🗓️</span><span class="bn-label">Plano</span>
+      <span class="bn-icon">🗓️</span><span class="bn-label">Planejar</span>
     </div>
-    <div class="bn-item active" data-tab="invoice" onclick="setTab('invoice')">
-      <span class="bn-icon">📋</span>
-      <span class="bn-label">Fatura</span>
+    <div class="bn-item" data-tab="invoice" onclick="setTab('invoice')">
+      <span class="bn-icon">📋</span><span class="bn-label">Fatura</span>
     </div>
     <div class="bn-item" data-tab="lancamentos" onclick="setTab('lancamentos')">
-      <span class="bn-icon">➕</span>
-      <span class="bn-label">Lançar</span>
-    </div>
-    <div class="bn-item" data-tab="charts" onclick="setTab('charts')">
-      <span class="bn-icon">📊</span>
-      <span class="bn-label">Gráficos</span>
+      <span class="bn-icon">➕</span><span class="bn-label">Lançar</span>
     </div>
     <div class="bn-item" data-tab="history" onclick="setTab('history')">
-      <span class="bn-icon">🕑</span>
-      <span class="bn-label">Histórico</span>
+      <span class="bn-icon">🕑</span><span class="bn-label">Histórico</span>
     </div>
     <div class="bn-item" data-tab="cardreport" onclick="setTab('cardreport')">
-      <span class="bn-icon">📋</span>
-      <span class="bn-label">Relatório</span>
+      <span class="bn-icon">📄</span><span class="bn-label">Relatório</span>
     </div>
-    <div class="bn-item" onclick="cycleTheme()" id="bnTheme">
-      <span class="bn-icon" id="bnThemeIcon">🌙</span>
-      <span class="bn-label">Tema</span>
-    </div>
-    <div class="bn-item" data-tab="faq" onclick="setTab('faq')">
-      <span class="bn-icon">💬</span>
-      <span class="bn-label">Ajuda</span>
-    </div>
-    <div class="bn-item" data-tab="settings" onclick="setTab('settings')">
-      <span class="bn-icon">⚙️</span>
-      <span class="bn-label">Config</span>
+    <div class="bn-item" id="bnHamburger" onclick="openMobDrawer()">
+      <span class="bn-icon">☰</span><span class="bn-label">Menu</span>
     </div>
   </div>
 </nav>
+
+<!-- hidden span preserves bnThemeIcon JS reference -->
+<span id="bnThemeIcon" style="display:none">🌙</span>
+
+<!-- ── MOBILE DRAWER (hamburger) ── -->
+<div class="mob-drawer-overlay" id="mobDrawerOverlay" onclick="closeMobDrawer()"></div>
+<div class="mob-drawer" id="mobDrawer">
+  <div class="mob-drawer-header">
+    <div class="mob-drawer-title">Menu</div>
+    <button class="mob-drawer-close" onclick="closeMobDrawer()">✕</button>
+  </div>
+  <div class="mob-drawer-body">
+    <div class="mob-drawer-section-title">Análise</div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('charts')">
+      <span class="mob-drawer-icon">📊</span><span>Gráficos</span>
+    </div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('annual')">
+      <span class="mob-drawer-icon">📅</span><span>Visão Anual</span>
+    </div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('budgets')">
+      <span class="mob-drawer-icon">🎯</span><span>Teto de Gastos</span>
+    </div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('subscriptions')">
+      <span class="mob-drawer-icon">🔁</span><span>Assinaturas</span>
+    </div>
+    <div class="mob-drawer-section-title">Configurações</div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('settings')">
+      <span class="mob-drawer-icon">⚙️</span><span>Configurações</span>
+    </div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();cycleTheme()" id="mobDrawerTheme">
+      <span class="mob-drawer-icon" id="mobDrawerThemeIcon">🌙</span><span>Alternar Tema</span>
+    </div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('faq')">
+      <span class="mob-drawer-icon">💬</span><span>Ajuda & FAQ</span>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── PERFORMANCE: substitui transition:all por propriedades específicas ── */
+.nav-item{transition:background .18s cubic-bezier(.16,1,.3,1),border-color .18s cubic-bezier(.16,1,.3,1),transform .18s cubic-bezier(.16,1,.3,1),box-shadow .18s cubic-bezier(.16,1,.3,1)!important}
+.bn-item{transition:background .16s,border-color .16s!important}
+.sidebar-footer-item{transition:background .16s!important}
+/* Remove backdrop-filter do overlay do drawer mobile — GPU intensivo em celular */
+.mob-drawer-overlay{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+/* Otimiza card-thumb: usa propriedades explícitas */
+.card-thumb{transition:opacity .38s cubic-bezier(.16,1,.3,1),transform .38s cubic-bezier(.16,1,.3,1),border-color .38s cubic-bezier(.16,1,.3,1)!important}
+</style>
+.mob-drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:490;backdrop-filter:blur(3px)}
+.mob-drawer-overlay.open{display:block}
+.mob-drawer{position:fixed;bottom:0;left:0;right:0;background:var(--sb-bg);border-radius:20px 20px 0 0;z-index:495;transform:translateY(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);padding-bottom:env(safe-area-inset-bottom);border-top:1px solid var(--sb-border);box-shadow:0 -8px 40px rgba(0,0,0,.3)}
+.mob-drawer.open{transform:translateY(0)}
+.mob-drawer-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 10px;border-bottom:1px solid var(--sb-border)}
+.mob-drawer-title{font-family:var(--display);font-size:var(--fs-lg);font-weight:800;color:var(--sb-text)}
+.mob-drawer-close{background:var(--bg3);border:1.5px solid var(--border);color:var(--text3);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:var(--fs-base);display:flex;align-items:center;justify-content:center;transition:all .15s}
+.mob-drawer-close:hover{background:var(--red-l);color:var(--red);border-color:rgba(192,57,43,.2)}
+.mob-drawer-body{padding:10px 12px 18px;display:flex;flex-direction:column;gap:2px}
+.mob-drawer-section-title{font-size:var(--fs-micro);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sb-text3);padding:10px 10px 4px}
+.mob-drawer-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;cursor:pointer;transition:background .15s;color:var(--sb-text2);font-size:var(--fs-base);font-weight:600;border:1.5px solid transparent}
+.mob-drawer-item:hover{background:var(--sb-hover);border-color:var(--sb-border)}
+.mob-drawer-icon{font-size:var(--fs-xl);width:26px;text-align:center;flex-shrink:0}
+</style>
+
+<script>
+function openMobDrawer(){
+  document.getElementById('mobDrawer').classList.add('open');
+  document.getElementById('mobDrawerOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeMobDrawer(){
+  document.getElementById('mobDrawer').classList.remove('open');
+  document.getElementById('mobDrawerOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+// Patch updateThemeIcons to also update drawer icon
+(function patchThemeIconSync(){
+  function tryPatch(){
+    if(typeof updateThemeIcons==='function'){
+      const _orig=updateThemeIcons;
+      window.updateThemeIcons=function(){
+        _orig();
+        const bn=document.getElementById('bnThemeIcon');
+        const di=document.getElementById('mobDrawerThemeIcon');
+        if(bn&&di) di.textContent=bn.textContent;
+      };
+    } else {
+      setTimeout(tryPatch,200);
+    }
+  }
+  tryPatch();
+})();
+</script>
 
 <!-- TRANSACTION MODAL -->
 <!-- ADD/EDIT CARD MODAL -->
@@ -4005,7 +4080,7 @@ else if(S.tab==='future')      renderFuture(el,c);
 else if(S.tab==='budgets')     renderBudgetsPage(el);
 else if(S.tab==='subscriptions') renderSubscriptionsPage(el);
 else                           renderSettings(el);
-try{ if(typeof renderCarousel==='function') renderCarousel(); }catch(e){ console.error('[Aurum] renderCarousel sync', e && e.message || String(e)); }
+// renderCarousel é chamado pelo setTab após renderContent — não duplicar aqui
 }
 // ── FEATURE 3: Comparativo mês anterior ──
 function monthTotalDebits(month){
@@ -4398,7 +4473,15 @@ ${s.due>0?`<button class="btn btn-primary btn-full" onclick="openPayModal()">�
 </div>
 </div>`;
 }
+// Cache: mapa de cartões e formatter de data — evita .find() e new Date() por item
+let _txCardMap=null,_txDateFmt=null;
+function _buildTxCache(){
+  _txCardMap=Object.fromEntries((S.cards||[]).map(c=>[c.id,c]));
+  _txDateFmt=new Intl.DateTimeFormat('pt-BR');
+}
+function _invalidateTxCache(){ _txCardMap=null; }
 function txHTML(t){
+if(!_txCardMap) _buildTxCache();
 const em=t.category?t.category.split(' ')[0]:'💳';
 const cr=t.type==='credit';
 const isEstorno=cr&&(t.category||'').includes('Estorno');
@@ -4408,19 +4491,20 @@ const lastBadge=(t.instNum===t.totalInst&&t.totalInst>1)?`<span class="badge bad
 const recBadge=t.recurring?`<span class="rec-badge">🔁 recorrente</span>`:'';
 const estornoBadge=isEstorno?`<span style="background:var(--green-l);color:var(--green-d);padding:1px 7px;border-radius:4px;font-size:var(--fs-nano);font-weight:700;letter-spacing:.04em">ESTORNO</span>`:'';
 const encargoBadge=isEncargo?`<span style="background:var(--red-l);color:var(--red);padding:1px 7px;border-radius:4px;font-size:var(--fs-nano);font-weight:700;letter-spacing:.04em">ENCARGO</span>`:'';
-const txCard=S.cards.find(cc=>cc.id===t.cardId);
+const txCard=_txCardMap[t.cardId];
 const reembBadge=(txCard?.cardType==='corp'&&txCard?.corpReimb)?`<span style="background:var(--corp-l);color:var(--corp);padding:1px 6px;border-radius:4px;font-size:var(--fs-nano);font-weight:700;border:0.5px solid rgba(29,80,170,.2)">↩ reimb.</span>`:'';
 const corpBadge=(txCard?.cardType==='corp'&&!txCard?.corpReimb)?`<span style="background:var(--corp-l);color:var(--corp);padding:1px 6px;border-radius:4px;font-size:var(--fs-nano);font-weight:700;border:0.5px solid rgba(29,80,170,.2)">💼 corp</span>`:'';
 const portadorBadge=t.portador?`<span style="background:var(--purple-l);color:var(--purple);padding:1px 6px;border-radius:4px;font-size:var(--fs-nano);font-weight:700;border:0.5px solid rgba(80,32,136,.2)">👤 ${t.portador}</span>`:'';
 const safeDesc=t.desc.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
 const cat=t.category||'🛍️ Outros';
 const rowBorder=isEstorno?'border-left:3px solid var(--green);padding-left:9px;background:var(--green-l);border-radius:0 var(--r) var(--r) 0;':isEncargo?'border-left:3px solid var(--red);padding-left:9px;':cr?'border-left:3px solid var(--green);padding-left:9px;':'';
+const dateStr=t.date?_txDateFmt.format(new Date(t.date+'T12:00:00')):'-';
 return `<div class="tx-item" data-cat="${cat}" style="${rowBorder}">
 <div class="tx-icon" style="${cr?'background:var(--green-l)':''}}">${em}</div>
 <div class="tx-info">
 <div class="tx-name">${t.desc}</div>
 <div class="tx-meta">
-<span>${new Date(t.date+'T12:00:00').toLocaleDateString('pt-BR')}</span>
+<span>${dateStr}</span>
 ${ib}${lastBadge}${recBadge}${estornoBadge}${encargoBadge}${reembBadge}${corpBadge}${portadorBadge}
 <span style="color:var(--text3)">${cat.split(' ').slice(1).join(' ')}</span>
 </div>
@@ -4676,7 +4760,10 @@ ${catOpts}
 <div style="margin-bottom:12px">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
 <div style="font-size:var(--fs-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)">Lançamentos recentes</div>
+<div style="display:flex;align-items:center;gap:8px">
 <div id="lt-filter-count" style="font-size:var(--fs-micro);color:var(--text3);font-weight:600;font-family:var(--mono)"></div>
+<button onclick="openHistRelatorio()" title="Gerar relatório de compras para impressão" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:var(--r);border:1.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-family:var(--body);font-size:var(--fs-micro);font-weight:700;cursor:pointer;transition:all .18s;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap" onmouseover="this.style.borderColor='var(--gold-m)';this.style.color='var(--gold)';this.style.background='var(--gold-l)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)';this.style.background='var(--bg2)'">📋 Relatório</button>
+</div>
 </div>
 <div style="display:flex;flex-direction:column;gap:8px">
 <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -5961,6 +6048,7 @@ ${ib}${portBadge}
 ltFilter();
 }
 function renderHistory(el){
+_invalidateTxCache();
 const q=(S.histSearch||'').toLowerCase().trim();
 const sortH=S.histSort||'date-desc';
 const filterCard=S.histCard||'';
@@ -6033,17 +6121,48 @@ el.innerHTML=searchBar+`<div class="es-wrap">
 </div>`;
 return;
 }
+// Agrupa por mês
 const byM={};
 all.forEach(t=>{if(!byM[t.invoiceMonth])byM[t.invoiceMonth]=[];byM[t.invoiceMonth].push(t)});
-el.innerHTML=searchBar+Object.keys(byM).sort((a,b)=>b.localeCompare(a)).map(m=>{
-const debitTotal=byM[m].reduce((s,t)=>s+((t.type==='credit'?-1:1)*(Number(t.amount)||0)),0);
-return `<div style="margin-bottom:24px">
+const months=Object.keys(byM).sort((a,b)=>b.localeCompare(a));
+
+// Render imediato: primeiro lote (≤2 meses ou 40 itens)
+const FIRST_BATCH=2;
+function renderMonth(m){
+  const debitTotal=byM[m].reduce((s,t)=>s+((t.type==='credit'?-1:1)*(Number(t.amount)||0)),0);
+  return `<div style="margin-bottom:24px" data-hist-month="${m}">
 <div style="font-size:var(--fs-micro);letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;justify-content:space-between">
 <span>${monthLabel(m)}</span><span>${fmtR(debitTotal)}</span>
 </div>
 <div class="tx-list">${byM[m].map(txHTML).join('')}</div>
 </div>`;
-}).join('');
+}
+el.innerHTML=searchBar+months.slice(0,FIRST_BATCH).map(renderMonth).join('');
+
+// Lote restante via requestIdleCallback (não bloqueia o frame inicial)
+if(months.length>FIRST_BATCH){
+  const remaining=months.slice(FIRST_BATCH);
+  const stamp=Date.now();
+  el.dataset.histStamp=stamp;
+  const schedFn=typeof requestIdleCallback==='function'?requestIdleCallback:cb=>setTimeout(cb,16);
+  let i=0;
+  function appendNext(deadline){
+    if(el.dataset.histStamp!=stamp) return; // saiu da aba, cancela
+    while(i<remaining.length){
+      const chunk=(typeof deadline!=='undefined'&&deadline.timeRemaining)?Math.max(1,Math.floor(deadline.timeRemaining()/8)):1;
+      const end=Math.min(i+chunk,remaining.length);
+      const frag=remaining.slice(i,end).map(renderMonth).join('');
+      el.insertAdjacentHTML('beforeend',frag);
+      i=end;
+      if(i>=remaining.length) break;
+      if(typeof deadline!=='undefined'&&deadline.timeRemaining&&deadline.timeRemaining()<2){
+        schedFn(appendNext);
+        return;
+      }
+    }
+  }
+  schedFn(appendNext);
+}
 }
 let _cfgDragId=null;
 function cfgDragStart(e,id){
@@ -7893,9 +8012,17 @@ const btn=document.getElementById('sidebarToggle');
 if(sb && collapsed) sb.classList.add('collapsed');
 if(btn){btn.setAttribute('aria-expanded', collapsed?'false':'true');btn.title=collapsed?'Expandir menu':'Recolher menu';}
 }
+// Debounce do localStorage para não bloquear o fio principal a cada setTab
+let _tabSaveTimer=null;
+function _debounceSaveTab(t){
+  clearTimeout(_tabSaveTimer);
+  _tabSaveTimer=setTimeout(()=>{
+    try{const d=JSON.parse(localStorage.getItem('ccp')||'{}');d.tab=t;localStorage.setItem('ccp',JSON.stringify(d));}catch(e){}
+  },300);
+}
 function setTab(t){
 S.tab=t;
-try{const d=JSON.parse(localStorage.getItem('ccp')||'{}');d.tab=t;localStorage.setItem('ccp',JSON.stringify(d));}catch(e){}
+_debounceSaveTab(t);
 renderContent();
 const tc=document.getElementById('tabContent');
 if(tc){tc.classList.remove('tab-enter');void tc.offsetWidth;tc.classList.add('tab-enter');}
@@ -8399,6 +8526,7 @@ function isEncrypted(val){
 return typeof val === 'string' && !val.startsWith('{') && !val.startsWith('[');
 }
 function save(){
+_invalidateTxCache(); // invalida cache de cartões/datas ao salvar
 const payload={
 cards:S.cards,tx:S.tx,payments:S.payments,
 activeCardId:S.activeCardId,
@@ -8421,6 +8549,8 @@ compact:!!S.compact,
 lastModified:new Date().toISOString(),
 };
 const storageKey = profileKey('ccp');
+// Atualiza S.lastModified AGORA para que applyJbData/applyJbData possa proteger dados locais
+S.lastModified = payload.lastModified;
 // Contador de versão global para evitar race condition na criptografia assíncrona
 if(typeof window._saveVersion === 'undefined') window._saveVersion = 0;
 const myVersion = ++window._saveVersion;
@@ -9962,9 +10092,11 @@ function importBackupJSON(){
           danger: true,
           onOk: ()=>{
             try{
-              const pid = activeProfileId ? activeProfileId() : (localStorage.getItem('ccp-active-profile')||'u1');
-              localStorage.setItem('ccp-'+pid, JSON.stringify(data));
-              localStorage.setItem('ccp-'+pid+'-bkp', JSON.stringify(data));
+              const storageKey = (typeof profileKey === 'function')
+                ? profileKey('ccp')
+                : 'ccp-' + (localStorage.getItem('ccp-active-profile') || 'u1');
+              localStorage.setItem(storageKey, JSON.stringify(data));
+              localStorage.setItem(storageKey + '-bkp', JSON.stringify(data));
               showToast('✅ Backup restaurado com sucesso!', 'green');
               setTimeout(()=>{ location.reload(); }, 800);
             }catch(err){
@@ -11300,8 +11432,11 @@ showToast('Erro ao conectar: '+err.message,'error');
 }
 async function manualSync(){
 if(!JB.key||!JB.binId){ setTab('settings'); showToast('Configure o JSONbin em ⚙️ Config','error'); return; }
+// CORREÇÃO: push primeiro (preserva dados locais na nuvem), depois pull (verifica nuvem)
+// A ordem antiga (pull→push) causava perda de dados: o pull sobrescrevia o S com dados antigos
+// da nuvem e em seguida o push enviava esses dados antigos para lá.
+await jbPush(false);
 await jbPull(false);
-await jbPush(true);
 }
 function scheduleSync(){
 if(!JB.key||!JB.binId) return;
@@ -18261,681 +18396,568 @@ body.fpanel-focus-mode .sidebar {
 })();
 </script>
 
-<!-- ═══════════════════════════════════════════════════
-     MÓDULO: RELATÓRIO DE HISTÓRICO DE COMPRAS
-     Aurum Pro — relatório imprimível por período
-════════════════════════════════════════════════════ -->
-<style>
-/* ── Estilos do modal de relatório ── */
-#modal-relatorio .modal {
-  max-width: 860px;
-  width: calc(100vw - 32px);
-  padding: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  max-height: 92vh;
-}
-.rpt-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg2);
-  flex-shrink: 0;
-}
-.rpt-title {
-  font-family: var(--display);
-  font-size: var(--fs-xl);
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -.3px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.rpt-controls {
-  padding: 16px 24px;
-  background: var(--bg3);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.rpt-ctrl-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  margin-bottom: 10px;
-}
-.rpt-ctrl-row:last-child { margin-bottom: 0; }
-.rpt-ctrl-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 130px;
-}
-.rpt-ctrl-label {
-  font-size: var(--fs-micro);
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--text3);
-}
-.rpt-shortcuts {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-.rpt-shortcut {
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  cursor: pointer;
-  border: 1.5px solid var(--border);
-  background: var(--bg2);
-  color: var(--text2);
-  transition: all .15s;
-  white-space: nowrap;
-}
-.rpt-shortcut:hover, .rpt-shortcut.active {
-  border-color: var(--gold);
-  background: var(--gold-l);
-  color: var(--gold-d);
-}
-.rpt-preview-wrap {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--bg);
-}
-.rpt-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 24px;
-  border-top: 1px solid var(--border);
-  background: var(--bg2);
-  flex-shrink: 0;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.rpt-count-badge {
-  font-size: var(--fs-xs);
-  color: var(--text3);
-  font-weight: 500;
-}
-.rpt-count-badge strong { color: var(--text); }
-
-/* ── Preview do relatório (dentro do modal) ── */
-#rptPreview {
-  padding: 24px;
-}
-.rpt-doc {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.12);
-  overflow: hidden;
-}
-.rpt-doc-header {
-  background: linear-gradient(135deg, #0d1829 0%, #1a2e4a 100%);
-  padding: 24px 28px 20px;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-.rpt-doc-header::before {
-  content: '';
-  position: absolute;
-  top: -30px; right: -30px;
-  width: 140px; height: 140px;
-  border-radius: 50%;
-  background: rgba(200,146,42,.12);
-}
-.rpt-doc-appname {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: rgba(245,208,120,.7);
-  margin-bottom: 6px;
-}
-.rpt-doc-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: 4px;
-  letter-spacing: -.3px;
-}
-.rpt-doc-period {
-  font-size: 13px;
-  color: rgba(255,255,255,.6);
-  margin-bottom: 0;
-}
-.rpt-doc-meta {
-  position: absolute;
-  bottom: 20px;
-  right: 28px;
-  text-align: right;
-  font-size: 10px;
-  color: rgba(255,255,255,.4);
-}
-.rpt-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  border-bottom: 1px solid #e8e2d8;
-}
-.rpt-sum-box {
-  padding: 16px 20px;
-  border-right: 1px solid #e8e2d8;
-  background: #fdf9f3;
-}
-.rpt-sum-box:last-child { border-right: none; }
-.rpt-sum-label {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: #7a6040;
-  margin-bottom: 4px;
-}
-.rpt-sum-val {
-  font-size: 20px;
-  font-weight: 800;
-  color: #0e0a04;
-  letter-spacing: -.4px;
-}
-.rpt-sum-sub {
-  font-size: 10px;
-  color: #9a8060;
-  margin-top: 2px;
-}
-.rpt-section-title {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: #9a8060;
-  padding: 14px 20px 8px;
-  border-bottom: 1px solid #f0e8dc;
-  background: #faf7f3;
-}
-/* Resumo por cartão */
-.rpt-card-strip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 9px 20px;
-  border-bottom: 1px solid #f5f0ea;
-  font-size: 12px;
-}
-.rpt-card-strip:last-child { border-bottom: none; }
-.rpt-card-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: inline-block;
-  margin-right: 8px;
-}
-.rpt-card-name { color: #2a1e0e; font-weight: 600; }
-.rpt-card-count { color: #9a8060; margin-left: 8px; }
-.rpt-card-val { font-weight: 700; color: #0e0a04; font-size: 13px; }
-/* Tabela de lançamentos */
-.rpt-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
-}
-.rpt-table th {
-  background: #f5ede0;
-  color: #7a6040;
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  padding: 8px 12px;
-  text-align: left;
-  border-bottom: 1px solid #e8dccf;
-}
-.rpt-table th:last-child { text-align: right; }
-.rpt-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #f5f0ea;
-  color: #2a1e0e;
-  vertical-align: middle;
-}
-.rpt-table tr:nth-child(even) td { background: #fdf9f5; }
-.rpt-table tr:last-child td { border-bottom: none; }
-.rpt-table td:last-child { text-align: right; font-weight: 700; color: #8c1e18; }
-.rpt-table .rpt-inst {
-  display: inline-block;
-  background: #fdf0d8;
-  color: #7a5208;
-  border-radius: 3px;
-  padding: 1px 5px;
-  font-size: 8px;
-  font-weight: 700;
-  margin-left: 4px;
-}
-.rpt-table-total {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 20px;
-  background: #f5ede0;
-  border-top: 2px solid #e8dccf;
-  font-size: 12px;
-}
-.rpt-total-label { color: #7a6040; font-weight: 600; }
-.rpt-total-val { font-size: 18px; font-weight: 800; color: #8c1e18; }
-.rpt-doc-foot {
-  padding: 12px 20px;
-  background: #fdf9f3;
-  border-top: 1px solid #f0e8dc;
-  font-size: 9px;
-  color: #b0987a;
-  text-align: center;
-}
-.rpt-empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: #9a8060;
-  font-size: 13px;
-}
-
-/* ── @media print: só imprime o documento, sem o app ── */
-@media print {
-  body > * { display: none !important; }
-  #rpt-print-target { display: block !important; }
-  #rpt-print-target * { display: revert !important; }
-  @page { margin: 14mm 16mm; size: A4; }
-
-  .rpt-doc { box-shadow: none !important; border-radius: 0 !important; }
-  .rpt-doc-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .rpt-table th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .rpt-sum-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .rpt-table-total { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .rpt-section-title { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .rpt-table tr:nth-child(even) td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .rpt-table { page-break-inside: auto; }
-  .rpt-table tr { page-break-inside: avoid; page-break-after: auto; }
-}
-</style>
-
-<!-- Elemento oculto usado apenas na impressão -->
-<div id="rpt-print-target" style="display:none"></div>
-
-<!-- Modal de relatório -->
-<div class="modal-overlay" id="modal-relatorio" onclick="if(event.target===this) closeReportModal()">
-  <div class="modal">
-    <!-- Header -->
-    <div class="rpt-header">
-      <div class="rpt-title">
-        <span>📊</span> Relatório de Compras
+<!-- ══════════════════════════════════════════════════════════════
+     MODAL: RELATÓRIO DE HISTÓRICO DE COMPRAS
+     Adicionado como feature extra — não altera código existente
+     ══════════════════════════════════════════════════════════════ -->
+<div id="modal-hist-relatorio" class="modal-overlay" style="z-index:400" onclick="if(event.target===this)closeHistRelatorio()">
+  <div class="modal" style="max-width:760px;width:100%;max-height:92vh;overflow-y:auto;padding:0">
+    <!-- CABEÇALHO FIXO -->
+    <div style="position:sticky;top:0;z-index:10;background:var(--bg2);border-bottom:1.5px solid var(--border);padding:20px 24px 16px;border-radius:20px 20px 0 0">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-family:var(--display);font-size:var(--fs-2xl);font-weight:800;color:var(--text);letter-spacing:-.3px">📋 Relatório de Compras</div>
+          <div style="font-size:var(--fs-xs);color:var(--text3);margin-top:3px">Escolha o período e gere o relatório para impressão</div>
+        </div>
+        <button onclick="closeHistRelatorio()" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text3);cursor:pointer;font-size:var(--fs-md2);width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s" onmouseover="this.style.background='var(--red-l)';this.style.color='var(--red)'" onmouseout="this.style.background='var(--bg3)';this.style.color='var(--text3)'">✕</button>
       </div>
-      <button class="modal-close" onclick="closeReportModal()">✕</button>
-    </div>
-
-    <!-- Controles -->
-    <div class="rpt-controls">
-      <div class="rpt-ctrl-row">
-        <div class="rpt-ctrl-group">
-          <span class="rpt-ctrl-label">De</span>
-          <input class="fc" type="date" id="rptFrom" oninput="rptUpdate()">
-        </div>
-        <div class="rpt-ctrl-group">
-          <span class="rpt-ctrl-label">Até</span>
-          <input class="fc" type="date" id="rptTo" oninput="rptUpdate()">
-        </div>
-        <div class="rpt-ctrl-group">
-          <span class="rpt-ctrl-label">Cartão</span>
-          <select class="fc" id="rptCard" onchange="rptUpdate()">
+      <!-- FILTROS -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;align-items:end">
+        <div>
+          <label style="display:block;font-size:var(--fs-micro);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">💳 Cartão</label>
+          <select id="hr-card" class="sort-sel" style="width:100%;height:34px;font-size:var(--fs-xs);padding:4px 8px" onchange="hrGenerate()">
             <option value="">Todos os cartões</option>
           </select>
         </div>
-      </div>
-      <div class="rpt-ctrl-row">
-        <span style="font-size:var(--fs-micro);color:var(--text3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap">Atalhos:</span>
-        <div class="rpt-shortcuts">
-          <span class="rpt-shortcut" onclick="rptShortcut('this')">Este mês</span>
-          <span class="rpt-shortcut" onclick="rptShortcut('last')">Mês passado</span>
-          <span class="rpt-shortcut" onclick="rptShortcut('3m')">Últimos 3 meses</span>
-          <span class="rpt-shortcut" onclick="rptShortcut('6m')">Últimos 6 meses</span>
-          <span class="rpt-shortcut" onclick="rptShortcut('year')">Este ano</span>
-          <span class="rpt-shortcut" onclick="rptShortcut('all')">Tudo</span>
+        <div>
+          <label style="display:block;font-size:var(--fs-micro);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">📅 De (mês/ano)</label>
+          <input type="month" id="hr-from" class="fc" style="margin:0;height:34px;padding:4px 10px;font-size:var(--fs-xs)" onchange="hrGenerate()">
+        </div>
+        <div>
+          <label style="display:block;font-size:var(--fs-micro);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">📅 Até (mês/ano)</label>
+          <input type="month" id="hr-to" class="fc" style="margin:0;height:34px;padding:4px 10px;font-size:var(--fs-xs)" onchange="hrGenerate()">
+        </div>
+        <div>
+          <label style="display:block;font-size:var(--fs-micro);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">🔢 Tipo</label>
+          <select id="hr-type" class="sort-sel" style="width:100%;height:34px;font-size:var(--fs-xs);padding:4px 8px" onchange="hrGenerate()">
+            <option value="debit">Débitos (compras)</option>
+            <option value="all">Débitos + Créditos</option>
+            <option value="credit">Créditos (estornos)</option>
+          </select>
         </div>
       </div>
-    </div>
-
-    <!-- Área do preview -->
-    <div class="rpt-preview-wrap">
-      <div id="rptPreview">
-        <div class="rpt-empty-state">Configure o período acima para gerar o relatório.</div>
+      <!-- BARRA DE AÇÕES -->
+      <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <div id="hr-summary-badge" style="flex:1;font-size:var(--fs-sm);color:var(--text2);font-weight:500"></div>
+        <button onclick="hrPrint()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--r);border:none;background:var(--gold);color:#fff;font-family:var(--body);font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(176,125,32,.3)" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">🖨️ Imprimir</button>
       </div>
     </div>
-
-    <!-- Footer com ações -->
-    <div class="rpt-footer">
-      <span class="rpt-count-badge" id="rptCountBadge">—</span>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-secondary" onclick="closeReportModal()" style="flex:none;min-width:90px">Fechar</button>
-        <button class="btn btn-primary" id="rptPrintBtn" onclick="rptPrint()" style="flex:none;min-width:130px;display:flex;align-items:center;gap:7px">
-          <span>🖨️</span> Imprimir / PDF
-        </button>
+    <!-- ÁREA DE PREVIEW -->
+    <div id="hr-preview" style="padding:20px 24px 28px;background:var(--bg3)">
+      <div style="text-align:center;padding:40px 20px;color:var(--text3)">
+        <div style="font-size:40px;margin-bottom:10px;opacity:.5">📋</div>
+        <div style="font-size:var(--fs-base);font-weight:600">Configure os filtros acima para gerar o relatório</div>
       </div>
     </div>
   </div>
 </div>
 
+<style>
+/* Estilos do relatório de compras */
+#hr-preview .hr-month-block { margin-bottom: 20px; }
+#hr-preview .hr-month-title {
+  font-family: var(--display);
+  font-size: var(--fs-md);
+  font-weight: 800;
+  color: var(--text);
+  padding: 8px 12px;
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r) var(--r) 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#hr-preview .hr-tx-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1.5px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--r) var(--r);
+  overflow: hidden;
+  background: var(--bg2);
+}
+#hr-preview .hr-tx-table th {
+  font-size: var(--fs-nano);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 7px 12px;
+  background: var(--bg3);
+  border-bottom: 1.5px solid var(--border);
+  text-align: left;
+}
+#hr-preview .hr-tx-table td {
+  font-size: var(--fs-xs);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+}
+#hr-preview .hr-tx-table tr:last-child td { border-bottom: none; }
+#hr-preview .hr-tx-table tr:hover td { background: var(--bg3); }
+#hr-preview .hr-amount-deb { color: var(--red); font-weight: 700; font-family: var(--num-font); text-align: right; }
+#hr-preview .hr-amount-cr  { color: var(--green); font-weight: 700; font-family: var(--num-font); text-align: right; }
+#hr-preview .hr-subtotal-row td {
+  background: var(--gold-l) !important;
+  font-weight: 700;
+  color: var(--gold-d);
+  border-top: 1.5px solid rgba(200,146,42,.3);
+  font-size: var(--fs-xs);
+}
+#hr-preview .hr-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+#hr-preview .hr-stat-box {
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 14px;
+}
+#hr-preview .hr-stat-label {
+  font-size: var(--fs-nano);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 5px;
+}
+#hr-preview .hr-stat-val {
+  font-family: var(--num-font);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.4px;
+}
+
+/* ─── CSS DE IMPRESSÃO DO RELATÓRIO ─── */
+@media print {
+  body.printing-hist-relatorio * { display: none !important; }
+  body.printing-hist-relatorio #hist-relatorio-printdoc { display: block !important; }
+  body.printing-hist-relatorio #hist-relatorio-printdoc * { display: revert !important; }
+}
+#hist-relatorio-printdoc {
+  display: none;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 9pt;
+  color: #111;
+  background: #fff;
+  width: 100%;
+}
+#hist-relatorio-printdoc .pr-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 2px solid #111;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+#hist-relatorio-printdoc .pr-logo { font-size: 16pt; font-weight: 900; letter-spacing: -.5px; }
+#hist-relatorio-printdoc .pr-logo span { color: #b07d20; }
+#hist-relatorio-printdoc .pr-meta { text-align: right; font-size: 8pt; color: #555; line-height: 1.5; }
+#hist-relatorio-printdoc .pr-title { font-size: 13pt; font-weight: 800; margin-bottom: 2px; }
+#hist-relatorio-printdoc .pr-subtitle { font-size: 8pt; color: #555; margin-bottom: 2px; }
+#hist-relatorio-printdoc .pr-stats {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  page-break-inside: avoid;
+  table-layout: fixed;
+}
+#hist-relatorio-printdoc .pr-stat {
+  width: 25%;
+  padding: 5px 10px;
+  border-right: 1px solid #ddd;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+#hist-relatorio-printdoc .pr-stat:last-child { border-right: none; }
+#hist-relatorio-printdoc .pr-stat-label { font-size: 7pt; font-weight: 700; text-transform: uppercase; color: #888; letter-spacing: .05em; }
+#hist-relatorio-printdoc .pr-stat-sep { color: #bbb; margin: 0 3px; }
+#hist-relatorio-printdoc .pr-stat-val { font-size: 9.5pt; font-weight: 800; color: #111; }
+#hist-relatorio-printdoc .pr-month-block { margin-bottom: 14px; page-break-inside: avoid; }
+#hist-relatorio-printdoc .pr-month-title {
+  font-size: 10pt;
+  font-weight: 800;
+  background: #f0f0f0;
+  padding: 5px 8px;
+  border: 1px solid #ccc;
+  border-bottom: none;
+  display: flex;
+  justify-content: space-between;
+}
+#hist-relatorio-printdoc table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  font-size: 8.5pt;
+}
+#hist-relatorio-printdoc thead { display: table-header-group; }
+#hist-relatorio-printdoc tfoot { display: table-row-group; }
+#hist-relatorio-printdoc th {
+  background: #f7f7f7;
+  font-size: 7pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #555;
+  padding: 5px 8px;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+}
+#hist-relatorio-printdoc td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+#hist-relatorio-printdoc tr:last-child td { border-bottom: none; }
+#hist-relatorio-printdoc .pr-deb { color: #c0392b; font-weight: 700; text-align: right; }
+#hist-relatorio-printdoc .pr-cr  { color: #27ae60; font-weight: 700; text-align: right; }
+#hist-relatorio-printdoc .pr-subtotal td {
+  background: #fffbf0 !important;
+  font-weight: 700;
+  border-top: 1px solid #c8922a;
+  color: #7a5208;
+  font-size: 8.5pt;
+}
+#hist-relatorio-printdoc .pr-subtotal td.pr-sub-empty {
+  background: transparent !important;
+  border-top: 1px solid #c8922a;
+  border-bottom: none;
+}
+#hist-relatorio-printdoc .pr-footer {
+  margin-top: 18px;
+  border-top: 1px solid #ccc;
+  padding-top: 6px;
+  font-size: 7.5pt;
+  color: #888;
+  display: flex;
+  justify-content: space-between;
+}
+</style>
+
+<!-- Elemento oculto para impressão -->
+<div id="hist-relatorio-printdoc"></div>
+
 <script>
-/* ══════════════════════════════════════════════
-   RELATÓRIO DE HISTÓRICO — lógica completa
-══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   LÓGICA DO RELATÓRIO DE HISTÓRICO DE COMPRAS
+   NOTA: S é declarado com "let" no script principal,
+   portanto acessamos como S (não window.S).
+   ══════════════════════════════════════════════════════ */
 
-/* Paleta de cores para cartões na impressão */
-const RPT_CARD_COLORS = [
-  '#c8922a','#4a8be0','#4acf8a','#f06858','#a070e0',
-  '#3ab0e0','#e0914a','#609060','#8060c0','#c04060'
-];
-
-/* Helpers de data */
-function rptFmtDate(isoDate){
-  if(!isoDate) return '—';
-  try {
-    const [y,m,d] = String(isoDate).slice(0,10).split('-');
-    return `${d}/${m}/${y}`;
-  } catch(e){ return isoDate; }
-}
-function rptMonthRange(ym){
-  const [y,m] = ym.split('-').map(Number);
-  const first = `${y}-${String(m).padStart(2,'0')}-01`;
-  const last  = new Date(y, m, 0);
-  return { from: first, to: `${y}-${String(m).padStart(2,'0')}-${String(last.getDate()).padStart(2,'0')}` };
-}
-function rptFmtBRL(n){
-  return 'R$ ' + Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+function _hrGetS(){
+  // S é let global — acessível por nome em qualquer script da página.
+  // Usamos try/catch por precaução.
+  try{ return (typeof S !== 'undefined') ? S : null; }
+  catch(e){ return null; }
 }
 
-/* Abre o modal */
-function openReportModal(){
-  const overlay = document.getElementById('modal-relatorio');
-  if(!overlay) return;
+function _hrFmtBRL(v){
+  return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
 
-  /* Popula o select de cartões */
-  const sel = document.getElementById('rptCard');
-  if(sel && window.S && Array.isArray(S.cards)){
-    sel.innerHTML = '<option value="">Todos os cartões</option>' +
-      S.cards.map(c=>`<option value="${c.id}">${c.name}${c.last4?' ···'+c.last4:''}</option>`).join('');
+function _hrMLbl(ym){
+  const[y,m]=ym.split('-');
+  const ns=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  return ns[parseInt(m)-1]+' '+y;
+}
+
+function _hrNowYM(){
+  const n=new Date();
+  return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
+}
+
+function _hrYMRange(from,to){
+  const months=[];
+  let[fy,fm]=from.split('-').map(Number);
+  const[ty,tm]=to.split('-').map(Number);
+  while(fy<ty||(fy===ty&&fm<=tm)){
+    months.push(fy+'-'+String(fm).padStart(2,'0'));
+    fm++;if(fm>12){fm=1;fy++;}
   }
-
-  /* Define o período padrão: mês atual */
-  rptShortcut('this');
-
-  overlay.classList.add('open');
+  return months;
 }
-window.openReportModal = openReportModal;
 
-function closeReportModal(){
-  const overlay = document.getElementById('modal-relatorio');
-  if(overlay) overlay.classList.remove('open');
-}
-window.closeReportModal = closeReportModal;
+function openHistRelatorio(){
+  const modal=document.getElementById('modal-hist-relatorio');
+  if(!modal) return;
 
-/* Atalhos de período */
-function rptShortcut(key){
-  const cur = (typeof curMonth === 'function') ? curMonth() : new Date().toISOString().slice(0,7);
-  const [cy,cm] = cur.split('-').map(Number);
+  const jaAberto=modal.classList.contains('open');
+  const appS=_hrGetS();
+  const sel=document.getElementById('hr-card');
 
-  let from, to;
-
-  if(key === 'this'){
-    const r = rptMonthRange(cur);
-    from = r.from; to = r.to;
-  } else if(key === 'last'){
-    const prev = new Date(cy, cm-2, 1);
-    const pm = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
-    const r = rptMonthRange(pm);
-    from = r.from; to = r.to;
-  } else if(key === '3m'){
-    const start = new Date(cy, cm-3, 1);
-    from = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-01`;
-    to = rptMonthRange(cur).to;
-  } else if(key === '6m'){
-    const start = new Date(cy, cm-6, 1);
-    from = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-01`;
-    to = rptMonthRange(cur).to;
-  } else if(key === 'year'){
-    from = `${cy}-01-01`;
-    to = `${cy}-12-31`;
-  } else if(key === 'all'){
-    from = '2000-01-01';
-    to = '2099-12-31';
-  }
-
-  document.getElementById('rptFrom').value = from;
-  document.getElementById('rptTo').value = to;
-
-  /* Destaca o atalho ativo */
-  document.querySelectorAll('.rpt-shortcut').forEach(el => el.classList.remove('active'));
-  event && event.target && event.target.classList.add('active');
-
-  rptUpdate();
-}
-window.rptShortcut = rptShortcut;
-
-/* Atualiza o preview com os dados filtrados */
-function rptUpdate(){
-  const from   = document.getElementById('rptFrom').value;
-  const to     = document.getElementById('rptTo').value;
-  const cardId = document.getElementById('rptCard').value;
-  const prev   = document.getElementById('rptPreview');
-  const badge  = document.getElementById('rptCountBadge');
-
-  if(!from || !to){
-    prev.innerHTML = '<div class="rpt-empty-state">Selecione um período para visualizar.</div>';
-    if(badge) badge.innerHTML = '—';
-    return;
-  }
-
-  /* Filtra apenas débitos no intervalo de datas */
-  const txAll = (window.S && Array.isArray(S.tx)) ? S.tx : [];
-  let txs = txAll.filter(t => {
-    if((t.type||'debit') !== 'debit') return false;
-    const d = String(t.date||t.invoiceMonth||'').slice(0,10);
-    return d >= from && d <= to;
-  });
-  if(cardId) txs = txs.filter(t => t.cardId === cardId);
-  txs = txs.slice().sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')));
-
-  const total = txs.reduce((s,t) => s + (Number(t.amount)||0), 0);
-
-  /* Badge de contagem */
-  if(badge){
-    badge.innerHTML = txs.length === 0
-      ? 'Nenhum lançamento'
-      : `<strong>${txs.length}</strong> lançamento${txs.length!==1?'s'  :''} · Total: <strong>${rptFmtBRL(total)}</strong>`;
-  }
-
-  if(txs.length === 0){
-    prev.innerHTML = '<div class="rpt-doc"><div class="rpt-empty-state">Nenhum débito encontrado no período selecionado.</div></div>';
-    return;
-  }
-
-  /* Período formatado */
-  const fromFmt = rptFmtDate(from);
-  const toFmt   = from === to ? null : rptFmtDate(to);
-  const periodLabel = toFmt ? `${fromFmt} a ${toFmt}` : fromFmt;
-
-  /* Cards mapeados */
-  const cards = (window.S && Array.isArray(S.cards)) ? S.cards : [];
-  const cardMap = {};
-  cards.forEach((c,i) => { cardMap[c.id] = { ...c, color: RPT_CARD_COLORS[i % RPT_CARD_COLORS.length] }; });
-
-  /* Resumo por cartão */
-  const byCard = {};
-  txs.forEach(t => {
-    if(!byCard[t.cardId]) byCard[t.cardId] = { total: 0, count: 0 };
-    byCard[t.cardId].total += Number(t.amount)||0;
-    byCard[t.cardId].count++;
-  });
-
-  const cardStripRows = Object.entries(byCard)
-    .sort((a,b) => b[1].total - a[1].total)
-    .map(([cid, info]) => {
-      const c = cardMap[cid] || { name: 'Cartão desconhecido', color: '#aaa' };
-      return `<div class="rpt-card-strip">
-        <span><span class="rpt-card-dot" style="background:${c.color}"></span>
-        <span class="rpt-card-name">${c.name}${c.last4?' ···'+c.last4:''}</span>
-        <span class="rpt-card-count">${info.count} lançamento${info.count!==1?'s':''}</span></span>
-        <span class="rpt-card-val">${rptFmtBRL(info.total)}</span>
-      </div>`;
-    }).join('');
-
-  /* Linhas da tabela */
-  const tableRows = txs.map(t => {
-    const c = cardMap[t.cardId] || { name: '?', color: '#aaa' };
-    const instTag = t.totalInst > 1
-      ? `<span class="rpt-inst">${t.instNum}/${t.totalInst}</span>`
-      : '';
-    const cat = String(t.category||'Outros').replace(/^[^A-Za-zÀ-ÿ0-9]+/,'').trim() || 'Outros';
-    return `<tr>
-      <td>${rptFmtDate(t.date)}</td>
-      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-        ${String(t.desc||'Lançamento')}${instTag}
-        ${t.note?`<div style="font-size:9px;color:#9a8060;margin-top:1px;font-style:italic">${String(t.note).slice(0,50)}</div>`:''}
-      </td>
-      <td><span style="display:inline-flex;align-items:center;gap:4px"><span style="width:7px;height:7px;border-radius:50%;background:${c.color};display:inline-block;flex-shrink:0"></span>${c.name}</span></td>
-      <td style="color:#5a4220">${cat}</td>
-      <td>${rptFmtBRL(t.amount)}</td>
-    </tr>`;
-  }).join('');
-
-  const dateNow = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
-
-  prev.innerHTML = `
-  <div class="rpt-doc" id="rptDocContent">
-    <!-- Cabeçalho -->
-    <div class="rpt-doc-header">
-      <div class="rpt-doc-appname">Aurum Pro</div>
-      <div class="rpt-doc-title">Relatório de Compras</div>
-      <div class="rpt-doc-period">Período: ${periodLabel}${cardId && cardMap[cardId] ? ' · ' + cardMap[cardId].name : ''}</div>
-      <div class="rpt-doc-meta">Gerado em ${dateNow}</div>
-    </div>
-
-    <!-- Resumo executivo -->
-    <div class="rpt-summary-grid">
-      <div class="rpt-sum-box">
-        <div class="rpt-sum-label">Total gasto</div>
-        <div class="rpt-sum-val">${rptFmtBRL(total)}</div>
-        <div class="rpt-sum-sub">débitos no período</div>
-      </div>
-      <div class="rpt-sum-box">
-        <div class="rpt-sum-label">Lançamentos</div>
-        <div class="rpt-sum-val">${txs.length}</div>
-        <div class="rpt-sum-sub">transaç${txs.length!==1?'ões':'ão'}</div>
-      </div>
-      <div class="rpt-sum-box">
-        <div class="rpt-sum-label">Ticket médio</div>
-        <div class="rpt-sum-val">${rptFmtBRL(total/txs.length)}</div>
-        <div class="rpt-sum-sub">por lançamento</div>
-      </div>
-    </div>
-
-    <!-- Por cartão -->
-    <div class="rpt-section-title">Por cartão</div>
-    ${cardStripRows}
-
-    <!-- Tabela de lançamentos -->
-    <div class="rpt-section-title">Lançamentos detalhados</div>
-    <table class="rpt-table">
-      <thead>
-        <tr>
-          <th style="width:76px">Data</th>
-          <th>Descrição</th>
-          <th style="width:110px">Cartão</th>
-          <th style="width:110px">Categoria</th>
-          <th style="width:96px">Valor</th>
-        </tr>
-      </thead>
-      <tbody>${tableRows}</tbody>
-    </table>
-    <div class="rpt-table-total">
-      <span class="rpt-total-label">Total do período</span>
-      <span class="rpt-total-val">${rptFmtBRL(total)}</span>
-    </div>
-
-    <div class="rpt-doc-foot">Aurum Pro — Relatório gerado em ${dateNow} · Apenas débitos · ${txs.length} lançamento${txs.length!==1?'s':''}</div>
-  </div>`;
-}
-window.rptUpdate = rptUpdate;
-
-/* Imprime o relatório */
-function rptPrint(){
-  const content = document.getElementById('rptDocContent');
-  if(!content){ showToast('Gere o relatório primeiro','error'); return; }
-
-  const target = document.getElementById('rpt-print-target');
-  if(!target) return;
-
-  /* Copia o HTML do documento para o elemento de impressão */
-  target.innerHTML = content.outerHTML;
-
-  /* Dispara a impressão */
-  window.print();
-
-  /* Limpa depois */
-  setTimeout(()=>{ target.innerHTML = ''; }, 1000);
-}
-window.rptPrint = rptPrint;
-
-/* Adiciona o botão "Relatório" na aba Histórico quando ela é renderizada */
-(function patchHistoryTab(){
-  const origRender = window.renderHistory;
-  if(!origRender || window._rptHistoryPatched) return;
-  window._rptHistoryPatched = true;
-
-  window.renderHistory = function(el){
-    origRender.call(this, el);
-    /* Injeta o botão de relatório abaixo da search bar existente */
-    if(el && !el.querySelector('.rpt-open-btn')){
-      const btn = document.createElement('button');
-      btn.className = 'tool-btn rpt-open-btn';
-      btn.innerHTML = '📊 Gerar Relatório';
-      btn.style.cssText = 'margin-bottom:14px;border-color:rgba(200,146,42,.4);color:var(--gold-d);background:var(--gold-l)';
-      btn.onclick = openReportModal;
-      /* Insere antes da lista de transações (após a search bar) */
-      const firstChild = el.firstElementChild;
-      if(firstChild) el.insertBefore(btn, firstChild.nextSibling);
-      else el.prepend(btn);
+  if(sel){
+    const cards=(appS&&appS.cards)||[];
+    // Qual cartão pré-selecionar?
+    let preSelect='';
+    if(jaAberto){
+      preSelect=sel.value;
+    } else {
+      // Herda filtro da aba Histórico
+      const ltFilter=document.getElementById('lt-card-filter');
+      if(ltFilter&&ltFilter.value) preSelect=ltFilter.value;
+      else if(appS&&appS.activeCardId) preSelect=appS.activeCardId;
     }
-  };
-})();
 
-/* Tenta patchear após o DOM estar pronto, caso renderHistory já tenha rodado */
-setTimeout(()=>{
-  if(!window._rptHistoryPatched) {
-    (function patchHistoryTab(){
-      const origRender = window.renderHistory;
-      if(!origRender || window._rptHistoryPatched) return;
-      window._rptHistoryPatched = true;
-      window.renderHistory = function(el){
-        origRender.call(this, el);
-        if(el && !el.querySelector('.rpt-open-btn')){
-          const btn = document.createElement('button');
-          btn.className = 'tool-btn rpt-open-btn';
-          btn.innerHTML = '📊 Gerar Relatório';
-          btn.style.cssText = 'margin-bottom:14px;border-color:rgba(200,146,42,.4);color:var(--gold-d);background:var(--gold-l)';
-          btn.onclick = openReportModal;
-          const firstChild = el.firstElementChild;
-          if(firstChild) el.insertBefore(btn, firstChild.nextSibling);
-          else el.prepend(btn);
-        }
-      };
-    })();
+    // Reconstrói lista de cartões
+    sel.innerHTML='<option value="">Todos os cartões</option>';
+    cards.forEach(c=>{
+      const o=document.createElement('option');
+      o.value=c.id; o.textContent=c.name;
+      sel.appendChild(o);
+    });
+
+    // Aplica pré-seleção via .value (mais confiável que .selected=true)
+    if(preSelect && cards.some(c=>c.id===preSelect)){
+      sel.value=preSelect;
+    } else {
+      sel.value='';
+    }
   }
-}, 600);
+
+  // Período padrão: mês atual (só na 1ª abertura)
+  if(!jaAberto){
+    const cur=_hrNowYM();
+    const fe=document.getElementById('hr-from');
+    const te=document.getElementById('hr-to');
+    if(fe) fe.value=cur;
+    if(te) te.value=cur;
+  }
+
+  modal.classList.add('open');
+  hrGenerate();
+}
+
+function closeHistRelatorio(){
+  const m=document.getElementById('modal-hist-relatorio');
+  if(m) m.classList.remove('open');
+}
+
+function hrGenerate(){
+  const preview=document.getElementById('hr-preview');
+  const badge=document.getElementById('hr-summary-badge');
+  if(!preview) return;
+
+  const appS=_hrGetS();
+  if(!appS){
+    preview.innerHTML='<div style="text-align:center;padding:30px;color:var(--red);font-weight:600">⚠️ App não inicializado. Recarregue a página.</div>';
+    return;
+  }
+
+  const cardId=document.getElementById('hr-card')?.value||'';
+  const from=document.getElementById('hr-from')?.value||_hrNowYM();
+  const to=document.getElementById('hr-to')?.value||_hrNowYM();
+  const type=document.getElementById('hr-type')?.value||'debit';
+
+  if(from>to){
+    preview.innerHTML='<div style="text-align:center;padding:30px;color:var(--red);font-weight:600">⚠️ "De" não pode ser posterior a "Até"</div>';
+    if(badge) badge.textContent='';
+    return;
+  }
+
+  const months=_hrYMRange(from,to);
+
+  // Filtra transações
+  // Transações sem t.type explícito são tratadas como débito
+  let txs=(appS.tx||[]).filter(t=>{
+    const ym=(t.invoiceMonth||t.date||'').substring(0,7);
+    if(!ym||ym<from||ym>to) return false;
+    if(cardId&&t.cardId!==cardId) return false;
+    const tType=t.type||'debit';
+    if(type==='debit'&&tType!=='debit') return false;
+    if(type==='credit'&&tType!=='credit') return false;
+    return true;
+  });
+
+  // Ordena por data
+  txs=txs.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+
+  const totalDeb=txs.filter(t=>(t.type||'debit')!=='credit').reduce((s,t)=>s+Number(t.amount||0),0);
+  const totalCr=txs.filter(t=>t.type==='credit').reduce((s,t)=>s+Number(t.amount||0),0);
+  const countTx=txs.length;
+  const avgMonth=months.length>0?totalDeb/months.length:0;
+
+  if(badge){
+    badge.innerHTML=`<span style="color:var(--text3)">${countTx} lançamento${countTx!==1?'s':''} · ${months.length} mês${months.length!==1?'es':''}</span>`;
+  }
+
+  if(countTx===0){
+    preview.innerHTML=`<div style="text-align:center;padding:40px;color:var(--text3)">
+      <div style="font-size:36px;margin-bottom:10px;opacity:.5">🔍</div>
+      <div style="font-size:var(--fs-base);font-weight:600">Nenhum lançamento encontrado neste período</div>
+      <div style="font-size:var(--fs-sm);margin-top:6px">Tente ajustar os filtros</div>
+    </div>`;
+    return;
+  }
+
+  const cardMap={};
+  (appS.cards||[]).forEach(c=>{cardMap[c.id]=c.name;});
+
+  let html=`<div class="hr-stats-row">
+    <div class="hr-stat-box"><div class="hr-stat-label">Total débitos</div><div class="hr-stat-val" style="color:var(--red)">${_hrFmtBRL(totalDeb)}</div></div>
+    <div class="hr-stat-box"><div class="hr-stat-label">Total estornos</div><div class="hr-stat-val" style="color:var(--green)">${_hrFmtBRL(totalCr)}</div></div>
+    <div class="hr-stat-box"><div class="hr-stat-label">Média mensal</div><div class="hr-stat-val">${_hrFmtBRL(avgMonth)}</div></div>
+    <div class="hr-stat-box"><div class="hr-stat-label">Lançamentos</div><div class="hr-stat-val">${countTx}</div></div>
+  </div>`;
+
+  months.forEach(ym=>{
+    const mTxs=txs.filter(t=>(t.invoiceMonth||t.date||'').substring(0,7)===ym);
+    if(!mTxs.length) return;
+    const mDeb=mTxs.filter(t=>(t.type||'debit')!=='credit').reduce((s,t)=>s+Number(t.amount||0),0);
+    const mCr=mTxs.filter(t=>t.type==='credit').reduce((s,t)=>s+Number(t.amount||0),0);
+    const cols=!cardId?4:3;
+
+    html+=`<div class="hr-month-block">
+      <div class="hr-month-title">
+        <span>📅 ${_hrMLbl(ym)}</span>
+        <span style="font-size:var(--fs-xs);color:var(--text3)">${mTxs.length} lançamento${mTxs.length!==1?'s':''}</span>
+      </div>
+      <table class="hr-tx-table">
+        <thead><tr>
+          <th style="width:90px">Data</th>
+          <th>Descrição</th>
+          <th style="width:120px">Categoria</th>
+          ${!cardId?'<th style="width:110px">Cartão</th>':''}
+          <th style="width:90px;text-align:right">Valor</th>
+        </tr></thead>
+        <tbody>`;
+
+    mTxs.forEach(t=>{
+      const cr=t.type==='credit';
+      const dateStr=t.date?new Date(t.date+'T12:00:00').toLocaleDateString('pt-BR'):'-';
+      const cat=(t.category||'').split(' ').slice(1).join(' ')||'Outros';
+      const inst=t.totalInst>1?` <span style="font-size:9px;background:var(--gold-l);color:var(--gold-d);padding:1px 4px;border-radius:3px;font-weight:700">${t.instNum}/${t.totalInst}</span>`:'';
+      html+=`<tr>
+        <td style="white-space:nowrap;color:var(--text3)">${dateStr}</td>
+        <td><span style="font-weight:500;color:var(--text)">${t.desc}</span>${inst}</td>
+        <td style="color:var(--text3)">${cat}</td>
+        ${!cardId?`<td style="color:var(--text3);font-size:10px">${cardMap[t.cardId]||''}</td>`:''}
+        <td class="${cr?'hr-amount-cr':'hr-amount-deb'}">${cr?'+ ':''} ${_hrFmtBRL(t.amount)}</td>
+      </tr>`;
+    });
+
+    html+=`</tbody>
+        <tfoot>
+          <tr class="hr-subtotal-row">
+            <td colspan="${cols-1}" style="text-align:right;font-weight:700;color:var(--gold-d)">Subtotal do mês</td>
+            <td style="text-align:right;font-family:var(--num-font);font-weight:800;color:var(--gold)">
+              ${mDeb>0?'− '+_hrFmtBRL(mDeb):''}
+              ${mCr>0&&mDeb>0?' / ':''}
+              ${mCr>0?'+ '+_hrFmtBRL(mCr):''}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>`;
+  });
+
+  html+=`<div style="display:flex;justify-content:flex-end;margin-top:4px">
+    <div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 20px;text-align:right">
+      <div style="font-size:var(--fs-micro);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:4px">Total do período</div>
+      <div style="font-family:var(--num-font);font-size:var(--fs-3xl);font-weight:800;color:var(--red);letter-spacing:-.5px">${_hrFmtBRL(totalDeb)}</div>
+      ${totalCr>0?`<div style="font-size:var(--fs-sm);color:var(--green);font-weight:700;margin-top:2px">Estornos: + ${_hrFmtBRL(totalCr)}</div>`:''}
+      ${totalCr>0?`<div style="font-size:var(--fs-sm);color:var(--text2);font-weight:700;margin-top:2px">Líquido: ${_hrFmtBRL(totalDeb-totalCr)}</div>`:''}
+    </div>
+  </div>`;
+
+  preview.innerHTML=html;
+
+  // Salva para impressão
+  window._hrPrintData={cardId,from,to,type,txs,months,totalDeb,totalCr,countTx,avgMonth,cardMap};
+}
+
+function hrPrint(){
+  const d=window._hrPrintData;
+  if(!d||!d.txs||d.txs.length===0){
+    if(typeof showToast==='function') showToast('Nenhum dado para imprimir. Gere o relatório primeiro.','error');
+    return;
+  }
+  const{cardId,from,to,type,txs,months,totalDeb,totalCr,countTx,avgMonth,cardMap}=d;
+  const appS=_hrGetS();
+  const cardName=cardId?((appS&&appS.cards)||[]).find(c=>c.id===cardId)?.name||'':'Todos os cartões';
+  const typeLabel=type==='debit'?'Débitos':type==='credit'?'Créditos':'Débitos e Créditos';
+  const now=new Date();
+  const nowStr=now.toLocaleDateString('pt-BR')+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const periodLabel=from===to?_hrMLbl(from):`${_hrMLbl(from)} a ${_hrMLbl(to)}`;
+
+  let html=`<div class="pr-header">
+    <div>
+      <div class="pr-logo">Aurum <span>Pro</span></div>
+      <div class="pr-title">Relatório de Compras</div>
+      <div class="pr-subtitle">${periodLabel} · ${cardName} · ${typeLabel}</div>
+    </div>
+    <div class="pr-meta">Emitido em ${nowStr}<br>Período: ${periodLabel}<br>Cartão: ${cardName}</div>
+  </div>
+  <table class="pr-stats"><tr>
+    <td class="pr-stat"><span class="pr-stat-label">Total Débitos</span><span class="pr-stat-sep">·</span><span class="pr-stat-val" style="color:#c0392b">${_hrFmtBRL(totalDeb)}</span></td>
+    <td class="pr-stat"><span class="pr-stat-label">Total Estornos</span><span class="pr-stat-sep">·</span><span class="pr-stat-val" style="color:#27ae60">${_hrFmtBRL(totalCr)}</span></td>
+    <td class="pr-stat"><span class="pr-stat-label">Média Mensal</span><span class="pr-stat-sep">·</span><span class="pr-stat-val">${_hrFmtBRL(avgMonth)}</span></td>
+    <td class="pr-stat"><span class="pr-stat-label">Lançamentos</span><span class="pr-stat-sep">·</span><span class="pr-stat-val">${countTx}</span></td>
+  </tr></table>`;
+
+  months.forEach(ym=>{
+    const mTxs=txs.filter(t=>(t.invoiceMonth||t.date||'').substring(0,7)===ym);
+    if(!mTxs.length) return;
+    const mDeb=mTxs.filter(t=>(t.type||'debit')!=='credit').reduce((s,t)=>s+Number(t.amount||0),0);
+    const mCr=mTxs.filter(t=>t.type==='credit').reduce((s,t)=>s+Number(t.amount||0),0);
+    const cols=!cardId?4:3;
+
+    html+=`<div class="pr-month-block">
+      <div class="pr-month-title"><span>${_hrMLbl(ym)}</span><span style="font-size:8pt;color:#555">${mTxs.length} lançamento${mTxs.length!==1?'s':''}</span></div>
+      <table><thead><tr>
+        <th style="width:70px">Data</th><th>Descrição</th><th style="width:100px">Categoria</th>
+        ${!cardId?'<th style="width:90px">Cartão</th>':''}
+        <th style="width:80px;text-align:right">Valor</th>
+      </tr></thead><tbody>`;
+
+    mTxs.forEach(t=>{
+      const cr=t.type==='credit';
+      const dateStr=t.date?new Date(t.date+'T12:00:00').toLocaleDateString('pt-BR'):'-';
+      const cat=(t.category||'').replace(/^[\u{1F300}-\u{1FFFF}\u2600-\u26FF\u2700-\u27BF ]+/u,'').trim()||'Outros';
+      const inst=t.totalInst>1?` (${t.instNum}/${t.totalInst})`:'';
+      html+=`<tr>
+        <td style="white-space:nowrap;color:#666">${dateStr}</td>
+        <td>${t.desc}${inst}</td>
+        <td style="color:#666">${cat}</td>
+        ${!cardId?`<td style="color:#666;font-size:7.5pt">${cardMap[t.cardId]||''}</td>`:''}
+        <td class="${cr?'pr-cr':'pr-deb'}">${cr?'+ ':''} ${_hrFmtBRL(t.amount)}</td>
+      </tr>`;
+    });
+
+    const htmlCols=!cardId?5:4; // colunas reais do HTML
+    html+=`</tbody><tfoot>
+      <tr class="pr-subtotal">
+        <td colspan="${htmlCols-2}" style="background:transparent!important;border-top:1px solid #c8922a;border-bottom:none"></td>
+        <td style="text-align:right;white-space:nowrap;font-weight:700;color:#7a5208;border-top:1px solid #c8922a">Subtotal</td>
+        <td style="text-align:right;white-space:nowrap;font-weight:700;color:#7a5208;border-top:1px solid #c8922a">${mDeb>0?'− '+_hrFmtBRL(mDeb):''}${mCr>0&&mDeb>0?' / ':''}${mCr>0?'+ '+_hrFmtBRL(mCr):''}</td>
+      </tr>
+    </tfoot></table></div>`;
+  });
+
+  html+=`<div style="margin-top:16px;border:1px solid #ccc;border-radius:4px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;background:#fffbf0;page-break-inside:avoid">
+    <div style="font-weight:700;font-size:10pt">Total do período</div>
+    <div style="text-align:right">
+      <div style="font-size:13pt;font-weight:900;color:#c0392b">${_hrFmtBRL(totalDeb)}</div>
+      ${totalCr>0?`<div style="font-size:8pt;color:#27ae60;font-weight:700">Estornos: + ${_hrFmtBRL(totalCr)}</div>`:''}
+      ${totalCr>0?`<div style="font-size:8.5pt;font-weight:700">Líquido: ${_hrFmtBRL(totalDeb-totalCr)}</div>`:''}
+    </div>
+  </div>
+  <div class="pr-footer">
+    <span>Aurum Pro · Relatório gerado em ${nowStr}</span>
+    <span>Período: ${periodLabel}</span>
+  </div>`;
+
+  const printEl=document.getElementById('hist-relatorio-printdoc');
+  if(printEl) printEl.innerHTML=html;
+
+  document.body.classList.add('printing-hist-relatorio');
+  window.print();
+  setTimeout(()=>{ document.body.classList.remove('printing-hist-relatorio'); }, 1200);
+}
 </script>
