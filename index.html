@@ -2870,6 +2870,7 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
 /* Otimiza card-thumb: usa propriedades explícitas */
 .card-thumb{transition:opacity .38s cubic-bezier(.16,1,.3,1),transform .38s cubic-bezier(.16,1,.3,1),border-color .38s cubic-bezier(.16,1,.3,1)!important}
 </style>
+<style>
 .mob-drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:490;backdrop-filter:blur(3px)}
 .mob-drawer-overlay.open{display:block}
 .mob-drawer{position:fixed;bottom:0;left:0;right:0;background:var(--sb-bg);border-radius:20px 20px 0 0;z-index:495;transform:translateY(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);padding-bottom:env(safe-area-inset-bottom);border-top:1px solid var(--sb-border);box-shadow:0 -8px 40px rgba(0,0,0,.3)}
@@ -11298,7 +11299,15 @@ if(!force && S.lastModified && d.lastModified){
   }
 }
 S.cards      = d.cards   || [];
-S.tx         = d.tx      || [];
+// MERGE seguro de lançamentos por ID: une local + nuvem, sem duplicar, sem perder dados
+// Isso evita que um push anterior com dados incompletos destrua lançamentos locais
+const localTxMap = {};
+(S.tx||[]).forEach(t=>{ if(t.id) localTxMap[t.id]=t; });
+const cloudTxMap = {};
+(d.tx||[]).forEach(t=>{ if(t.id) cloudTxMap[t.id]=t; });
+// Nuvem prevalece para tx existentes em ambos; locais exclusivos são preservados
+const mergedTx = Object.values({...localTxMap, ...cloudTxMap});
+S.tx         = mergedTx;
 S.payments   = d.payments|| [];
 S.activeCardId = d.activeCardId || (S.cards[0]?.id||null);
 S.budgets    = d.budgets  || {};
