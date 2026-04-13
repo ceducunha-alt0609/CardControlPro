@@ -2746,7 +2746,8 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
           ↩
         </button>
         <!-- Supabase sync indicator -->
-        <div id="sbSyncIndicator" title="Sync Supabase — clique para sincronizar agora" onclick="sbManualSync()" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;color:var(--text3);white-space:nowrap;transition:all .3s;cursor:pointer;flex-shrink:0">
+        <div id="sbSyncIndicator" title="Sync Supabase — clique para sincronizar agora" onclick="sbManualSync()" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;color:var(--text3);white-space:nowrap;transition:all .3s;cursor:pointer;flex-shrink:0"
+          onmouseover="this.title=window._sbStatus==='error'?'Erro de conexão — clique para tentar novamente':'Sincronizar agora com Supabase'">
           <span id="sbSyncDot" style="width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s"></span>
           <span id="sbSyncLabel" class="sync-lbl">Supabase</span>
         </div>
@@ -4744,6 +4745,25 @@ ${catOpts}
 <input type="checkbox" id="lt-recurring" style="accent-color:var(--blue);width:16px;height:16px;cursor:pointer">
 <label for="lt-recurring" style="font-size:var(--fs-sm);font-weight:500;color:var(--text2);cursor:pointer">🔁 Lançamento recorrente (repete todo mês)</label>
 </div>
+<!-- Mês da fatura (só crédito/estorno) -->
+<div id="lt-credit-month-sec" style="display:none">
+<label style="font-size:var(--fs-xs);font-weight:600;color:var(--text2);display:block;margin-bottom:6px">↩️ Abater da fatura de</label>
+<select class="fc" id="lt-credit-month" style="margin:0">
+${(()=>{
+const opts=[];
+const now=new Date();
+for(let i=-2;i<=2;i++){
+  const d=new Date(now.getFullYear(),now.getMonth()+i,1);
+  const ym=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  const lbl=d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const sel=i===0?' selected':'';
+  opts.push(`<option value="${ym}"${sel}>${lbl.charAt(0).toUpperCase()+lbl.slice(1)}</option>`);
+}
+return opts.join('');
+})()}
+</select>
+<div style="font-size:var(--fs-micro);color:var(--text3);margin-top:4px">Escolha em qual fatura este estorno/crédito deve ser abatido</div>
+</div>
 <!-- Nota -->
 <div>
 <label style="font-size:var(--fs-xs);font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Nota (opcional)</label>
@@ -4952,17 +4972,20 @@ const db = document.getElementById('lt-btn-debit');
 const cr = document.getElementById('lt-btn-credit');
 const instSec = document.getElementById('lt-inst-sec');
 const recRow = document.getElementById('lt-rec-row');
+const creditMonthSec = document.getElementById('lt-credit-month-sec');
 if(!db) return;
 if(type==='debit'){
 db.style.cssText='padding:10px;border-radius:var(--r);border:2px solid var(--blue);background:var(--blue-l);color:var(--blue);font-family:var(--body);font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:all .15s';
 cr.style.cssText='padding:10px;border-radius:var(--r);border:2px solid var(--border);background:var(--bg2);color:var(--text3);font-family:var(--body);font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:all .15s';
 if(instSec) instSec.style.display='block';
 if(recRow) recRow.style.display='flex';
+if(creditMonthSec) creditMonthSec.style.display='none';
 } else {
 cr.style.cssText='padding:10px;border-radius:var(--r);border:2px solid var(--green);background:var(--green-l);color:var(--green);font-family:var(--body);font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:all .15s';
 db.style.cssText='padding:10px;border-radius:var(--r);border:2px solid var(--border);background:var(--bg2);color:var(--text3);font-family:var(--body);font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:all .15s';
 if(instSec) instSec.style.display='none';
 if(recRow) recRow.style.display='none';
+if(creditMonthSec) creditMonthSec.style.display='block';
 }
 }
 function ltUpdateGradient(){
@@ -5947,7 +5970,13 @@ if(!amt||amt<=0){amtEl.style.borderColor='var(--red)';ok=false;}else{amtEl.style
 if(!ok||!date||!cardId) return;
 if(S.editTxId){
 const t=S.tx.find(x=>x.id===S.editTxId);
-if(t) Object.assign(t,{desc,amount:amt,type,category:cat,date,note,recurring,cardId,portador});
+if(t){
+const editCard=getCard(cardId);
+// Recalcula invoiceMonth ao editar: créditos usam seletor de mês ou mês calendário; débitos respeitam fechamento
+const creditMonthSel=document.getElementById('lt-credit-month');
+const editIM=editCard?(type==='credit'?(creditMonthSel?.value||date.substring(0,7)):invMonth(date,editCard.close)):t.invoiceMonth;
+Object.assign(t,{desc,amount:amt,type,category:cat,date,note,recurring,cardId,portador,invoiceMonth:editIM});
+}
 save();
 renderCarousel();
 renderDetail();
@@ -5964,7 +5993,10 @@ if(!card) return;
 const gid=uid();
 const eff=type==='credit'?1:n;
 for(let i=0;i<eff;i++){
-const baseIM=invMonth(date,card.close);
+// Para créditos/estornos: usa o mês escolhido no seletor (ou mês calendário da data como fallback)
+// Isso garante que o estorno abate da fatura correta, independente do dia de fechamento
+const creditMonthSel=document.getElementById('lt-credit-month');
+const baseIM=type==='credit'?(creditMonthSel?.value||date.substring(0,7)):invMonth(date,card.close);
 const im=i===0?baseIM:addM(baseIM,i);
 S.tx.push({id:uid(),cardId,desc:eff>1?`${desc} (${i+1}/${eff})`:desc,amount:amt/eff,type,category:cat,date,invoiceMonth:im,totalInst:eff,instNum:i+1,gid,note,portador,recurring:recurring&&eff===1});
 }
@@ -7039,6 +7071,24 @@ const noteEl=document.getElementById('lt-note'); if(noteEl) noteEl.value=t.note|
 const recEl=document.getElementById('lt-recurring'); if(recEl) recEl.checked=t.recurring||false;
 const catSel=document.getElementById('lt-cat'); if(catSel){ catSel.value=t.category||''; syncAurumSelectLabel('lt-cat'); }
 ltSetType(t.type);
+// Se for crédito, pre-seleciona o mês da fatura no seletor
+if(t.type==='credit'){
+  setTimeout(()=>{
+    const cmSel=document.getElementById('lt-credit-month');
+    if(cmSel&&t.invoiceMonth){
+      // Garante que o mês existe como opção, senão adiciona
+      if(![...cmSel.options].some(o=>o.value===t.invoiceMonth)){
+        const [y,m]=t.invoiceMonth.split('-');
+        const lbl=new Date(parseInt(y),parseInt(m)-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+        const opt=document.createElement('option');
+        opt.value=t.invoiceMonth;
+        opt.text=lbl.charAt(0).toUpperCase()+lbl.slice(1);
+        cmSel.insertBefore(opt,cmSel.firstChild);
+      }
+      cmSel.value=t.invoiceMonth;
+    }
+  },90);
+}
 updateLtPortador();
 setTimeout(()=>{
 const portSel=document.getElementById('lt-portador');
@@ -8599,6 +8649,24 @@ if(d.compact) S.compact=d.compact;
 if(d.lastModified) S.lastModified=d.lastModified;
 applyPerformanceMode();
 }
+function sbRefresh(){
+/* Recarrega o estado S do localStorage e re-renderiza o app sem reload de página.
+   Útil após sync Realtime ou para forçar atualização manual. */
+try{
+  const raw = localStorage.getItem(profileKey('ccp'));
+  if(!raw) return false;
+  let parsed;
+  try{ parsed = JSON.parse(raw); }catch(e){ return false; }
+  if(!parsed || typeof parsed !== 'object') return false;
+  applyLoadedData(parsed);
+  if(typeof renderUI === 'function') renderUI();
+  else if(typeof renderContent === 'function') renderContent();
+  if(typeof _invalidateTxCache === 'function') _invalidateTxCache();
+  return true;
+}catch(e){ console.warn('[Aurum] sbRefresh error:', e); return false; }
+}
+window.sbRefresh = sbRefresh; // expõe globalmente
+
 function load(){
 try{
 const raw=localStorage.getItem(profileKey('ccp'));
@@ -11863,6 +11931,21 @@ if(amt <= 0) continue;
 if(/PAGAMENTO|CRÉDITO/i.test(rawDesc) || rawLine.includes('+ R$')){
 if(/PAGAMENTO/i.test(rawDesc))
 r.payments.push({desc:rawDesc.trim(), amount:amt, day:day.padStart(2,'0'), mon:String(mon).padStart(2,'0')});
+else if(/CRÉDITO|ESTORNO/i.test(rawDesc)){
+// Estornos/créditos entram como transação type:'credit' para abater da fatura
+const monStr=String(mon).padStart(2,'0');
+r.txs.push({
+id:uid(), gid:uid(), cardId:'',
+date:`${year}-${monStr}-${day.padStart(2,'0')}`,
+desc:rawDesc.trim(), amount:amt,
+instNum:1, totalInst:1,
+type:'credit',
+category:'↩️ Estorno',
+isCharge:false,
+invoiceMonth:r.invoiceMonth, isFuture:false,
+note:'', recurring:false
+});
+}
 continue;
 }
 const instM = rawDesc.match(/\(Parcela\s+(\d+)\s+de\s+(\d+)\)/i);
@@ -11998,7 +12081,24 @@ if(!mon) continue;
 const amt=parseBRL(amtStr);
 if(amt<=0||amt>50000) continue;
 if(/PAGAMENTO|CRÉDITO|ESTORNO/i.test(desc)){
+if(/PAGAMENTO/i.test(desc)){
 r.payments.push({desc:desc.trim(),amount:amt,day:day.padStart(2,'0'),mon:String(mon).padStart(2,'0')});
+} else {
+// Estornos e créditos entram como transação type:'credit' para abater da fatura
+const txYear=mon>r.invoiceMonthNum?r.invoiceYear-1:r.invoiceYear;
+const monStr=String(mon).padStart(2,'0');
+r.txs.push({
+id:uid(), gid:uid(), cardId:'',
+date:`${txYear}-${monStr}-${day.padStart(2,'0')}`,
+desc:desc.trim(), amount:amt,
+instNum:1, totalInst:1,
+type:'credit',
+category:'↩️ Estorno',
+isCharge:false,
+invoiceMonth:r.invoiceMonth, isFuture:false,
+note:'', recurring:false
+});
+}
 continue;
 }
 const txYear=mon>r.invoiceMonthNum?r.invoiceYear-1:r.invoiceYear;
@@ -17604,18 +17704,22 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
 
 <script>
 /* ============================================================
-   AURUM PRO — Supabase Sync
-   Sync em tempo real a cada lançamento, por perfil
+   AURUM PRO — Supabase Sync + Realtime
+   Push a cada lançamento + websocket para sync entre devices
    ============================================================ */
 (function(){
   const SB_URL  = 'https://lwldroopbooeocchgngg.supabase.co';
   const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3bGRyb29wYm9vZW9jY2hnbmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDY3MDUsImV4cCI6MjA5MDI4MjcwNX0.fDWYV4yVLqf4j8Bce_o7denInTvJUxWhqcexND4UOyc';
   const TABLE   = 'aurum_data';
   let _sbTimer  = null;
-  let _sbStatus = 'idle'; // idle | syncing | ok | error
+  let _sbStatus = 'idle';
   let _sbLastAt = null;
+  let _sbWs     = null;      // websocket realtime
+  let _sbWsHb   = null;      // heartbeat timer
+  let _sbWsRef  = 1;         // ref counter para mensagens
+  let _sbIgnoreNext = false; // evita loop: push próprio → recebe realtime → push de novo
 
-  /* ── helpers ── */
+  /* ── headers REST ── */
   function sbHeaders(){
     return {
       'Content-Type' : 'application/json',
@@ -17633,16 +17737,17 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
   /* ── UI indicator ── */
   function sbSetStatus(s, label){
     _sbStatus = s;
-    const dot  = document.getElementById('sbSyncDot');
-    const lbl  = document.getElementById('sbSyncLabel');
-    const ind  = document.getElementById('sbSyncIndicator');
+    window._sbStatus = s;
+    const dot = document.getElementById('sbSyncDot');
+    const lbl = document.getElementById('sbSyncLabel');
+    const ind = document.getElementById('sbSyncIndicator');
     if(!dot || !lbl || !ind) return;
-
     const map = {
-      idle    : { color:'var(--text3)', text:'Supabase',    bg:'var(--bg2)',    border:'var(--border)' },
-      syncing : { color:'var(--blue)',  text:'Salvando…',   bg:'var(--blue-l)', border:'rgba(74,139,224,.35)' },
-      ok      : { color:'var(--green)', text:'✓ Salvo',     bg:'var(--green-l)',border:'rgba(74,207,138,.35)' },
-      error   : { color:'var(--red)',   text:'Erro sync',   bg:'var(--red-l)',  border:'rgba(240,104,88,.35)' },
+      idle    : { color:'var(--text3)', text:'Supabase',   bg:'var(--bg2)',    border:'var(--border)' },
+      syncing : { color:'var(--blue)',  text:'Salvando…',  bg:'var(--blue-l)', border:'rgba(74,139,224,.35)' },
+      ok      : { color:'var(--green)', text:'✓ Salvo',    bg:'var(--green-l)',border:'rgba(74,207,138,.35)' },
+      live    : { color:'var(--green)', text:'● Ao vivo',  bg:'var(--green-l)',border:'rgba(74,207,138,.35)' },
+      error   : { color:'var(--red)',   text:'Erro sync',  bg:'var(--red-l)',  border:'rgba(240,104,88,.35)' },
     };
     const cfg = map[s] || map.idle;
     dot.style.background  = cfg.color;
@@ -17650,58 +17755,113 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     ind.style.color       = cfg.color;
     ind.style.background  = cfg.bg;
     ind.style.borderColor = cfg.border;
-
-    /* Anima dot quando syncing */
-    dot.style.animation = s === 'syncing' ? 'pulse 1s infinite' : 'none';
-
-    /* Após "ok", volta para idle depois de 3s */
+    dot.style.animation   = s === 'syncing' ? 'pulse 1s infinite' : 'none';
     if(s === 'ok'){
       clearTimeout(sbSetStatus._timer);
-      sbSetStatus._timer = setTimeout(()=> sbSetStatus('idle'), 3000);
+      // Após 3s volta para "live" se websocket ativo, senão "idle"
+      sbSetStatus._timer = setTimeout(()=> sbSetStatus(_sbWs && _sbWs.readyState === 1 ? 'live' : 'idle'), 3000);
     }
+  }
+
+  /* ── retry ── */
+  let _sbRetryTimer = null;
+  let _sbRetryCount = 0;
+
+  function sbScheduleRetry(manual){
+    const delays = [5000, 15000, 60000];
+    if(_sbRetryCount >= delays.length) return;
+    const delay = delays[_sbRetryCount++];
+    clearTimeout(_sbRetryTimer);
+    _sbRetryTimer = setTimeout(()=> sbPush(manual), delay);
+  }
+
+  function sbDiagnoseError(err){
+    if(!navigator.onLine) return 'offline';
+    const msg = (err && err.message) ? err.message.toLowerCase() : '';
+    if(msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('load failed'))
+      return 'network';
+    return 'unknown';
+  }
+
+  /* ── fetch com timeout via Promise.race (sem AbortController — evita DataCloneError) ── */
+  function fetchWithTimeout(url, options, ms){
+    const timeout = new Promise((_,reject)=>
+      setTimeout(()=> reject(Object.assign(new Error('Timeout'), {name:'AbortError'})), ms)
+    );
+    return Promise.race([fetch(url, options), timeout]);
   }
 
   /* ── push: salva JSON no Supabase ── */
   async function sbPush(manual){
     const pid = activeProfileId();
     if(!pid) return;
-
-    /* Monta payload igual ao save() */
     let payload;
     try{
       const raw = localStorage.getItem('ccp-' + pid) ||
-                  localStorage.getItem('ccp-' + pid + '-u1') ||
-                  localStorage.getItem(pid === 'u1' ? 'ccp-u1' : ('ccp-' + pid));
+                  localStorage.getItem('ccp-u1');
       if(!raw) return;
-      /* tenta parsear; se cifrado, usa string direta */
       try{ payload = JSON.parse(raw); }catch(e){ payload = raw; }
     }catch(e){ return; }
 
     sbSetStatus('syncing');
     try{
-      /* upsert por profile_id */
-      const res = await fetch(`${SB_URL}/rest/v1/${TABLE}`, {
+      const res = await fetchWithTimeout(`${SB_URL}/rest/v1/${TABLE}`, {
         method : 'POST',
         headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
         body   : JSON.stringify({
-          profile_id  : pid,
-          data        : typeof payload === 'string' ? payload : JSON.stringify(payload),
-          updated_at  : new Date().toISOString()
+          profile_id : pid,
+          data       : typeof payload === 'string' ? payload : JSON.stringify(payload),
+          updated_at : new Date().toISOString()
         })
-      });
+      }, 12000);
+
       if(!res.ok){
         const txt = await res.text();
         console.warn('[Supabase] push error', res.status, txt);
-        /* Tabela não existe? tenta criar via RPC — improvável no hosted */
-        sbSetStatus('error');
+        if(res.status === 503 || res.status === 521 || res.status === 522){
+          sbSetStatus('error', '⏸ Pausado');
+          if(manual) typeof showToast === 'function' &&
+            showToast('☁️ Projeto Supabase pausado. Acesse supabase.com para reativar.','error');
+        } else if(res.status === 401 || res.status === 403){
+          sbSetStatus('error', '🔑 Auth');
+          if(manual) typeof showToast === 'function' &&
+            showToast('☁️ Erro de autenticação Supabase. Verifique a chave API.','error');
+        } else {
+          sbSetStatus('error');
+          sbScheduleRetry(manual);
+        }
         return;
       }
       _sbLastAt = new Date();
+      _sbRetryCount = 0;
+      clearTimeout(_sbRetryTimer);
+      // Sinaliza que o próximo evento realtime é eco do nosso próprio push — ignorar
+      _sbIgnoreNext = true;
+      setTimeout(()=> _sbIgnoreNext = false, 3000);
       sbSetStatus('ok');
       if(manual) typeof showToast === 'function' && showToast('☁️ Sincronizado com Supabase','green');
     }catch(err){
-      console.error('[Supabase]', err);
-      sbSetStatus('error');
+      const cause = sbDiagnoseError(err);
+      if(cause === 'offline'){
+        sbSetStatus('error', '📵 Offline');
+        window.addEventListener('online', function onOnline(){
+          window.removeEventListener('online', onOnline);
+          _sbRetryCount = 0;
+          sbPush(false);
+        }, { once: true });
+      } else if(err && err.name === 'AbortError'){
+        sbSetStatus('error', '⏱ Timeout');
+        if(_sbRetryCount === 0) console.warn('[Supabase] Timeout — verifique se o projeto está ativo em supabase.com');
+        if(manual) typeof showToast === 'function' &&
+          showToast('☁️ Supabase não respondeu. Verifique se o projeto está ativo.','');
+        if(_sbRetryCount < 1) sbScheduleRetry(manual);
+      } else {
+        sbSetStatus('error', '⏸ Inativo');
+        if(_sbRetryCount === 0) console.warn('[Supabase] Projeto inacessível — verifique em supabase.com se está ativo.');
+        if(manual) typeof showToast === 'function' &&
+          showToast('☁️ Supabase inacessível. Acesse supabase.com e verifique se o projeto está ativo.','error');
+        if(_sbRetryCount < 1) sbScheduleRetry(manual);
+      }
     }
   }
 
@@ -17710,9 +17870,10 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     const pid = activeProfileId();
     if(!pid) return null;
     try{
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `${SB_URL}/rest/v1/${TABLE}?profile_id=eq.${encodeURIComponent(pid)}&select=data,updated_at&limit=1`,
-        { headers: sbHeaders() }
+        { headers: sbHeaders() },
+        10000
       );
       if(!res.ok) return null;
       const rows = await res.json();
@@ -17721,13 +17882,119 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     }catch(e){ return null; }
   }
 
-  /* ── scheduleSync: substitui o scheduleSync original ── */
+  /* ══════════════════════════════════════════
+     REALTIME — WebSocket nativo do Supabase
+     Escuta mudanças na tabela e atualiza o app
+     automaticamente em todos os devices
+  ══════════════════════════════════════════ */
+  function sbRealtimeConnect(){
+    if(_sbWs && (_sbWs.readyState === 0 || _sbWs.readyState === 1)) return; // já conectado/conectando
+
+    const wsUrl = SB_URL.replace('https://', 'wss://') + '/realtime/v1/websocket?apikey=' + SB_KEY + '&vsn=1.0.0';
+
+    try{ _sbWs = new WebSocket(wsUrl); }
+    catch(e){ console.warn('[Supabase Realtime] WebSocket não suportado:', e); return; }
+
+    _sbWs.onopen = function(){
+      console.log('[Supabase Realtime] Conectado');
+      sbSetStatus('live');
+
+      // Envia join no canal postgres_changes para a tabela aurum_data
+      const pid = activeProfileId();
+      const joinMsg = {
+        topic  : 'realtime:public:' + TABLE,
+        event  : 'phx_join',
+        payload: {
+          config: {
+            broadcast   : { self: false },
+            presence    : { key: '' },
+            postgres_changes: [{
+              event : '*',
+              schema: 'public',
+              table : TABLE,
+              filter: 'profile_id=eq.' + pid
+            }]
+          }
+        },
+        ref: String(_sbWsRef++)
+      };
+      _sbWs.send(JSON.stringify(joinMsg));
+
+      // Heartbeat a cada 25s para manter conexão viva
+      clearInterval(_sbWsHb);
+      _sbWsHb = setInterval(function(){
+        if(_sbWs && _sbWs.readyState === 1){
+          _sbWs.send(JSON.stringify({ topic:'phoenix', event:'heartbeat', payload:{}, ref: String(_sbWsRef++) }));
+        }
+      }, 25000);
+    };
+
+    _sbWs.onmessage = function(evt){
+      let msg;
+      try{ msg = JSON.parse(evt.data); }catch(e){ return; }
+
+      // Ignora heartbeat reply e join reply
+      if(msg.event === 'phx_reply' || msg.event === 'phx_close') return;
+
+      // Evento de mudança no banco — outro device salvou
+      if(msg.event === 'postgres_changes' || (msg.payload && msg.payload.type)){
+        if(_sbIgnoreNext){ _sbIgnoreNext = false; return; } // era eco do nosso push
+
+        const pid = activeProfileId();
+        const cloudData = msg.payload && msg.payload.record && msg.payload.record.data;
+        const cloudTs   = msg.payload && msg.payload.record && msg.payload.record.updated_at;
+
+        if(!cloudData) return;
+
+        // Compara timestamp — só aplica se a nuvem for mais recente
+        const localRaw = localStorage.getItem('ccp-' + pid) || localStorage.getItem('ccp-u1');
+        let localTs = null;
+        try{ const lp = JSON.parse(localRaw||'{}'); if(lp.lastModified) localTs = new Date(lp.lastModified); }catch(e){}
+
+        const cloudDate = cloudTs ? new Date(cloudTs) : null;
+        if(cloudDate && localTs && (cloudDate - localTs) < 2000) return; // diferença < 2s, ignora
+
+        // Aplica silenciosamente via sbRefresh e re-renderiza sem reload
+        try{
+          const dataStr = typeof cloudData === 'string' ? cloudData : JSON.stringify(cloudData);
+          localStorage.setItem('ccp-' + pid, dataStr);
+          // sbRefresh() lê o localStorage, popula S e chama renderUI()
+          const ok = typeof window.sbRefresh === 'function' ? window.sbRefresh() : false;
+          if(!ok){
+            // fallback caso sbRefresh ainda não esteja disponível
+            if(typeof window.load === 'function') window.load();
+            if(typeof window.renderUI === 'function') window.renderUI();
+            else if(typeof window.renderContent === 'function') window.renderContent();
+          }
+          if(typeof showToast === 'function') showToast('🔄 Dados atualizados de outro dispositivo', 'green');
+          sbSetStatus('live');
+        }catch(e){
+          console.warn('[Supabase Realtime] Erro ao aplicar update:', e);
+        }
+      }
+    };
+
+    _sbWs.onerror = function(e){
+      // Erro silencioso — onclose vai tratar a reconexão
+    };
+
+    _sbWs.onclose = function(evt){
+      clearInterval(_sbWsHb);
+      _sbWsHb = null;
+      // Se não foi fechamento limpo (code 1000), tenta reconectar em 5s
+      if(evt.code !== 1000 && evt.code !== 1001){
+        console.warn('[Supabase Realtime] Desconectado (code ' + evt.code + '), reconectando em 5s…');
+        sbSetStatus('idle');
+        setTimeout(sbRealtimeConnect, 5000);
+      }
+    };
+  }
+
+  /* ── scheduleSync: hook sobre o scheduleSync original ── */
   function hookScheduleSync(){
     const origSchedule = window.scheduleSync;
     window.scheduleSync = function(){
-      /* mantém jsonbin se configurado */
       if(typeof origSchedule === 'function') origSchedule();
-      /* agenda push supabase */
       clearTimeout(_sbTimer);
       _sbTimer = setTimeout(()=> sbPush(false), 1500);
     };
@@ -17740,7 +18007,7 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     await sbPush(true);
   };
 
-  /* ── startup: verifica se há dado mais recente na nuvem ── */
+  /* ── startup: verifica dado mais recente na nuvem ── */
   async function sbStartupCheck(){
     const pid = activeProfileId();
     if(!pid) return;
@@ -17748,19 +18015,17 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     if(!row) return;
 
     const cloudTs  = row.updated_at ? new Date(row.updated_at) : null;
-    const localRaw = localStorage.getItem('ccp-' + pid) ||
-                     localStorage.getItem('ccp-u1');
+    const localRaw = localStorage.getItem('ccp-' + pid) || localStorage.getItem('ccp-u1');
     let localTs = null;
     try{
       const lp = JSON.parse(localRaw || '{}');
       if(lp.lastModified) localTs = new Date(lp.lastModified);
     }catch(e){}
 
-    /* Se nuvem for mais recente em mais de 60s, pergunta ao usuário */
     if(cloudTs && (!localTs || (cloudTs - localTs) > 60000)){
       const diff = localTs ? Math.round((cloudTs - localTs)/1000/60) : null;
       const msg  = diff
-        ? `☁️ O Supabase tem dados ${diff} minuto${diff>1?'s':''} mais recentes. Restaurar?`
+        ? '☁️ O Supabase tem dados ' + diff + ' minuto' + (diff>1?'s':'') + ' mais recentes. Restaurar?'
         : '☁️ Dados encontrados no Supabase. Restaurar?';
       if(typeof window.showConfirm === 'function'){
         window.showConfirm({
@@ -17770,7 +18035,7 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
           onOk  : ()=>{
             try{
               localStorage.setItem('ccp-' + pid, row.data);
-              typeof window.showToast==='function' && window.showToast('☁️ Dados restaurados do Supabase','green');
+              typeof window.showToast === 'function' && window.showToast('☁️ Dados restaurados do Supabase','green');
               setTimeout(()=>{ location.reload(); }, 800);
             }catch(e){}
           }
@@ -17782,9 +18047,8 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
   /* ── init ── */
   function init(){
     hookScheduleSync();
-    /* Verifica nuvem após 2s do app carregar */
     setTimeout(sbStartupCheck, 2000);
-    /* Reinicia hook caso o app reinstancie scheduleSync */
+    setTimeout(sbRealtimeConnect, 2500); // conecta Realtime após startup check
     setTimeout(()=>{ if(!window.scheduleSync._sbPatched) hookScheduleSync(); }, 3500);
   }
 
