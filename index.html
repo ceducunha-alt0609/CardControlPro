@@ -17602,6 +17602,7 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
 }
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 /* ============================================================
    AURUM PRO — Supabase Sync
@@ -17779,6 +17780,105 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     }
   }
 
+  /* ── Realtime: WebSocket via SDK Supabase ── */
+  let _sbClient   = null;
+  let _sbChannel  = null;
+  let _sbPollTimer = null; // fallback polling
+
+  function applyCloudData(row){
+    const pid = activeProfileId();
+    if(!row || !row.data) return;
+
+    const cloudTs = row.updated_at ? new Date(row.updated_at) : null;
+    /* Ignora se foi o próprio dispositivo que salvou há pouco (< 5s) */
+    if(_sbLastAt && cloudTs && (cloudTs - _sbLastAt) < 5000) return;
+
+    const localRaw = localStorage.getItem('ccp-' + pid) || localStorage.getItem('ccp-u1');
+    let localTs = null;
+    try{ const lp = JSON.parse(localRaw || '{}'); if(lp.lastModified) localTs = new Date(lp.lastModified); }catch(e){}
+
+    if(cloudTs && (!localTs || (cloudTs - localTs) > 5000)){
+      try{
+        localStorage.setItem('ccp-' + pid, row.data);
+        if(typeof window.load === 'function'){
+          window.load();
+          if(typeof window.renderAll === 'function') window.renderAll();
+          else if(typeof window.renderContent === 'function') window.renderContent();
+        } else { location.reload(); }
+        sbSetStatus('ok', '↻ Atualizado');
+        if(typeof showToast === 'function') showToast('☁️ Dados sincronizados em tempo real','green');
+      }catch(e){ console.warn('[Supabase apply]', e); }
+    }
+  }
+
+  function startRealtime(){
+    /* Aguarda SDK carregar */
+    if(typeof supabase === 'undefined' || !supabase.createClient){
+      /* fallback para polling se SDK não carregar */
+      console.warn('[Supabase] SDK não disponível, usando polling');
+      startPollingFallback();
+      return;
+    }
+
+    const pid = activeProfileId();
+    if(!pid) return;
+
+    _sbClient  = supabase.createClient(SB_URL, SB_KEY);
+    _sbChannel = _sbClient
+      .channel('aurum-realtime-' + pid)
+      .on(
+        'postgres_changes',
+        {
+          event : '*',             /* INSERT, UPDATE, DELETE */
+          schema: 'public',
+          table : TABLE,
+          filter: 'profile_id=eq.' + pid
+        },
+        (payload) => {
+          console.log('[Supabase Realtime] evento:', payload.eventType);
+          /* payload.new contém o row atualizado */
+          if(payload.new && payload.new.data){
+            applyCloudData(payload.new);
+          } else {
+            /* fallback: busca o dado completo */
+            sbPull().then(row => { if(row) applyCloudData(row); });
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[Supabase Realtime] status:', status);
+        if(status === 'SUBSCRIBED'){
+          sbSetStatus('idle', 'Realtime ✓');
+          setTimeout(()=> sbSetStatus('idle'), 2000);
+        }
+        if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT'){
+          console.warn('[Supabase Realtime] falhou, iniciando polling fallback');
+          startPollingFallback();
+        }
+      });
+
+    /* Também verifica ao voltar ao foco (ex: desbloquear celular) */
+    document.addEventListener('visibilitychange', ()=>{
+      if(document.visibilityState === 'visible'){
+        sbPull().then(row => { if(row) applyCloudData(row); });
+      }
+    });
+  }
+
+  /* ── polling fallback (caso Realtime falhe) ── */
+  async function sbPollCheck(){
+    const row = await sbPull();
+    if(row) applyCloudData(row);
+  }
+
+  function startPollingFallback(){
+    if(_sbPollTimer) clearInterval(_sbPollTimer);
+    _sbPollTimer = setInterval(sbPollCheck, 30000);
+    document.addEventListener('visibilitychange', ()=>{
+      if(document.visibilityState === 'visible') sbPollCheck();
+    });
+  }
+
   /* ── init ── */
   function init(){
     hookScheduleSync();
@@ -17786,6 +17886,8 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     setTimeout(sbStartupCheck, 2000);
     /* Reinicia hook caso o app reinstancie scheduleSync */
     setTimeout(()=>{ if(!window.scheduleSync._sbPatched) hookScheduleSync(); }, 3500);
+    /* Inicia Realtime (com fallback automático para polling) */
+    setTimeout(startRealtime, 1000);
   }
 
   if(document.readyState === 'loading'){
