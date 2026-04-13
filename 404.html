@@ -2,61 +2,37 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aurum Pro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0d1829">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #0d1829;
-      color: #fff;
-      font-family: system-ui, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      text-align: center;
+  <script>
+    // GitHub Pages SPA redirect
+    // Redireciona qualquer rota 404 de volta ao index.html
+    // mantendo o caminho como query string para o index processar
+    var segmentCount = 0;
+    var location = window.location;
+    var base = location.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/';
+    var path = location.pathname.slice(base.length).replace(/&/g, '~and~');
+    var search = location.search.slice(1).replace(/&/g, '~and~');
+    var hash = location.hash.slice(1);
+    if (path || search || hash) {
+      location.replace(
+        base + '?p=/' + [path, search, hash].filter(Boolean).join('~and~')
+      );
+    } else {
+      location.replace(base);
     }
-    .spinner {
-      width: 48px; height: 48px;
-      border: 3px solid rgba(200,146,42,.25);
-      border-top-color: #c8922a;
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-      margin: 0 auto 20px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    p { color: rgba(245,208,120,.6); font-size: 13px; margin-top: 8px; }
-  </style>
+  </script>
 </head>
 <body>
-  <div>
+  <style>
+    body { margin:0; background:#0d1829; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; }
+    .msg { color:#d4af37; text-align:center; }
+    .spinner { width:40px; height:40px; border:3px solid #1a2f52; border-top-color:#d4af37; border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px; }
+    @keyframes spin { to { transform:rotate(360deg) } }
+  </style>
+  <div class="msg">
     <div class="spinner"></div>
     <p>Carregando Aurum Pro…</p>
   </div>
-  <script>
-    /* ─────────────────────────────────────────────────────────────
-       GitHub Pages — SPA Redirect
-       Redireciona qualquer 404 de volta para index.html
-       preservando o path/query como parâmetro.
-    ───────────────────────────────────────────────────────────── */
-    (function() {
-      var l = window.location;
-      // Reconstrói a URL como query string para o index.html conseguir ler
-      var redirect = l.pathname.slice(1).split('/').slice(1).join('/');
-      var query    = l.search.slice(1);
-      var hash     = l.hash.slice(1);
-
-      var newUrl = l.protocol + '//' + l.hostname
-        + (l.port ? ':' + l.port : '')
-        + l.pathname.split('/').slice(0, 2).join('/')
-        + '/?p=/' + redirect
-        + (query ? '&q=' + query : '')
-        + (hash  ? '&h=' + encodeURIComponent(hash) : '');
-
-      // Redireciona instantaneamente
-      l.replace(newUrl);
-    })();
-  </script>
 </body>
 </html>
