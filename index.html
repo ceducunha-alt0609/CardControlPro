@@ -18585,36 +18585,62 @@ body.fpanel-focus-mode .sidebar {
 #hist-relatorio-printdoc .pr-subtitle { font-size: 8pt; color: #555; margin-bottom: 2px; }
 #hist-relatorio-printdoc .pr-stats {
   width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 8px;
+  border-collapse: separate;
+  border-spacing: 5px;
+  margin: 0 -5px 10px -5px;
   page-break-inside: avoid;
   table-layout: fixed;
 }
 #hist-relatorio-printdoc .pr-stat {
   width: 25%;
-  padding: 5px 10px;
-  border-right: 1px solid #ddd;
-  vertical-align: middle;
-  white-space: nowrap;
+  padding: 8px 12px;
+  vertical-align: top;
+  background: #fafafa;
+  border: 1px solid #e0d4b0;
+  border-top: 3px solid #c8922a;
+  border-radius: 4px;
 }
-#hist-relatorio-printdoc .pr-stat:last-child { border-right: none; }
-#hist-relatorio-printdoc .pr-stat-label { font-size: 7pt; font-weight: 700; text-transform: uppercase; color: #888; letter-spacing: .05em; }
-#hist-relatorio-printdoc .pr-stat-sep { color: #bbb; margin: 0 3px; }
-#hist-relatorio-printdoc .pr-stat-val { font-size: 9.5pt; font-weight: 800; color: #111; }
-#hist-relatorio-printdoc .pr-month-block { margin-bottom: 8px; }
+#hist-relatorio-printdoc .pr-stat-label {
+  display: block;
+  font-size: 6.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #999;
+  letter-spacing: .08em;
+  margin-bottom: 3px;
+}
+#hist-relatorio-printdoc .pr-stat-sep { display: none; }
+#hist-relatorio-printdoc .pr-stat-val {
+  display: block;
+  font-size: 11pt;
+  font-weight: 900;
+  color: #1a1a1a;
+  letter-spacing: -.3px;
+}
+#hist-relatorio-printdoc .pr-month-block { margin-bottom: 10px; }
 #hist-relatorio-printdoc .pr-month-title {
   font-size: 10pt;
   font-weight: 800;
-  background: #f0f0f0;
-  padding: 5px 8px;
-  border: 1px solid #ccc;
+  background: linear-gradient(90deg, #f5f0e8 0%, #faf8f4 100%);
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-left: 4px solid #c8922a;
   border-bottom: none;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   page-break-after: avoid;
   break-after: avoid;
+}
+#hist-relatorio-printdoc .pr-month-count {
+  font-size: 7.5pt;
+  font-weight: 600;
+  color: #888;
+  background: #ede8dc;
+  border: 1px solid #d4c9a8;
+  border-radius: 10px;
+  padding: 1px 8px;
+  letter-spacing: .02em;
 }
 #hist-relatorio-printdoc table {
   width: 100%;
@@ -18945,9 +18971,10 @@ function hrGenerate(){
     html+=`</tbody>
         <tfoot>
           <tr class="hr-subtotal-row">
-            <td colspan="${cols-1}" style="text-align:right;font-weight:700;color:var(--gold-d)">Subtotal do mês</td>
+            <td colspan="${cols-2}" style="text-align:right"></td>
+            <td style="text-align:right;font-weight:700;color:var(--gold-d);white-space:nowrap">Subtotal do mês</td>
             <td style="text-align:right;font-family:var(--num-font);font-weight:800;color:var(--gold)">
-              ${mDeb>0?'− '+_hrFmtBRL(mDeb):''}
+              ${mDeb>0?_hrFmtBRL(mDeb):''}
               ${mCr>0&&mDeb>0?' / ':''}
               ${mCr>0?'+ '+_hrFmtBRL(mCr):''}
             </td>
@@ -18997,10 +19024,10 @@ function hrPrint(){
     <div class="pr-meta">Emitido em ${nowStr}<br>Período: ${periodLabel}<br>Cartão: ${cardName}${portadorShow?'<br>Portador: '+portadorLabel:''}</div>
   </div>
   <table class="pr-stats"><tr>
-    <td class="pr-stat"><span class="pr-stat-label">Total Débitos</span><span class="pr-stat-sep">·</span><span class="pr-stat-val" style="color:#c0392b">${_hrFmtBRL(totalDeb)}</span></td>
-    <td class="pr-stat"><span class="pr-stat-label">Total Estornos</span><span class="pr-stat-sep">·</span><span class="pr-stat-val" style="color:#27ae60">${_hrFmtBRL(totalCr)}</span></td>
-    <td class="pr-stat"><span class="pr-stat-label">Média Mensal</span><span class="pr-stat-sep">·</span><span class="pr-stat-val">${_hrFmtBRL(avgMonth)}</span></td>
-    <td class="pr-stat"><span class="pr-stat-label">Lançamentos</span><span class="pr-stat-sep">·</span><span class="pr-stat-val">${countTx}</span></td>
+    <td class="pr-stat"><span class="pr-stat-label">Total Débitos</span><span class="pr-stat-val" style="color:#c0392b">${_hrFmtBRL(totalDeb)}</span></td>
+    <td class="pr-stat"><span class="pr-stat-label">Total Estornos</span><span class="pr-stat-val" style="color:#27ae60">${_hrFmtBRL(totalCr)}</span></td>
+    <td class="pr-stat"><span class="pr-stat-label">Média Mensal</span><span class="pr-stat-val">${_hrFmtBRL(avgMonth)}</span></td>
+    <td class="pr-stat"><span class="pr-stat-label">Lançamentos</span><span class="pr-stat-val">${countTx}</span></td>
   </tr></table>`;
 
   months.forEach(ym=>{
@@ -19011,7 +19038,7 @@ function hrPrint(){
     const cols=!cardId?4:3;
 
     html+=`<div class="pr-month-block" style="page-break-inside:auto">
-      <div class="pr-month-title"><span>${_hrMLbl(ym)}</span><span style="font-size:8pt;color:#555">${mTxs.length} lançamento${mTxs.length!==1?'s':''}</span></div>
+      <div class="pr-month-title"><span>${_hrMLbl(ym)}</span><span class="pr-month-count">${mTxs.length} lançamento${mTxs.length!==1?'s':''}</span></div>
       <table><thead><tr>
         <th style="width:70px">Data</th><th>Descrição</th><th style="width:100px">Categoria</th>
         ${!cardId?'<th style="width:90px">Cartão</th>':''}
@@ -19043,8 +19070,9 @@ function hrPrint(){
         <col style="width:80px">
       </colgroup>
       <tr>
-        <td colspan="${totalCols-1}" style="padding:4px 8px;text-align:right;font-weight:700;color:#7a5208;font-size:8.5pt;border:none">Subtotal</td>
-        <td style="padding:4px 8px;text-align:right;font-weight:700;color:#c0392b;font-size:8.5pt;border:none;white-space:nowrap">${mDeb>0?'− '+_hrFmtBRL(mDeb):''}${mCr>0&&mDeb>0?' / ':''}${mCr>0?'+ '+_hrFmtBRL(mCr):''}</td>
+        <td colspan="${totalCols-2}" style="padding:4px 8px;border:none"></td>
+        <td style="padding:4px 8px;text-align:right;font-weight:700;color:#7a5208;font-size:8.5pt;border:none;white-space:nowrap">Subtotal</td>
+        <td style="padding:4px 8px;text-align:right;font-weight:700;color:#c0392b;font-size:8.5pt;border:none;white-space:nowrap">${mDeb>0?_hrFmtBRL(mDeb):''}${mCr>0&&mDeb>0?' / ':''}${mCr>0?'+ '+_hrFmtBRL(mCr):''}</td>
       </tr>
     </table></div>`;
   });
