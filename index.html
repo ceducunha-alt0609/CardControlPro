@@ -3498,7 +3498,7 @@ function getCard(id){return S.cards.find(c=>c.id===id)}
 function activeCard(){return getCard(S.activeCardId)}
 function invMonth(dateStr,closeDay){
 const d=new Date(dateStr+'T12:00:00');
-if(d.getDate()<closeDay) return dateStr.substring(0,7);
+if(d.getDate()<=closeDay) return dateStr.substring(0,7);
 const nx=new Date(d.getFullYear(),d.getMonth()+1,1);
 return `${nx.getFullYear()}-${pad(nx.getMonth()+1)}`;
 }
@@ -3618,7 +3618,7 @@ const openMonth=invMonth(today,card.close);
 const current=monthSummary(cardId,openMonth);
 const future=futureCommitted(cardId,openMonth);
 // Usa valor líquido do ciclo aberto (já com créditos/estornos), abatendo apenas o pagamento em dinheiro
-const currentUsed=Math.max(0,(current.netCharges||0)-(current.paidGross||0));
+const currentUsed=Math.max(0,(current.total||0)-(current.paidGross||0));
 return currentUsed+future;
 }
 function carriedBalance(cardId,month,depth=0){
@@ -7082,10 +7082,15 @@ const seen=new Set();
 S.tx.filter(t=>t.recurring&&t.type==='debit').forEach(t=>{
 if(seen.has(t.gid)) return;
 seen.add(t.gid);
-const already=S.tx.some(x=>x.gid===t.gid&&x.invoiceMonth===cur);
+// Usa o cartao dono da transacao e respeita o dia de fechamento
+const txCard=getCard(t.cardId);
+const closeDay=txCard?.close||1;
+const day=String(closeDay).padStart(2,'0');
+const refDate=`${cur}-${day}`;
+const im=invMonth(refDate,closeDay);
+const already=S.tx.some(x=>x.gid===t.gid&&x.invoiceMonth===im);
 if(!already){
-const day=String(activeCard()?.close||1).padStart(2,'0');
-S.tx.push({...t,id:uid(),invoiceMonth:cur,date:`${cur}-${day}`});
+S.tx.push({...t,id:uid(),invoiceMonth:im,date:refDate});
 added++;
 }
 });
