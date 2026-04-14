@@ -2746,8 +2746,7 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
           ↩
         </button>
         <!-- Supabase sync indicator -->
-        <div id="sbSyncIndicator" title="Sync Supabase — clique para sincronizar agora" onclick="sbManualSync()" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;color:var(--text3);white-space:nowrap;transition:all .3s;cursor:pointer;flex-shrink:0"
-          onmouseover="this.title=window._sbStatus==='error'?'Erro de conexão — clique para tentar novamente':'Sincronizar agora com Supabase'">
+        <div id="sbSyncIndicator" title="Sync Supabase — clique para sincronizar agora" onclick="sbManualSync()" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;color:var(--text3);white-space:nowrap;transition:all .3s;cursor:pointer;flex-shrink:0">
           <span id="sbSyncDot" style="width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s"></span>
           <span id="sbSyncLabel" class="sync-lbl">Supabase</span>
         </div>
@@ -3435,19 +3434,30 @@ function closeMobDrawer(){
 </div>
 
 <script>const GRADS = [
-{g:'linear-gradient(145deg,#1e3a8a 0%,#1d4ed8 45%,#1e3a8a 100%)',a:'#3b82f6'},
-{g:'linear-gradient(145deg,#164e63 0%,#0e7490 45%,#0a3d52 100%)',a:'#06b6d4'},
-{g:'linear-gradient(145deg,#14532d 0%,#166534 45%,#0a3320 100%)',a:'#22c55e'},
-{g:'linear-gradient(145deg,#7f1d1d 0%,#b91c1c 45%,#6b1111 100%)',a:'#ef4444'},
-{g:'linear-gradient(145deg,#78350f 0%,#b45309 45%,#5c2a08 100%)',a:'#f59e0b'},
-{g:'linear-gradient(145deg,#3b0764 0%,#6d28d9 45%,#2e0550 100%)',a:'#a855f7'},
-{g:'linear-gradient(145deg,#0c4a6e 0%,#0369a1 45%,#083a58 100%)',a:'#38bdf8'},
-{g:'linear-gradient(145deg,#500724 0%,#9d174d 45%,#3b051c 100%)',a:'#f472b6'},
+{g:'linear-gradient(145deg,#1e3a8a 0%,#1d4ed8 45%,#1e3a8a 100%)',a:'#3b82f6',label:'Azul'},
+{g:'linear-gradient(145deg,#164e63 0%,#0e7490 45%,#0a3d52 100%)',a:'#06b6d4',label:'Ciano'},
+{g:'linear-gradient(145deg,#14532d 0%,#166534 45%,#0a3320 100%)',a:'#22c55e',label:'Verde'},
+{g:'linear-gradient(145deg,#7f1d1d 0%,#b91c1c 45%,#6b1111 100%)',a:'#ef4444',label:'Vermelho'},
+{g:'linear-gradient(145deg,#78350f 0%,#b45309 45%,#5c2a08 100%)',a:'#f59e0b',label:'Ambar'},
+{g:'linear-gradient(145deg,#3b0764 0%,#6d28d9 45%,#2e0550 100%)',a:'#a855f7',label:'Roxo'},
+{g:'linear-gradient(145deg,#0c4a6e 0%,#0369a1 45%,#083a58 100%)',a:'#38bdf8',label:'Sky'},
+{g:'linear-gradient(145deg,#500724 0%,#9d174d 45%,#3b051c 100%)',a:'#f472b6',label:'Pink'},
 {g:'linear-gradient(145deg,#0a0a0a 0%,#1c1c1e 45%,#0a0a0a 100%)',a:'#6b7280',label:'Preto'},
-{g:'linear-gradient(145deg,#d1d5db 0%,#f3f4f6 45%,#e5e7eb 100%)',a:'#9ca3af',label:'Branco'},
+{g:'linear-gradient(145deg,#d1d5db 0%,#f3f4f6 45%,#e5e7eb 100%)',a:'#9ca3af',label:'Branco',dark:true},
 {g:'linear-gradient(145deg,#6b7280 0%,#9ca3af 45%,#4b5563 100%)',a:'#d1d5db',label:'Prata'},
 {g:'linear-gradient(145deg,#78450a 0%,#d4a017 45%,#8b5e0a 100%)',a:'#f5c842',label:'Dourado'},
 {g:'linear-gradient(145deg,#78450a 0%,#fbbf24 45%,#d97706 100%)',a:'#fde68a',label:'Amarelo'},
+{g:'linear-gradient(145deg,#4c0519 0%,#9f1239 45%,#3b0413 100%)',a:'#fb7185',label:'Rose'},
+{g:'linear-gradient(145deg,#b8945e 0%,#e8d5a3 45%,#c8a87a 100%)',a:'#92400e',label:'Champanhe',dark:true},
+{g:'linear-gradient(145deg,#0f172a 0%,#1e293b 45%,#0f172a 100%)',a:'#64748b',label:'Grafite'},
+{g:'linear-gradient(145deg,#022c22 0%,#065f46 45%,#011a14 100%)',a:'#34d399',label:'Esmeralda'},
+{g:'linear-gradient(145deg,#431407 0%,#9a3412 45%,#2c0d04 100%)',a:'#fb923c',label:'Cobre'},
+{g:'linear-gradient(145deg,#1c0f0a 0%,#3d1f12 45%,#120a06 100%)',a:'#a16207',label:'Marrom'},
+{g:'linear-gradient(145deg,#1e1b4b 0%,#312e81 45%,#13114d 100%)',a:'#818cf8',label:'Indigo'},
+{g:'linear-gradient(145deg,#94a3b8 0%,#e2e8f0 45%,#748999 100%)',a:'#1e293b',label:'Prata Plus',dark:true},
+{g:'linear-gradient(145deg,#2d0a1e 0%,#6b1f3a 45%,#1e0614 100%)',a:'#e879a0',label:'Vinho'},
+{g:'linear-gradient(145deg,#0c4a6e 0%,#6d28d9 100%)',a:'#818cf8',label:'Aurora'},
+
 ];
 let S = {
 cards:[],tx:[],payments:[],
@@ -3919,24 +3929,24 @@ ondragend="cardDragEnd(event)">
 <div class="card-thumb-edge-top"></div>
 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;position:relative;z-index:3">
   <div>
-    <div style="font-size:var(--fs-lg);font-weight:800;letter-spacing:.02em;color:rgba(255,255,255,.95);font-family:var(--display);line-height:1.1;text-shadow:0 1px 4px rgba(0,0,0,.5)">${c.name}</div>
-    ${_holderShort?`<div style="font-size:var(--fs-nano);font-weight:500;color:rgba(255,255,255,.5);margin-top:1px;letter-spacing:.04em;text-transform:uppercase">${_holderShort}</div>`:''}
+    <div style="font-size:var(--fs-lg);font-weight:800;letter-spacing:.02em;color:${g.dark?'rgba(25,15,5,.9)':'rgba(255,255,255,.95)'};font-family:var(--display);line-height:1.1;text-shadow:${g.dark?'0 1px 2px rgba(0,0,0,.1)':'0 1px 4px rgba(0,0,0,.5)'}">${c.name}</div>
+    ${_holderShort?`<div style="font-size:var(--fs-nano);font-weight:500;color:${g.dark?'rgba(25,15,5,.45)':'rgba(255,255,255,.5)'};margin-top:1px;letter-spacing:.04em;text-transform:uppercase">${_holderShort}</div>`:''}
   </div>
   <div style="flex-shrink:0;margin-top:1px">${brandSvg}</div>
 </div>
 <div style="position:relative;z-index:3">
-  <div style="font-size:var(--fs-nano);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:2px">Fatura ${_selMonthLabel}</div>
-  <div class="card-thumb-used" style="font-size:var(--fs-3xl);font-weight:700;color:#fff;letter-spacing:-.5px;font-family:var(--mono);line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.5)">${fmtR(_invoiceVal)}</div>
+  <div style="font-size:var(--fs-nano);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:${g.dark?'rgba(25,15,5,.42)':'rgba(255,255,255,.45)'};margin-bottom:2px">Fatura ${_selMonthLabel}</div>
+  <div class="card-thumb-used" style="font-size:var(--fs-3xl);font-weight:700;color:${g.dark?'rgba(20,10,5,.9)':'#fff'};letter-spacing:-.5px;font-family:var(--mono);line-height:1;text-shadow:${g.dark?'0 1px 1px rgba(0,0,0,.08)':'0 1px 4px rgba(0,0,0,.5)'}">${fmtR(_invoiceVal)}</div>
 </div>
 <div style="display:flex;align-items:flex-end;justify-content:space-between;position:relative;z-index:3">
   <div>
-    <div style="font-size:8px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:2px">Vencimento</div>
-    <div style="font-size:var(--fs-base);font-weight:700;color:rgba(255,255,255,.92);text-shadow:0 1px 2px rgba(0,0,0,.4)">${dueLabel}${dueAlert}</div>
+    <div style="font-size:8px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:${g.dark?'rgba(25,15,5,.42)':'rgba(255,255,255,.45)'};margin-bottom:2px">Vencimento</div>
+    <div style="font-size:var(--fs-base);font-weight:700;color:${g.dark?'rgba(20,10,5,.88)':'rgba(255,255,255,.92)'};text-shadow:${g.dark?'none':'0 1px 2px rgba(0,0,0,.4)'}">${dueLabel}${dueAlert}</div>
   </div>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:96px">
-    <div style="font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)">Disponível p/ usar</div>
-    <span class="card-thumb-limit" style="font-size:var(--fs-micro);font-weight:800;color:rgba(255,255,255,.82);font-family:var(--mono);letter-spacing:-.3px;white-space:nowrap">${_limiteDisp}</span>
-    <div style="width:72px;height:5px;border-radius:99px;background:rgba(0,0,0,.28);overflow:hidden;position:relative;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)">
+    <div style="font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:${g.dark?'rgba(25,15,5,.4)':'rgba(255,255,255,.42)'}">Disponível p/ usar</div>
+    <span class="card-thumb-limit" style="font-size:var(--fs-micro);font-weight:800;color:${g.dark?'rgba(20,10,5,.75)':'rgba(255,255,255,.82)'};font-family:var(--mono);letter-spacing:-.3px;white-space:nowrap">${_limiteDisp}</span>
+    <div style="width:72px;height:5px;border-radius:99px;background:${g.dark?'rgba(0,0,0,.14)':'rgba(0,0,0,.28)'};overflow:hidden;position:relative;box-shadow:inset 0 1px 2px ${g.dark?'rgba(0,0,0,.1)':'rgba(0,0,0,.25)'}">
       <div style="height:100%;width:${Math.round(_barFillPct)}%;border-radius:99px;background:${_barGrad};box-shadow:0 0 6px ${_barGlow};transition:width .9s cubic-bezier(.16,1,.3,1);position:relative">
         <div style="position:absolute;top:0;left:0;right:0;height:50%;background:rgba(255,255,255,.28);border-radius:99px 99px 0 0"></div>
       </div>
@@ -4745,25 +4755,6 @@ ${catOpts}
 <input type="checkbox" id="lt-recurring" style="accent-color:var(--blue);width:16px;height:16px;cursor:pointer">
 <label for="lt-recurring" style="font-size:var(--fs-sm);font-weight:500;color:var(--text2);cursor:pointer">🔁 Lançamento recorrente (repete todo mês)</label>
 </div>
-<!-- Mês da fatura (só crédito/estorno) -->
-<div id="lt-credit-month-sec" style="display:none">
-<label style="font-size:var(--fs-xs);font-weight:600;color:var(--text2);display:block;margin-bottom:6px">↩️ Abater da fatura de</label>
-<select class="fc" id="lt-credit-month" style="margin:0">
-${(()=>{
-const opts=[];
-const now=new Date();
-for(let i=-2;i<=2;i++){
-  const d=new Date(now.getFullYear(),now.getMonth()+i,1);
-  const ym=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-  const lbl=d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-  const sel=i===0?' selected':'';
-  opts.push(`<option value="${ym}"${sel}>${lbl.charAt(0).toUpperCase()+lbl.slice(1)}</option>`);
-}
-return opts.join('');
-})()}
-</select>
-<div style="font-size:var(--fs-micro);color:var(--text3);margin-top:4px">Escolha em qual fatura este estorno/crédito deve ser abatido</div>
-</div>
 <!-- Nota -->
 <div>
 <label style="font-size:var(--fs-xs);font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Nota (opcional)</label>
@@ -4972,20 +4963,17 @@ const db = document.getElementById('lt-btn-debit');
 const cr = document.getElementById('lt-btn-credit');
 const instSec = document.getElementById('lt-inst-sec');
 const recRow = document.getElementById('lt-rec-row');
-const creditMonthSec = document.getElementById('lt-credit-month-sec');
 if(!db) return;
 if(type==='debit'){
 db.style.cssText='padding:10px;border-radius:var(--r);border:2px solid var(--blue);background:var(--blue-l);color:var(--blue);font-family:var(--body);font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:all .15s';
 cr.style.cssText='padding:10px;border-radius:var(--r);border:2px solid var(--border);background:var(--bg2);color:var(--text3);font-family:var(--body);font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:all .15s';
 if(instSec) instSec.style.display='block';
 if(recRow) recRow.style.display='flex';
-if(creditMonthSec) creditMonthSec.style.display='none';
 } else {
 cr.style.cssText='padding:10px;border-radius:var(--r);border:2px solid var(--green);background:var(--green-l);color:var(--green);font-family:var(--body);font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:all .15s';
 db.style.cssText='padding:10px;border-radius:var(--r);border:2px solid var(--border);background:var(--bg2);color:var(--text3);font-family:var(--body);font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:all .15s';
 if(instSec) instSec.style.display='none';
 if(recRow) recRow.style.display='none';
-if(creditMonthSec) creditMonthSec.style.display='block';
 }
 }
 function ltUpdateGradient(){
@@ -5970,13 +5958,7 @@ if(!amt||amt<=0){amtEl.style.borderColor='var(--red)';ok=false;}else{amtEl.style
 if(!ok||!date||!cardId) return;
 if(S.editTxId){
 const t=S.tx.find(x=>x.id===S.editTxId);
-if(t){
-const editCard=getCard(cardId);
-// Recalcula invoiceMonth ao editar: créditos usam seletor de mês ou mês calendário; débitos respeitam fechamento
-const creditMonthSel=document.getElementById('lt-credit-month');
-const editIM=editCard?(type==='credit'?(creditMonthSel?.value||date.substring(0,7)):invMonth(date,editCard.close)):t.invoiceMonth;
-Object.assign(t,{desc,amount:amt,type,category:cat,date,note,recurring,cardId,portador,invoiceMonth:editIM});
-}
+if(t) Object.assign(t,{desc,amount:amt,type,category:cat,date,note,recurring,cardId,portador});
 save();
 renderCarousel();
 renderDetail();
@@ -5993,10 +5975,7 @@ if(!card) return;
 const gid=uid();
 const eff=type==='credit'?1:n;
 for(let i=0;i<eff;i++){
-// Para créditos/estornos: usa o mês escolhido no seletor (ou mês calendário da data como fallback)
-// Isso garante que o estorno abate da fatura correta, independente do dia de fechamento
-const creditMonthSel=document.getElementById('lt-credit-month');
-const baseIM=type==='credit'?(creditMonthSel?.value||date.substring(0,7)):invMonth(date,card.close);
+const baseIM=invMonth(date,card.close);
 const im=i===0?baseIM:addM(baseIM,i);
 S.tx.push({id:uid(),cardId,desc:eff>1?`${desc} (${i+1}/${eff})`:desc,amount:amt/eff,type,category:cat,date,invoiceMonth:im,totalInst:eff,instNum:i+1,gid,note,portador,recurring:recurring&&eff===1});
 }
@@ -7071,24 +7050,6 @@ const noteEl=document.getElementById('lt-note'); if(noteEl) noteEl.value=t.note|
 const recEl=document.getElementById('lt-recurring'); if(recEl) recEl.checked=t.recurring||false;
 const catSel=document.getElementById('lt-cat'); if(catSel){ catSel.value=t.category||''; syncAurumSelectLabel('lt-cat'); }
 ltSetType(t.type);
-// Se for crédito, pre-seleciona o mês da fatura no seletor
-if(t.type==='credit'){
-  setTimeout(()=>{
-    const cmSel=document.getElementById('lt-credit-month');
-    if(cmSel&&t.invoiceMonth){
-      // Garante que o mês existe como opção, senão adiciona
-      if(![...cmSel.options].some(o=>o.value===t.invoiceMonth)){
-        const [y,m]=t.invoiceMonth.split('-');
-        const lbl=new Date(parseInt(y),parseInt(m)-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-        const opt=document.createElement('option');
-        opt.value=t.invoiceMonth;
-        opt.text=lbl.charAt(0).toUpperCase()+lbl.slice(1);
-        cmSel.insertBefore(opt,cmSel.firstChild);
-      }
-      cmSel.value=t.invoiceMonth;
-    }
-  },90);
-}
 updateLtPortador();
 setTimeout(()=>{
 const portSel=document.getElementById('lt-portador');
@@ -7331,7 +7292,7 @@ if(!document.hidden) checkDueNotifs();
 }
 function initColorPicker(){
 document.getElementById('colorOpts').innerHTML=GRADS.map((g,i)=>
-`<div class="col-opt ${S.selColor===i?'sel':''}" style="background:${g.g}" onclick="selCol(${i})"></div>`
+`<div class="col-opt ${S.selColor===i?'sel':''}" title="${g.label||'Cor '+(i+1)}" style="background:${g.g};${g.dark?'border-color:rgba(0,0,0,.18)!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)':''}" onclick="selCol(${i})"></div>`
 ).join('');
 }
 function selCol(i){
@@ -7500,7 +7461,7 @@ holders:(S._portadores||[]).map(h=>h.trim()).filter(Boolean),
 };
 if(S.editCardId){Object.assign(getCard(S.editCardId),data)}
 else{const id=uid();S.cards.push({id,...data});if(!S.activeCardId)S.activeCardId=id}
-save();closeModal('card');render();showToast('✓ Cartão salvo','green');
+closeModal('card');render();showToast('✓ Cartão salvo','green');
 }
 function openPayModal(){
 const c=activeCard();if(!c)return;
@@ -8509,7 +8470,6 @@ styles:{lineColor:[180,230,210],lineWidth:.2,overflow:'ellipsize'},
 });
 }
 const fy=(doc.lastAutoTable?.finalY||sy)+8;
-const netDue=Math.max(0,s.due-totalCredits);
 const fItems=[
 {l:'COMPRAS',      v:fmt(s.debits),  c:ink},
 {l:'PAGO',         v:fmt(s.paid),    c:green},
@@ -8517,10 +8477,10 @@ const fItems=[
 {l:'TOTAL A PAGAR',v:fmt(s.due),     c:red,  hl:true},
 ];
 const fItemsWithCredits=totalCredits>0?[
-{l:'COMPRAS',             v:fmt(s.debits),    c:ink},
+{l:'COMPRAS',             v:fmt(s.debits),       c:ink},
 {l:'ESTORNO APLICADO',    v:'− '+fmt(totalCredits), c:green},
-{l:'PAGO',                v:fmt(s.paid),      c:green},
-{l:'TOTAL A PAGAR',       v:fmt(netDue),      c:netDue>0?red:green, hl:true},
+{l:'PAGO',                v:fmt(s.paidGross),    c:green},
+{l:'TOTAL A PAGAR',       v:fmt(s.due),          c:s.due>0?red:green, hl:true},
 ]:fItems;
 const fRowH=totalCredits>0?26:26;
 doc.setFillColor(...offwhite);doc.roundedRect(10,fy,190,fRowH,2,2,'F');
@@ -8649,24 +8609,6 @@ if(d.compact) S.compact=d.compact;
 if(d.lastModified) S.lastModified=d.lastModified;
 applyPerformanceMode();
 }
-function sbRefresh(){
-/* Recarrega o estado S do localStorage e re-renderiza o app sem reload de página.
-   Útil após sync Realtime ou para forçar atualização manual. */
-try{
-  const raw = localStorage.getItem(profileKey('ccp'));
-  if(!raw) return false;
-  let parsed;
-  try{ parsed = JSON.parse(raw); }catch(e){ return false; }
-  if(!parsed || typeof parsed !== 'object') return false;
-  applyLoadedData(parsed);
-  if(typeof renderUI === 'function') renderUI();
-  else if(typeof renderContent === 'function') renderContent();
-  if(typeof _invalidateTxCache === 'function') _invalidateTxCache();
-  return true;
-}catch(e){ console.warn('[Aurum] sbRefresh error:', e); return false; }
-}
-window.sbRefresh = sbRefresh; // expõe globalmente
-
 function load(){
 try{
 const raw=localStorage.getItem(profileKey('ccp'));
@@ -11366,7 +11308,25 @@ if(!force && S.lastModified && d.lastModified){
     return false;
   }
 }
-S.cards      = d.cards   || [];
+// MERGE seguro de cartões: preserva nome/cor/configurações editadas localmente
+// Se o cartão existe em ambos, usa dados locais para campos de configuração (name, colorIdx, etc.)
+// e dados da nuvem para campos financeiros (limit, due, close, etc.)
+const localCardMap = {};
+(S.cards||[]).forEach(c=>{ if(c.id) localCardMap[c.id]=c; });
+S.cards = (d.cards||[]).map(dc=>{
+  const lc = localCardMap[dc.id];
+  if(!lc) return dc; // cartão novo da nuvem
+  // Preserva campos editáveis localmente se local for mais recente ou igual
+  return Object.assign({}, dc, {
+    name: lc.name ?? dc.name,
+    colorIdx: lc.colorIdx ?? dc.colorIdx,
+    holder: lc.holder ?? dc.holder,
+    brand: lc.brand ?? dc.brand,
+    last4: lc.last4 ?? dc.last4,
+    corpName: lc.corpName ?? dc.corpName,
+    cardType: lc.cardType ?? dc.cardType,
+  });
+});
 // MERGE seguro de lançamentos por ID: une local + nuvem, sem duplicar, sem perder dados
 // Isso evita que um push anterior com dados incompletos destrua lançamentos locais
 const localTxMap = {};
@@ -11931,21 +11891,6 @@ if(amt <= 0) continue;
 if(/PAGAMENTO|CRÉDITO/i.test(rawDesc) || rawLine.includes('+ R$')){
 if(/PAGAMENTO/i.test(rawDesc))
 r.payments.push({desc:rawDesc.trim(), amount:amt, day:day.padStart(2,'0'), mon:String(mon).padStart(2,'0')});
-else if(/CRÉDITO|ESTORNO/i.test(rawDesc)){
-// Estornos/créditos entram como transação type:'credit' para abater da fatura
-const monStr=String(mon).padStart(2,'0');
-r.txs.push({
-id:uid(), gid:uid(), cardId:'',
-date:`${year}-${monStr}-${day.padStart(2,'0')}`,
-desc:rawDesc.trim(), amount:amt,
-instNum:1, totalInst:1,
-type:'credit',
-category:'↩️ Estorno',
-isCharge:false,
-invoiceMonth:r.invoiceMonth, isFuture:false,
-note:'', recurring:false
-});
-}
 continue;
 }
 const instM = rawDesc.match(/\(Parcela\s+(\d+)\s+de\s+(\d+)\)/i);
@@ -12081,24 +12026,7 @@ if(!mon) continue;
 const amt=parseBRL(amtStr);
 if(amt<=0||amt>50000) continue;
 if(/PAGAMENTO|CRÉDITO|ESTORNO/i.test(desc)){
-if(/PAGAMENTO/i.test(desc)){
 r.payments.push({desc:desc.trim(),amount:amt,day:day.padStart(2,'0'),mon:String(mon).padStart(2,'0')});
-} else {
-// Estornos e créditos entram como transação type:'credit' para abater da fatura
-const txYear=mon>r.invoiceMonthNum?r.invoiceYear-1:r.invoiceYear;
-const monStr=String(mon).padStart(2,'0');
-r.txs.push({
-id:uid(), gid:uid(), cardId:'',
-date:`${txYear}-${monStr}-${day.padStart(2,'0')}`,
-desc:desc.trim(), amount:amt,
-instNum:1, totalInst:1,
-type:'credit',
-category:'↩️ Estorno',
-isCharge:false,
-invoiceMonth:r.invoiceMonth, isFuture:false,
-note:'', recurring:false
-});
-}
 continue;
 }
 const txYear=mon>r.invoiceMonthNum?r.invoiceYear-1:r.invoiceYear;
@@ -17705,21 +17633,27 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
 <script>
 /* ============================================================
    AURUM PRO — Supabase Sync + Realtime
-   Push a cada lançamento + websocket para sync entre devices
+   • push automático a cada lançamento (debounced 1.5s)
+   • pull na inicialização (se nuvem mais recente)
+   • Realtime WebSocket: atualiza instantaneamente quando outro
+     dispositivo salva dados no mesmo perfil
    ============================================================ */
 (function(){
   const SB_URL  = 'https://lwldroopbooeocchgngg.supabase.co';
   const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3bGRyb29wYm9vZW9jY2hnbmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDY3MDUsImV4cCI6MjA5MDI4MjcwNX0.fDWYV4yVLqf4j8Bce_o7denInTvJUxWhqcexND4UOyc';
   const TABLE   = 'aurum_data';
-  let _sbTimer  = null;
-  let _sbStatus = 'idle';
-  let _sbLastAt = null;
-  let _sbWs     = null;      // websocket realtime
-  let _sbWsHb   = null;      // heartbeat timer
-  let _sbWsRef  = 1;         // ref counter para mensagens
-  let _sbIgnoreNext = false; // evita loop: push próprio → recebe realtime → push de novo
 
-  /* ── headers REST ── */
+  let _sbTimer      = null;
+  let _sbStatus     = 'idle';   // idle | syncing | ok | error | realtime
+  let _sbLastAt     = null;
+  let _ws           = null;     // WebSocket connection
+  let _wsHb         = null;     // heartbeat interval
+  let _wsRef        = 1;        // message ref counter
+  let _wsReconnect  = null;     // reconnect timeout
+  let _ignoreNext   = false;    // ignora o próximo evento do Realtime (foi eu quem enviei)
+  let _wsConnected  = false;
+
+  /* ── helpers ── */
   function sbHeaders(){
     return {
       'Content-Type' : 'application/json',
@@ -17737,17 +17671,18 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
   /* ── UI indicator ── */
   function sbSetStatus(s, label){
     _sbStatus = s;
-    window._sbStatus = s;
     const dot = document.getElementById('sbSyncDot');
     const lbl = document.getElementById('sbSyncLabel');
     const ind = document.getElementById('sbSyncIndicator');
     if(!dot || !lbl || !ind) return;
+
     const map = {
-      idle    : { color:'var(--text3)', text:'Supabase',   bg:'var(--bg2)',    border:'var(--border)' },
-      syncing : { color:'var(--blue)',  text:'Salvando…',  bg:'var(--blue-l)', border:'rgba(74,139,224,.35)' },
-      ok      : { color:'var(--green)', text:'✓ Salvo',    bg:'var(--green-l)',border:'rgba(74,207,138,.35)' },
-      live    : { color:'var(--green)', text:'● Ao vivo',  bg:'var(--green-l)',border:'rgba(74,207,138,.35)' },
-      error   : { color:'var(--red)',   text:'Erro sync',  bg:'var(--red-l)',  border:'rgba(240,104,88,.35)' },
+      idle     : { color:'var(--text3)', text:'Supabase',     bg:'var(--bg2)',    border:'var(--border)' },
+      syncing  : { color:'var(--blue)',  text:'Salvando…',    bg:'var(--blue-l)', border:'rgba(74,139,224,.35)' },
+      ok       : { color:'var(--green)', text:'✓ Salvo',      bg:'var(--green-l)',border:'rgba(74,207,138,.35)' },
+      error    : { color:'var(--red)',   text:'Erro sync',    bg:'var(--red-l)',  border:'rgba(240,104,88,.35)' },
+      realtime : { color:'var(--cyan)',  text:'🔴 Ao vivo',   bg:'var(--cyan-l)', border:'rgba(56,184,232,.35)' },
+      pulling  : { color:'var(--blue)',  text:'↓ Recebendo…', bg:'var(--blue-l)', border:'rgba(74,139,224,.35)' },
     };
     const cfg = map[s] || map.idle;
     dot.style.background  = cfg.color;
@@ -17755,46 +17690,19 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     ind.style.color       = cfg.color;
     ind.style.background  = cfg.bg;
     ind.style.borderColor = cfg.border;
-    dot.style.animation   = s === 'syncing' ? 'pulse 1s infinite' : 'none';
+    dot.style.animation   = (s === 'syncing' || s === 'pulling') ? 'pulse 1s infinite' : 'none';
+
     if(s === 'ok'){
       clearTimeout(sbSetStatus._timer);
-      // Após 3s volta para "live" se websocket ativo, senão "idle"
-      sbSetStatus._timer = setTimeout(()=> sbSetStatus(_sbWs && _sbWs.readyState === 1 ? 'live' : 'idle'), 3000);
+      sbSetStatus._timer = setTimeout(()=> sbSetStatus(_wsConnected ? 'realtime' : 'idle'), 3000);
     }
-  }
-
-  /* ── retry ── */
-  let _sbRetryTimer = null;
-  let _sbRetryCount = 0;
-
-  function sbScheduleRetry(manual){
-    const delays = [5000, 15000, 60000];
-    if(_sbRetryCount >= delays.length) return;
-    const delay = delays[_sbRetryCount++];
-    clearTimeout(_sbRetryTimer);
-    _sbRetryTimer = setTimeout(()=> sbPush(manual), delay);
-  }
-
-  function sbDiagnoseError(err){
-    if(!navigator.onLine) return 'offline';
-    const msg = (err && err.message) ? err.message.toLowerCase() : '';
-    if(msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('load failed'))
-      return 'network';
-    return 'unknown';
-  }
-
-  /* ── fetch com timeout via Promise.race (sem AbortController — evita DataCloneError) ── */
-  function fetchWithTimeout(url, options, ms){
-    const timeout = new Promise((_,reject)=>
-      setTimeout(()=> reject(Object.assign(new Error('Timeout'), {name:'AbortError'})), ms)
-    );
-    return Promise.race([fetch(url, options), timeout]);
   }
 
   /* ── push: salva JSON no Supabase ── */
   async function sbPush(manual){
     const pid = activeProfileId();
     if(!pid) return;
+
     let payload;
     try{
       const raw = localStorage.getItem('ccp-' + pid) ||
@@ -17804,8 +17712,9 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     }catch(e){ return; }
 
     sbSetStatus('syncing');
+    _ignoreNext = true; // vou enviar agora — ignorar o echo do Realtime
     try{
-      const res = await fetchWithTimeout(`${SB_URL}/rest/v1/${TABLE}`, {
+      const res = await fetch(`${SB_URL}/rest/v1/${TABLE}`, {
         method : 'POST',
         headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
         body   : JSON.stringify({
@@ -17813,67 +17722,33 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
           data       : typeof payload === 'string' ? payload : JSON.stringify(payload),
           updated_at : new Date().toISOString()
         })
-      }, 12000);
-
+      });
       if(!res.ok){
-        const txt = await res.text();
-        console.warn('[Supabase] push error', res.status, txt);
-        if(res.status === 503 || res.status === 521 || res.status === 522){
-          sbSetStatus('error', '⏸ Pausado');
-          if(manual) typeof showToast === 'function' &&
-            showToast('☁️ Projeto Supabase pausado. Acesse supabase.com para reativar.','error');
-        } else if(res.status === 401 || res.status === 403){
-          sbSetStatus('error', '🔑 Auth');
-          if(manual) typeof showToast === 'function' &&
-            showToast('☁️ Erro de autenticação Supabase. Verifique a chave API.','error');
-        } else {
-          sbSetStatus('error');
-          sbScheduleRetry(manual);
-        }
+        _ignoreNext = false;
+        sbSetStatus('error');
+        console.warn('[Supabase] push error', res.status, await res.text());
         return;
       }
       _sbLastAt = new Date();
-      _sbRetryCount = 0;
-      clearTimeout(_sbRetryTimer);
-      // Sinaliza que o próximo evento realtime é eco do nosso próprio push — ignorar
-      _sbIgnoreNext = true;
-      setTimeout(()=> _sbIgnoreNext = false, 3000);
       sbSetStatus('ok');
-      if(manual) typeof showToast === 'function' && showToast('☁️ Sincronizado com Supabase','green');
+      if(manual) typeof showToast === 'function' && showToast('☁️ Sincronizado!','success');
     }catch(err){
-      const cause = sbDiagnoseError(err);
-      if(cause === 'offline'){
-        sbSetStatus('error', '📵 Offline');
-        window.addEventListener('online', function onOnline(){
-          window.removeEventListener('online', onOnline);
-          _sbRetryCount = 0;
-          sbPush(false);
-        }, { once: true });
-      } else if(err && err.name === 'AbortError'){
-        sbSetStatus('error', '⏱ Timeout');
-        if(_sbRetryCount === 0) console.warn('[Supabase] Timeout — verifique se o projeto está ativo em supabase.com');
-        if(manual) typeof showToast === 'function' &&
-          showToast('☁️ Supabase não respondeu. Verifique se o projeto está ativo.','');
-        if(_sbRetryCount < 1) sbScheduleRetry(manual);
-      } else {
-        sbSetStatus('error', '⏸ Inativo');
-        if(_sbRetryCount === 0) console.warn('[Supabase] Projeto inacessível — verifique em supabase.com se está ativo.');
-        if(manual) typeof showToast === 'function' &&
-          showToast('☁️ Supabase inacessível. Acesse supabase.com e verifique se o projeto está ativo.','error');
-        if(_sbRetryCount < 1) sbScheduleRetry(manual);
-      }
+      _ignoreNext = false;
+      console.error('[Supabase]', err);
+      sbSetStatus('error');
     }
+    /* libera flag de ignore após 3s (tempo suficiente para o echo chegar) */
+    setTimeout(()=>{ _ignoreNext = false; }, 3000);
   }
 
-  /* ── pull: carrega dados do Supabase ── */
-  async function sbPull(){
+  /* ── pull: busca dados do Supabase e aplica localmente ── */
+  async function sbPull(showPrompt){
     const pid = activeProfileId();
     if(!pid) return null;
     try{
-      const res = await fetchWithTimeout(
+      const res = await fetch(
         `${SB_URL}/rest/v1/${TABLE}?profile_id=eq.${encodeURIComponent(pid)}&select=data,updated_at&limit=1`,
-        { headers: sbHeaders() },
-        10000
+        { headers: sbHeaders() }
       );
       if(!res.ok) return null;
       const rows = await res.json();
@@ -17882,119 +17757,175 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     }catch(e){ return null; }
   }
 
-  /* ══════════════════════════════════════════
-     REALTIME — WebSocket nativo do Supabase
-     Escuta mudanças na tabela e atualiza o app
-     automaticamente em todos os devices
-  ══════════════════════════════════════════ */
-  function sbRealtimeConnect(){
-    if(_sbWs && (_sbWs.readyState === 0 || _sbWs.readyState === 1)) return; // já conectado/conectando
+  /* ── aplica dados da nuvem localmente ── */
+  function sbApplyRemoteData(remoteData, source){
+    const pid = activeProfileId();
+    if(!pid || !remoteData) return;
+    try{
+      localStorage.setItem('ccp-' + pid, remoteData);
+      /* Atualiza estado em memória sem recarregar a página */
+      if(typeof window.S !== 'undefined' && window.S){
+        try{
+          const parsed = JSON.parse(remoteData);
+          if(parsed && parsed.tx){
+            /* merge seguro: nuvem prevalece, sem perder transações locais muito recentes */
+            const localTxMap = {};
+            (window.S.tx||[]).forEach(t=>{ if(t.id) localTxMap[t.id]=t; });
+            const cloudTxMap = {};
+            (parsed.tx||[]).forEach(t=>{ if(t.id) cloudTxMap[t.id]=t; });
+            parsed.tx = Object.values({...localTxMap, ...cloudTxMap});
 
-    const wsUrl = SB_URL.replace('https://', 'wss://') + '/realtime/v1/websocket?apikey=' + SB_KEY + '&vsn=1.0.0';
+            /* Aplica campos principais */
+            ['cards','payments','budgets','cashbacks','subscriptions','savingsGoals','monthlyGoal'].forEach(k=>{
+              if(parsed[k] !== undefined) window.S[k] = parsed[k];
+            });
+            window.S.tx = parsed.tx;
 
-    try{ _sbWs = new WebSocket(wsUrl); }
-    catch(e){ console.warn('[Supabase Realtime] WebSocket não suportado:', e); return; }
+            /* Invalida cache de memoização */
+            if(window.__aurumMemo) window.__aurumMemo.monthSummary = {};
 
-    _sbWs.onopen = function(){
-      console.log('[Supabase Realtime] Conectado');
-      sbSetStatus('live');
+            /* Re-renderiza a UI */
+            if(typeof window.render === 'function') window.render();
+            if(typeof window.renderUI === 'function') window.renderUI();
 
-      // Envia join no canal postgres_changes para a tabela aurum_data
-      const pid = activeProfileId();
+            sbSetStatus('ok');
+            if(source === 'realtime'){
+              typeof showToast === 'function' && showToast('🔄 Atualizado de outro dispositivo','success');
+            }
+            return;
+          }
+        }catch(e){}
+      }
+      /* Fallback: recarrega a página */
+      typeof showToast === 'function' && showToast('🔄 Dados atualizados — recarregando…','');
+      setTimeout(()=>{ location.reload(); }, 1200);
+    }catch(e){ console.error('[Supabase] applyRemote', e); }
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     REALTIME via WebSocket nativo (protocolo phoenix/supabase)
+     Escuta mudanças na tabela aurum_data do perfil ativo
+     ═══════════════════════════════════════════════════════ */
+
+  function wsConnect(){
+    const pid = activeProfileId();
+    if(!pid) return;
+
+    /* URL do WebSocket do Supabase Realtime */
+    const wsUrl = `wss://lwldroopbooeocchgngg.supabase.co/realtime/v1/websocket?apikey=${SB_KEY}&vsn=1.0.0`;
+
+    try{
+      _ws = new WebSocket(wsUrl);
+    }catch(e){
+      console.warn('[Supabase RT] WebSocket não suportado');
+      return;
+    }
+
+    _ws.onopen = function(){
+      _wsConnected = true;
+      console.log('[Supabase RT] WebSocket conectado');
+      sbSetStatus('realtime');
+
+      /* 1. Junta o canal de realtime para a tabela */
       const joinMsg = {
-        topic  : 'realtime:public:' + TABLE,
+        topic  : `realtime:public:${TABLE}:profile_id=eq.${pid}`,
         event  : 'phx_join',
         payload: {
           config: {
-            broadcast   : { self: false },
-            presence    : { key: '' },
+            broadcast : { self: false }, // não recebe o próprio push
+            presence  : { key: '' },
             postgres_changes: [{
-              event : '*',
+              event : '*',      // INSERT, UPDATE, DELETE
               schema: 'public',
               table : TABLE,
-              filter: 'profile_id=eq.' + pid
+              filter: `profile_id=eq.${pid}`
             }]
           }
         },
-        ref: String(_sbWsRef++)
+        ref: String(_wsRef++)
       };
-      _sbWs.send(JSON.stringify(joinMsg));
+      _ws.send(JSON.stringify(joinMsg));
 
-      // Heartbeat a cada 25s para manter conexão viva
-      clearInterval(_sbWsHb);
-      _sbWsHb = setInterval(function(){
-        if(_sbWs && _sbWs.readyState === 1){
-          _sbWs.send(JSON.stringify({ topic:'phoenix', event:'heartbeat', payload:{}, ref: String(_sbWsRef++) }));
+      /* 2. Heartbeat a cada 25s para manter a conexão viva */
+      clearInterval(_wsHb);
+      _wsHb = setInterval(()=>{
+        if(_ws && _ws.readyState === WebSocket.OPEN){
+          _ws.send(JSON.stringify({ topic:'phoenix', event:'heartbeat', payload:{}, ref: String(_wsRef++) }));
         }
       }, 25000);
     };
 
-    _sbWs.onmessage = function(evt){
+    _ws.onmessage = function(evt){
       let msg;
       try{ msg = JSON.parse(evt.data); }catch(e){ return; }
 
-      // Ignora heartbeat reply e join reply
-      if(msg.event === 'phx_reply' || msg.event === 'phx_close') return;
+      /* Ignora mensagens de controle */
+      if(!msg || msg.event === 'phx_reply' || msg.event === 'heartbeat') return;
 
-      // Evento de mudança no banco — outro device salvou
-      if(msg.event === 'postgres_changes' || (msg.payload && msg.payload.type)){
-        if(_sbIgnoreNext){ _sbIgnoreNext = false; return; } // era eco do nosso push
+      /* Evento de mudança no banco */
+      if(msg.event === 'postgres_changes' || (msg.payload && msg.payload.data)){
+        const changePayload = msg.payload?.data || msg.payload;
+        const record = changePayload?.record || changePayload?.new;
 
-        const pid = activeProfileId();
-        const cloudData = msg.payload && msg.payload.record && msg.payload.record.data;
-        const cloudTs   = msg.payload && msg.payload.record && msg.payload.record.updated_at;
+        /* Ignora se foi o próprio dispositivo que enviou */
+        if(_ignoreNext){
+          console.log('[Supabase RT] echo ignorado (enviado por este dispositivo)');
+          return;
+        }
 
-        if(!cloudData) return;
+        if(record && record.data){
+          console.log('[Supabase RT] mudança recebida de outro dispositivo!');
+          sbSetStatus('pulling');
 
-        // Compara timestamp — só aplica se a nuvem for mais recente
-        const localRaw = localStorage.getItem('ccp-' + pid) || localStorage.getItem('ccp-u1');
-        let localTs = null;
-        try{ const lp = JSON.parse(localRaw||'{}'); if(lp.lastModified) localTs = new Date(lp.lastModified); }catch(e){}
-
-        const cloudDate = cloudTs ? new Date(cloudTs) : null;
-        if(cloudDate && localTs && (cloudDate - localTs) < 2000) return; // diferença < 2s, ignora
-
-        // Aplica silenciosamente via sbRefresh e re-renderiza sem reload
-        try{
-          const dataStr = typeof cloudData === 'string' ? cloudData : JSON.stringify(cloudData);
-          localStorage.setItem('ccp-' + pid, dataStr);
-          // sbRefresh() lê o localStorage, popula S e chama renderUI()
-          const ok = typeof window.sbRefresh === 'function' ? window.sbRefresh() : false;
-          if(!ok){
-            // fallback caso sbRefresh ainda não esteja disponível
-            if(typeof window.load === 'function') window.load();
-            if(typeof window.renderUI === 'function') window.renderUI();
-            else if(typeof window.renderContent === 'function') window.renderContent();
-          }
-          if(typeof showToast === 'function') showToast('🔄 Dados atualizados de outro dispositivo', 'green');
-          sbSetStatus('live');
-        }catch(e){
-          console.warn('[Supabase Realtime] Erro ao aplicar update:', e);
+          /* Pequeno delay para garantir que o dado chegou completo */
+          setTimeout(()=>{
+            sbApplyRemoteData(record.data, 'realtime');
+          }, 300);
         }
       }
     };
 
-    _sbWs.onerror = function(e){
-      // Erro silencioso — onclose vai tratar a reconexão
+    _ws.onerror = function(){
+      _wsConnected = false;
+      sbSetStatus(_sbStatus === 'realtime' ? 'idle' : _sbStatus);
+      /* O browser não expõe detalhes no evento de erro do WebSocket por segurança.
+         Logamos apenas contexto útil: se está offline ou qual estado a conexão tinha. */
+      const ctx = !navigator.onLine
+        ? 'dispositivo offline'
+        : 'readyState=' + (_ws ? _ws.readyState : '?') + ' (0=conectando 1=aberto 2=fechando 3=fechado)';
+      console.log('[Supabase RT] WebSocket encerrou com erro —', ctx);
     };
 
-    _sbWs.onclose = function(evt){
-      clearInterval(_sbWsHb);
-      _sbWsHb = null;
-      // Se não foi fechamento limpo (code 1000), tenta reconectar em 5s
-      if(evt.code !== 1000 && evt.code !== 1001){
-        console.warn('[Supabase Realtime] Desconectado (code ' + evt.code + '), reconectando em 5s…');
-        sbSetStatus('idle');
-        setTimeout(sbRealtimeConnect, 5000);
+    _ws.onclose = function(evt){
+      _wsConnected = false;
+      clearInterval(_wsHb);
+      console.log('[Supabase RT] WebSocket fechado — reconectando em 8s', evt.code);
+      if(_sbStatus === 'realtime') sbSetStatus('idle');
+
+      /* Reconecta automaticamente (exceto se fechado intencionalmente) */
+      clearTimeout(_wsReconnect);
+      if(evt.code !== 1000){
+        _wsReconnect = setTimeout(wsConnect, 8000);
       }
     };
   }
 
-  /* ── scheduleSync: hook sobre o scheduleSync original ── */
+  function wsDisconnect(){
+    clearInterval(_wsHb);
+    clearTimeout(_wsReconnect);
+    if(_ws){
+      _ws.onclose = null; // evita loop de reconexão
+      _ws.close(1000, 'intentional');
+      _ws = null;
+    }
+    _wsConnected = false;
+  }
+
+  /* ── scheduleSync: substitui o original, adiciona push Supabase ── */
   function hookScheduleSync(){
-    const origSchedule = window.scheduleSync;
+    const orig = window.scheduleSync;
     window.scheduleSync = function(){
-      if(typeof origSchedule === 'function') origSchedule();
+      if(typeof orig === 'function') orig(); // mantém JSONbin se configurado
       clearTimeout(_sbTimer);
       _sbTimer = setTimeout(()=> sbPush(false), 1500);
     };
@@ -18007,14 +17938,14 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     await sbPush(true);
   };
 
-  /* ── startup: verifica dado mais recente na nuvem ── */
+  /* ── startup: verifica se nuvem tem dados mais recentes ── */
   async function sbStartupCheck(){
     const pid = activeProfileId();
     if(!pid) return;
     const row = await sbPull();
     if(!row) return;
 
-    const cloudTs  = row.updated_at ? new Date(row.updated_at) : null;
+    const cloudTs = row.updated_at ? new Date(row.updated_at) : null;
     const localRaw = localStorage.getItem('ccp-' + pid) || localStorage.getItem('ccp-u1');
     let localTs = null;
     try{
@@ -18022,34 +17953,51 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
       if(lp.lastModified) localTs = new Date(lp.lastModified);
     }catch(e){}
 
+    /* Nuvem mais recente em mais de 60s → pergunta ao usuário */
     if(cloudTs && (!localTs || (cloudTs - localTs) > 60000)){
       const diff = localTs ? Math.round((cloudTs - localTs)/1000/60) : null;
       const msg  = diff
-        ? '☁️ O Supabase tem dados ' + diff + ' minuto' + (diff>1?'s':'') + ' mais recentes. Restaurar?'
+        ? `☁️ O Supabase tem dados ${diff} minuto${diff>1?'s':''} mais recentes.\nRestaurar agora?`
         : '☁️ Dados encontrados no Supabase. Restaurar?';
       if(typeof window.showConfirm === 'function'){
         window.showConfirm({
           title : 'Dados na nuvem',
-          msg   : msg,
+          msg,
           okText: 'Restaurar',
-          onOk  : ()=>{
-            try{
-              localStorage.setItem('ccp-' + pid, row.data);
-              typeof window.showToast === 'function' && window.showToast('☁️ Dados restaurados do Supabase','green');
-              setTimeout(()=>{ location.reload(); }, 800);
-            }catch(e){}
-          }
+          onOk  : ()=> sbApplyRemoteData(row.data, 'startup')
         });
       }
     }
   }
 
+  /* ── reconecta Realtime quando a aba volta ao foco (mobile) ── */
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.visibilityState === 'visible'){
+      if(!_wsConnected){
+        console.log('[Supabase RT] aba voltou ao foco — reconectando Realtime');
+        wsConnect();
+      }
+      /* Também faz um pull rápido para pegar mudanças que chegaram offline */
+      sbPull().then(row=>{
+        if(!row) return;
+        const cloudTs = row.updated_at ? new Date(row.updated_at) : null;
+        const localRaw = localStorage.getItem('ccp-' + activeProfileId()) || localStorage.getItem('ccp-u1');
+        let localTs = null;
+        try{ const lp = JSON.parse(localRaw||'{}'); if(lp.lastModified) localTs = new Date(lp.lastModified); }catch(e){}
+        if(cloudTs && (!localTs || (cloudTs - localTs) > 30000)){
+          sbApplyRemoteData(row.data, 'focus');
+        }
+      });
+    }
+  });
+
   /* ── init ── */
   function init(){
     hookScheduleSync();
-    setTimeout(sbStartupCheck, 2000);
-    setTimeout(sbRealtimeConnect, 2500); // conecta Realtime após startup check
-    setTimeout(()=>{ if(!window.scheduleSync._sbPatched) hookScheduleSync(); }, 3500);
+    setTimeout(sbStartupCheck, 2000);   // verifica nuvem ao abrir
+    setTimeout(wsConnect, 2500);        // inicia Realtime WebSocket
+    /* Reaplica hook se necessário */
+    setTimeout(()=>{ if(!window.scheduleSync._sbPatched) hookScheduleSync(); }, 4000);
   }
 
   if(document.readyState === 'loading'){
@@ -18849,36 +18797,62 @@ body.fpanel-focus-mode .sidebar {
 #hist-relatorio-printdoc .pr-subtitle { font-size: 8pt; color: #555; margin-bottom: 2px; }
 #hist-relatorio-printdoc .pr-stats {
   width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 8px;
+  border-collapse: separate;
+  border-spacing: 5px;
+  margin: 0 -5px 10px -5px;
   page-break-inside: avoid;
   table-layout: fixed;
 }
 #hist-relatorio-printdoc .pr-stat {
   width: 25%;
-  padding: 5px 10px;
-  border-right: 1px solid #ddd;
-  vertical-align: middle;
-  white-space: nowrap;
+  padding: 8px 12px;
+  vertical-align: top;
+  background: #fafafa;
+  border: 1px solid #e0d4b0;
+  border-top: 3px solid #c8922a;
+  border-radius: 4px;
 }
-#hist-relatorio-printdoc .pr-stat:last-child { border-right: none; }
-#hist-relatorio-printdoc .pr-stat-label { font-size: 7pt; font-weight: 700; text-transform: uppercase; color: #888; letter-spacing: .05em; }
-#hist-relatorio-printdoc .pr-stat-sep { color: #bbb; margin: 0 3px; }
-#hist-relatorio-printdoc .pr-stat-val { font-size: 9.5pt; font-weight: 800; color: #111; }
-#hist-relatorio-printdoc .pr-month-block { margin-bottom: 8px; }
+#hist-relatorio-printdoc .pr-stat-label {
+  display: block;
+  font-size: 6.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #999;
+  letter-spacing: .08em;
+  margin-bottom: 3px;
+}
+#hist-relatorio-printdoc .pr-stat-sep { display: none; }
+#hist-relatorio-printdoc .pr-stat-val {
+  display: block;
+  font-size: 11pt;
+  font-weight: 900;
+  color: #1a1a1a;
+  letter-spacing: -.3px;
+}
+#hist-relatorio-printdoc .pr-month-block { margin-bottom: 10px; }
 #hist-relatorio-printdoc .pr-month-title {
   font-size: 10pt;
   font-weight: 800;
-  background: #f0f0f0;
-  padding: 5px 8px;
-  border: 1px solid #ccc;
+  background: linear-gradient(90deg, #f5f0e8 0%, #faf8f4 100%);
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-left: 4px solid #c8922a;
   border-bottom: none;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   page-break-after: avoid;
   break-after: avoid;
+}
+#hist-relatorio-printdoc .pr-month-count {
+  font-size: 7.5pt;
+  font-weight: 600;
+  color: #888;
+  background: #ede8dc;
+  border: 1px solid #d4c9a8;
+  border-radius: 10px;
+  padding: 1px 8px;
+  letter-spacing: .02em;
 }
 #hist-relatorio-printdoc table {
   width: 100%;
@@ -19123,35 +19097,48 @@ function hrGenerate(){
 
   const months=_hrYMRange(from,to);
 
-  // Filtra transações
-  // Transações sem t.type explícito são tratadas como débito
-  let txs=(appS.tx||[]).filter(t=>{
+  // Base de filtro compartilhada (cartão + período + portador), sem filtro de tipo
+  const _baseFilter=t=>{
     const ym=(t.invoiceMonth||t.date||'').substring(0,7);
     if(!ym||ym<from||ym>to) return false;
     if(cardId&&t.cardId!==cardId) return false;
-    const tType=t.type||'debit';
-    if(type==='debit'&&tType!=='debit') return false;
-    if(type==='credit'&&tType!=='credit') return false;
     if(portador){
       if(portador==='__titular__'){ if((t.portador||'').trim()!=='') return false; }
       else { if((t.portador||'').trim()!==portador) return false; }
     }
     return true;
-  });
+  };
 
-  // Ordena por data
+  // Transações para a tabela principal (respeita filtro de tipo)
+  let txs=(appS.tx||[]).filter(t=>{
+    if(!_baseFilter(t)) return false;
+    const tType=t.type||'debit';
+    if(type==='debit'&&tType!=='debit') return false;
+    if(type==='credit'&&tType!=='credit') return false;
+    return true;
+  });
   txs=txs.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
 
+  // Estornos sempre buscados separadamente (exceto quando o filtro JÁ é "só créditos")
+  // Assim estornos aparecem e são abatidos mesmo quando o filtro é "Débitos"
+  let estornoTxs=[];
+  if(type!=='credit'){
+    estornoTxs=(appS.tx||[]).filter(t=>_baseFilter(t)&&t.type==='credit');
+    estornoTxs=estornoTxs.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  }
+
   const totalDeb=txs.filter(t=>(t.type||'debit')!=='credit').reduce((s,t)=>s+Number(t.amount||0),0);
-  const totalCr=txs.filter(t=>t.type==='credit').reduce((s,t)=>s+Number(t.amount||0),0);
-  const countTx=txs.length;
+  const totalCr=type==='credit'
+    ? txs.reduce((s,t)=>s+Number(t.amount||0),0)
+    : estornoTxs.reduce((s,t)=>s+Number(t.amount||0),0);
+  const countTx=txs.length+estornoTxs.length;
   const avgMonth=months.length>0?totalDeb/months.length:0;
 
   if(badge){
     badge.innerHTML=`<span style="color:var(--text3)">${countTx} lançamento${countTx!==1?'s':''} · ${months.length} mês${months.length!==1?'es':''}</span>`;
   }
 
-  if(countTx===0){
+  if(txs.length===0&&estornoTxs.length===0){
     preview.innerHTML=`<div style="text-align:center;padding:40px;color:var(--text3)">
       <div style="font-size:36px;margin-bottom:10px;opacity:.5">🔍</div>
       <div style="font-size:var(--fs-base);font-weight:600">Nenhum lançamento encontrado neste período</div>
@@ -19172,16 +19159,77 @@ function hrGenerate(){
 
   months.forEach(ym=>{
     const mTxs=txs.filter(t=>(t.invoiceMonth||t.date||'').substring(0,7)===ym);
-    if(!mTxs.length) return;
+    const mEstornos=estornoTxs.filter(t=>(t.invoiceMonth||t.date||'').substring(0,7)===ym);
+    if(!mTxs.length&&!mEstornos.length) return;
     const mDeb=mTxs.filter(t=>(t.type||'debit')!=='credit').reduce((s,t)=>s+Number(t.amount||0),0);
-    const mCr=mTxs.filter(t=>t.type==='credit').reduce((s,t)=>s+Number(t.amount||0),0);
+    const mCr=mEstornos.reduce((s,t)=>s+Number(t.amount||0),0)
+             +mTxs.filter(t=>t.type==='credit').reduce((s,t)=>s+Number(t.amount||0),0);
     const cols=!cardId?4:3;
+
+    /* Breakdown por portador — só quando não há filtro de portador específico */
+    let portadorBlockHtml='';
+    if(!portador){
+      const portMap={};
+      mTxs.filter(t=>(t.type||'debit')!=='credit').forEach(t=>{
+        const key=(t.portador||'').trim()||'__titular__';
+        portMap[key]=(portMap[key]||0)+Number(t.amount||0);
+      });
+      const portEntries=Object.entries(portMap).sort((a,b)=>b[1]-a[1]);
+      if(portEntries.length>1){
+        const rows=portEntries.map(([k,v])=>{
+          const label=k==='__titular__'?'Titular':k;
+          const pct=mDeb>0?Math.round(v/mDeb*100):0;
+          return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+            <div style="min-width:110px;font-size:var(--fs-xs);font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${label}</div>
+            <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+              <div style="width:${pct}%;height:100%;background:var(--gold);border-radius:3px"></div>
+            </div>
+            <div style="min-width:54px;text-align:right;font-family:var(--num-font);font-size:var(--fs-xs);font-weight:700;color:var(--text)">${_hrFmtBRL(v)}</div>
+            <div style="min-width:30px;text-align:right;font-size:var(--fs-nano);color:var(--text3)">${pct}%</div>
+          </div>`;
+        }).join('');
+        portadorBlockHtml=`<div style="margin:0 0 10px 0;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r)">
+          <div style="font-size:var(--fs-nano);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px">👤 Gastos por portador</div>
+          ${rows}
+        </div>`;
+      }
+    }
+
+    /* Tabela de estornos do mês */
+    let estornoBlockHtml='';
+    if(mEstornos.length>0){
+      const estRows=mEstornos.map(t=>{
+        const dateStr=t.date?new Date(t.date+'T12:00:00').toLocaleDateString('pt-BR'):'-';
+        const cat=(t.category||'').split(' ').slice(1).join(' ')||'Estorno';
+        return `<tr>
+          <td style="white-space:nowrap;color:var(--text3)">${dateStr}</td>
+          <td><span style="font-weight:500;color:var(--green-d)">${t.desc}</span></td>
+          <td style="color:var(--text3)">${cat}</td>
+          ${!cardId?`<td style="color:var(--text3);font-size:10px">${cardMap[t.cardId]||''}</td>`:''}
+          <td style="text-align:right;font-family:var(--num-font);font-weight:700;color:var(--green)">− ${_hrFmtBRL(t.amount)}</td>
+        </tr>`;
+      }).join('');
+      estornoBlockHtml=`<div style="margin-top:6px">
+        <div style="font-size:var(--fs-nano);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green-d);padding:4px 0 6px 2px">↩️ Estornos / Créditos</div>
+        <table class="hr-tx-table" style="border-color:var(--green-l)">
+          <thead><tr>
+            <th style="width:90px">Data</th>
+            <th>Descrição</th>
+            <th style="width:120px">Categoria</th>
+            ${!cardId?'<th style="width:110px">Cartão</th>':''}
+            <th style="width:90px;text-align:right">Valor</th>
+          </tr></thead>
+          <tbody>${estRows}</tbody>
+        </table>
+      </div>`;
+    }
 
     html+=`<div class="hr-month-block">
       <div class="hr-month-title">
         <span>📅 ${_hrMLbl(ym)}</span>
-        <span style="font-size:var(--fs-xs);color:var(--text3)">${mTxs.length} lançamento${mTxs.length!==1?'s':''}</span>
+        <span style="font-size:var(--fs-xs);color:var(--text3)">${mTxs.length+mEstornos.length} lançamento${(mTxs.length+mEstornos.length)!==1?'s':''}</span>
       </div>
+      ${portadorBlockHtml}
       <table class="hr-tx-table">
         <thead><tr>
           <th style="width:90px">Data</th>
@@ -19209,15 +19257,17 @@ function hrGenerate(){
     html+=`</tbody>
         <tfoot>
           <tr class="hr-subtotal-row">
-            <td colspan="${cols-1}" style="text-align:right;font-weight:700;color:var(--gold-d)">Subtotal do mês</td>
-            <td style="text-align:right;font-family:var(--num-font);font-weight:800;color:var(--gold)">
-              ${mDeb>0?'− '+_hrFmtBRL(mDeb):''}
-              ${mCr>0&&mDeb>0?' / ':''}
-              ${mCr>0?'+ '+_hrFmtBRL(mCr):''}
-            </td>
+            <td colspan="${cols-2}" style="text-align:right"></td>
+            <td style="text-align:right;font-weight:700;color:var(--gold-d);white-space:nowrap">Subtotal débitos</td>
+            <td style="text-align:right;font-family:var(--num-font);font-weight:800;color:var(--gold)">${_hrFmtBRL(mDeb)}</td>
           </tr>
         </tfoot>
       </table>
+      ${estornoBlockHtml}
+      ${mCr>0?`<div style="display:flex;justify-content:flex-end;gap:12px;padding:4px 2px;font-size:var(--fs-xs);font-weight:700">
+        <span style="color:var(--green)">− Estornos: ${_hrFmtBRL(mCr)}</span>
+        <span style="color:var(--text2)">Líquido: ${_hrFmtBRL(Math.max(0,mDeb-mCr))}</span>
+      </div>`:''}
     </div>`;
   });
 
@@ -19225,24 +19275,24 @@ function hrGenerate(){
     <div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 20px;text-align:right">
       <div style="font-size:var(--fs-micro);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:4px">Total do período</div>
       <div style="font-family:var(--num-font);font-size:var(--fs-3xl);font-weight:800;color:var(--red);letter-spacing:-.5px">${_hrFmtBRL(totalDeb)}</div>
-      ${totalCr>0?`<div style="font-size:var(--fs-sm);color:var(--green);font-weight:700;margin-top:2px">Estornos: + ${_hrFmtBRL(totalCr)}</div>`:''}
-      ${totalCr>0?`<div style="font-size:var(--fs-sm);color:var(--text2);font-weight:700;margin-top:2px">Líquido: ${_hrFmtBRL(totalDeb-totalCr)}</div>`:''}
+      ${totalCr>0?`<div style="font-size:var(--fs-sm);color:var(--green);font-weight:700;margin-top:2px">− Estornos: ${_hrFmtBRL(totalCr)}</div>`:''}
+      ${totalCr>0?`<div style="font-size:var(--fs-sm);color:var(--text2);font-weight:700;margin-top:2px">Líquido: ${_hrFmtBRL(Math.max(0,totalDeb-totalCr))}</div>`:''}
     </div>
   </div>`;
 
   preview.innerHTML=html;
 
-  // Salva para impressão
-  window._hrPrintData={cardId,from,to,type,txs,months,totalDeb,totalCr,countTx,avgMonth,cardMap,portador};
+  // Salva para impressão (inclui estornoTxs separado)
+  window._hrPrintData={cardId,from,to,type,txs,estornoTxs,months,totalDeb,totalCr,countTx,avgMonth,cardMap,portador};
 }
 
 function hrPrint(){
   const d=window._hrPrintData;
-  if(!d||!d.txs||d.txs.length===0){
+  if(!d||!d.txs||(d.txs.length===0&&(!d.estornoTxs||d.estornoTxs.length===0))){
     if(typeof showToast==='function') showToast('Nenhum dado para imprimir. Gere o relatório primeiro.','error');
     return;
   }
-  const{cardId,from,to,type,txs,months,totalDeb,totalCr,countTx,avgMonth,cardMap,portador}=d;
+  const{cardId,from,to,type,txs,estornoTxs=[],months,totalDeb,totalCr,countTx,avgMonth,cardMap,portador}=d;
   const appS=_hrGetS();
   const cardName=cardId?((appS&&appS.cards)||[]).find(c=>c.id===cardId)?.name||'':'Todos os cartões';
   const typeLabel=type==='debit'?'Débitos':type==='credit'?'Créditos':'Débitos e Créditos';
@@ -19261,11 +19311,41 @@ function hrPrint(){
     <div class="pr-meta">Emitido em ${nowStr}<br>Período: ${periodLabel}<br>Cartão: ${cardName}${portadorShow?'<br>Portador: '+portadorLabel:''}</div>
   </div>
   <table class="pr-stats"><tr>
-    <td class="pr-stat"><span class="pr-stat-label">Total Débitos</span><span class="pr-stat-sep">·</span><span class="pr-stat-val" style="color:#c0392b">${_hrFmtBRL(totalDeb)}</span></td>
-    <td class="pr-stat"><span class="pr-stat-label">Total Estornos</span><span class="pr-stat-sep">·</span><span class="pr-stat-val" style="color:#27ae60">${_hrFmtBRL(totalCr)}</span></td>
-    <td class="pr-stat"><span class="pr-stat-label">Média Mensal</span><span class="pr-stat-sep">·</span><span class="pr-stat-val">${_hrFmtBRL(avgMonth)}</span></td>
-    <td class="pr-stat"><span class="pr-stat-label">Lançamentos</span><span class="pr-stat-sep">·</span><span class="pr-stat-val">${countTx}</span></td>
+    <td class="pr-stat">
+      <span class="pr-stat-label">Total Débitos</span>
+      <div style="display:flex;align-items:baseline;gap:3px;margin-top:2px">
+        <span style="font-size:7.5pt;font-weight:800;color:#c0392b;line-height:1">R$</span>
+        <span class="pr-stat-val" style="color:#c0392b">${_hrFmtBRL(totalDeb).replace('R$','').trim()}</span>
+      </div>
+    </td>
+    <td class="pr-stat">
+      <span class="pr-stat-label">Total Estornos</span>
+      <div style="display:flex;align-items:baseline;gap:3px;margin-top:2px">
+        <span style="font-size:7.5pt;font-weight:800;color:#27ae60;line-height:1">R$</span>
+        <span class="pr-stat-val" style="color:#27ae60">${_hrFmtBRL(totalCr).replace('R$','').trim()}</span>
+      </div>
+    </td>
+    <td class="pr-stat">
+      <span class="pr-stat-label">Total a Pagar</span>
+      <div style="display:flex;align-items:baseline;gap:3px;margin-top:2px">
+        <span style="font-size:7.5pt;font-weight:800;color:#1a1a1a;line-height:1">R$</span>
+        <span class="pr-stat-val">${_hrFmtBRL(Math.max(0,totalDeb-totalCr)).replace('R$','').trim()}</span>
+      </div>
+    </td>
+    <td class="pr-stat">
+      <span class="pr-stat-label">Lançamentos</span>
+      <div style="margin-top:2px"><span class="pr-stat-val">${countTx}</span></div>
+    </td>
   </tr></table>`;
+
+  const hasCard=!cardId;
+  const colgroup=`<colgroup>
+      <col style="width:65px">
+      <col>
+      <col style="width:82px">
+      ${hasCard?'<col style="width:78px">':''}
+      <col style="width:98px">
+    </colgroup>`;
 
   months.forEach(ym=>{
     const mTxs=txs.filter(t=>(t.invoiceMonth||t.date||'').substring(0,7)===ym);
@@ -19274,51 +19354,116 @@ function hrPrint(){
     const mCr=mTxs.filter(t=>t.type==='credit').reduce((s,t)=>s+Number(t.amount||0),0);
     const cols=!cardId?4:3;
 
+    /* Breakdown por portador no PDF — só quando sem filtro de portador específico */
+    let prPortadorHtml='';
+    if(!portador){
+      const portMap={};
+      mTxs.filter(t=>(t.type||'debit')!=='credit').forEach(t=>{
+        const key=(t.portador||'').trim()||'__titular__';
+        portMap[key]=(portMap[key]||0)+Number(t.amount||0);
+      });
+      const portEntries=Object.entries(portMap).sort((a,b)=>b[1]-a[1]);
+      const portColors=['#2471a3','#1e8449','#d35400','#6c3483','#cb4335','#117a65'];
+      if(portEntries.length>1){
+        const rows=portEntries.map(([k,v],i)=>{
+          const label=k==='__titular__'?'Titular':k;
+          const pct=mDeb>0?Math.round(v/mDeb*100):0;
+          const color=portColors[i%portColors.length];
+          return `<tr>
+            <td style="padding:4px 8px;font-size:8.5pt;font-weight:700;color:${color}">${label}</td>
+            <td style="padding:4px 8px;font-size:8.5pt;text-align:right;font-weight:700;color:#c0392b">${_hrFmtBRL(v)}</td>
+            <td style="padding:4px 8px;font-size:7.5pt;text-align:right;color:#888">${pct}%</td>
+          </tr>`;
+        }).join('');
+        prPortadorHtml=`<table style="width:100%;border-collapse:collapse;margin-bottom:8px;border:1px solid #ddd;background:#fafafa;page-break-inside:avoid">
+          <thead><tr>
+            <th style="padding:5px 8px;font-size:7pt;text-align:left;background:#f0f0f0;color:#666;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Portador</th>
+            <th style="padding:5px 8px;font-size:7pt;text-align:right;background:#f0f0f0;color:#666;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Total</th>
+            <th style="padding:5px 8px;font-size:7pt;text-align:right;background:#f0f0f0;color:#666;font-weight:700;text-transform:uppercase;letter-spacing:.05em">%</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+      }
+    }
+
+    const totalCols=hasCard?5:4;
+
     html+=`<div class="pr-month-block" style="page-break-inside:auto">
-      <div class="pr-month-title"><span>${_hrMLbl(ym)}</span><span style="font-size:8pt;color:#555">${mTxs.length} lançamento${mTxs.length!==1?'s':''}</span></div>
-      <table><thead><tr>
-        <th style="width:70px">Data</th><th>Descrição</th><th style="width:100px">Categoria</th>
-        ${!cardId?'<th style="width:90px">Cartão</th>':''}
-        <th style="width:80px;text-align:right">Valor</th>
+      <div class="pr-month-title"><span>${_hrMLbl(ym)}</span><span class="pr-month-count">${mTxs.length} lançamento${mTxs.length!==1?'s':''}</span></div>
+      ${prPortadorHtml}
+      <table>${colgroup}<thead><tr>
+        <th style="width:65px">Data</th><th>Descrição</th><th style="width:82px">Categoria</th>
+        ${hasCard?'<th style="width:78px">Cartão</th>':''}
+        <th style="width:98px;text-align:right">Valor</th>
       </tr></thead><tbody>`;
 
     mTxs.forEach(t=>{
       const cr=t.type==='credit';
       const dateStr=t.date?new Date(t.date+'T12:00:00').toLocaleDateString('pt-BR'):'-';
       const cat=(t.category||'').replace(/^[\u{1F300}-\u{1FFFF}\u2600-\u26FF\u2700-\u27BF ]+/u,'').trim()||'Outros';
-      html+=`<tr>
-        <td style="white-space:nowrap;color:#666">${dateStr}</td>
-        <td>${t.desc}</td>
+      const rowStyle=cr?'background:#f0faf4;border-left:3px solid #27ae60;':'';
+      const valStyle=cr?'text-align:right;font-weight:700;color:#27ae60;white-space:nowrap;padding-right:6px'
+                      :'text-align:right;font-weight:600;color:#c0392b;white-space:nowrap;padding-right:6px';
+      const valText=cr?`− ${_hrFmtBRL(t.amount)}`:_hrFmtBRL(t.amount);
+      html+=`<tr style="${rowStyle}">
+        <td style="white-space:nowrap;color:#666;padding-left:${cr?'5px':'8px'}">${dateStr}</td>
+        <td style="color:${cr?'#1a7a45':'#111'}">${t.desc}${cr?' <span style="font-size:6.5pt;background:#d4edda;color:#155724;padding:1px 4px;border-radius:3px;font-weight:700;letter-spacing:.04em">ESTORNO</span>':''}</td>
         <td style="color:#666">${cat}</td>
-        ${!cardId?`<td style="color:#666;font-size:7.5pt">${cardMap[t.cardId]||''}</td>`:''}
-        <td class="${cr?'pr-cr':'pr-deb'}">${cr?'+ ':''} ${_hrFmtBRL(t.amount)}</td>
+        ${hasCard?`<td style="color:#666;font-size:7.5pt">${cardMap[t.cardId]||''}</td>`:''}
+        <td style="${valStyle}">${valText}</td>
       </tr>`;
     });
 
-    const hasCard=!cardId;
-    const totalCols=hasCard?5:4;
-    html+=`</tbody></table>
-    <table style="width:100%;border-collapse:collapse;border:1px solid #ccc;border-top:1px solid #c8922a;background:#fffbf0;table-layout:fixed;page-break-inside:avoid;break-inside:avoid;page-break-before:avoid;break-before:avoid">
-      <colgroup>
-        <col style="width:70px">
-        <col>
-        <col style="width:100px">
-        ${hasCard?'<col style="width:90px">':''}
-        <col style="width:80px">
-      </colgroup>
-      <tr>
-        <td colspan="${totalCols-1}" style="padding:4px 8px;text-align:right;font-weight:700;color:#7a5208;font-size:8.5pt;border:none">Subtotal</td>
-        <td style="padding:4px 8px;text-align:right;font-weight:700;color:#c0392b;font-size:8.5pt;border:none;white-space:nowrap">${mDeb>0?'− '+_hrFmtBRL(mDeb):''}${mCr>0&&mDeb>0?' / ':''}${mCr>0?'+ '+_hrFmtBRL(mCr):''}</td>
-      </tr>
-    </table></div>`;
+    html+=`</tbody></table></div>`;
   });
 
-  html+=`<div style="margin-top:8px;border:1px solid #ccc;border-radius:4px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;background:#fffbf0;page-break-inside:avoid">
-    <div style="font-weight:700;font-size:10pt">Total do período</div>
-    <div style="text-align:right">
-      <div style="font-size:13pt;font-weight:900;color:#c0392b">${_hrFmtBRL(totalDeb)}</div>
-      ${totalCr>0?`<div style="font-size:8pt;color:#27ae60;font-weight:700">Estornos: + ${_hrFmtBRL(totalCr)}</div>`:''}
-      ${totalCr>0?`<div style="font-size:8.5pt;font-weight:700">Líquido: ${_hrFmtBRL(totalDeb-totalCr)}</div>`:''}
+  // Subtotal único no final — usa a última colgroup gerada (mesmas larguras)
+  {
+    let _sf='<table style="width:100%;border-collapse:collapse;margin-bottom:8px;page-break-inside:avoid">'+colgroup+'<tbody>';
+    _sf+='<tr style="background:#fffbf0">';
+    _sf+='<td style="padding:5px 8px;border:none;border-top:2px solid #c8922a"></td>';
+    _sf+='<td style="padding:5px 8px;border:none;border-top:2px solid #c8922a"></td>';
+    _sf+='<td style="padding:5px 8px;text-align:right;font-weight:700;color:#7a5208;font-size:8pt;border:none;white-space:nowrap;border-top:2px solid #c8922a">Subtotal débitos</td>';
+    if(hasCard) _sf+='<td style="padding:5px 8px;border:none;border-top:2px solid #c8922a"></td>';
+    _sf+='<td style="padding:5px 8px;text-align:right;font-weight:800;color:#c0392b;font-size:9pt;border:none;white-space:nowrap;border-top:2px solid #c8922a">'+_hrFmtBRL(totalDeb)+'</td>';
+    _sf+='</tr>';
+    if(totalCr>0){
+      _sf+='<tr style="background:#f0faf4">';
+      _sf+='<td style="padding:3px 8px;border:none"></td>';
+      _sf+='<td style="padding:3px 8px;border:none"></td>';
+      _sf+='<td style="padding:3px 8px;text-align:right;font-weight:700;color:#1a7a45;font-size:8pt;border:none;white-space:nowrap">Estornos</td>';
+      if(hasCard) _sf+='<td style="padding:3px 8px;border:none"></td>';
+      _sf+='<td style="padding:3px 8px;text-align:right;font-weight:700;color:#27ae60;font-size:8.5pt;border:none;white-space:nowrap">− '+_hrFmtBRL(totalCr)+'</td>';
+      _sf+='</tr>';
+      _sf+='<tr style="background:#fffbf0;border-top:1px solid #ddd">';
+      _sf+='<td style="padding:4px 8px;border:none"></td>';
+      _sf+='<td style="padding:4px 8px;border:none"></td>';
+      _sf+='<td style="padding:4px 8px;text-align:right;font-weight:700;color:#333;font-size:8pt;border:none;white-space:nowrap">Líquido do mês</td>';
+      if(hasCard) _sf+='<td style="padding:4px 8px;border:none"></td>';
+      _sf+='<td style="padding:4px 8px;text-align:right;font-weight:900;color:#333;font-size:9pt;border:none;white-space:nowrap">'+_hrFmtBRL(Math.max(0,totalDeb-totalCr))+'</td>';
+      _sf+='</tr>';
+    }
+    _sf+='</tbody></table>';
+    html+=_sf;
+  }
+
+  html+=`<div style="margin-top:12px;border:1.5px solid #c8922a;border-radius:6px;background:#fffbf0;page-break-inside:avoid;overflow:hidden">
+    <div style="background:#c8922a;padding:6px 16px">
+      <span style="font-weight:800;font-size:9pt;color:#fff;text-transform:uppercase;letter-spacing:.08em">Total do período</span>
+    </div>
+    <div style="padding:10px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <span style="font-size:8.5pt;color:#555;font-weight:600">Total débitos</span>
+        <span style="font-size:13pt;font-weight:900;color:#c0392b;font-family:monospace">${_hrFmtBRL(totalDeb)}</span>
+      </div>
+      ${totalCr>0?`<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;padding-bottom:6px;border-bottom:1.5px solid #d5b870">
+        <span style="font-size:8.5pt;color:#1a7a45;font-weight:600">↩ Estornos aplicados</span>
+        <span style="font-size:11pt;font-weight:800;color:#27ae60;font-family:monospace">− ${_hrFmtBRL(totalCr)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px">
+        <span style="font-size:9pt;color:#222;font-weight:700">Líquido do período</span>
+        <span style="font-size:14pt;font-weight:900;color:#111;font-family:monospace">${_hrFmtBRL(Math.max(0,totalDeb-totalCr))}</span>
+      </div>`:''}
     </div>
   </div>
   <div class="pr-footer">
