@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-04-16T01:20:25.306Z",
+  "syncedAt": "2026-04-16T01:21:24.498Z",
   "profile": "u1",
-  "lastModified": "2026-04-16T00:52:56.183Z",
+  "lastModified": "2026-04-16T01:21:02.356Z",
   "data": {
     "cards": [
       {
@@ -29,6 +29,36 @@
         "sortOrder": 0
       },
       {
+        "id": "vs0llp2ohzmnsvu3kq",
+        "name": "Itaú Uniclass",
+        "last4": "7460",
+        "holder": "Carlos",
+        "expiry": "10/30",
+        "limit": 48657,
+        "close": 14,
+        "due": 21,
+        "rate": 14.9,
+        "brand": "Visa",
+        "colorIdx": 8,
+        "dueHistory": [],
+        "limitHistory": [
+          {
+            "limit": 14916,
+            "from": "05/2026"
+          }
+        ],
+        "due2": null,
+        "due2From": null,
+        "cardType": "personal",
+        "corpName": "",
+        "corpReimb": false,
+        "holders": [
+          "Olinda",
+          "Condominio"
+        ],
+        "sortOrder": 1
+      },
+      {
         "id": "x96p92fwvtmnsutu3c",
         "name": "Inter",
         "last4": "2713",
@@ -51,38 +81,6 @@
           "Olinda",
           "Condominio"
         ],
-        "noInterest": false,
-        "sortOrder": 1
-      },
-      {
-        "id": "vs0llp2ohzmnsvu3kq",
-        "name": "Itaú Uniclass",
-        "last4": "7460",
-        "holder": "Carlos",
-        "expiry": "10/30",
-        "limit": 48657,
-        "close": 14,
-        "due": 21,
-        "rate": 14.9,
-        "brand": "Visa",
-        "colorIdx": 8,
-        "dueHistory": [],
-        "limitHistory": [
-          {
-            "limit": 14.916,
-            "from": "04/2026"
-          }
-        ],
-        "due2": null,
-        "due2From": null,
-        "cardType": "personal",
-        "corpName": "",
-        "corpReimb": false,
-        "holders": [
-          "Olinda",
-          "Condominio"
-        ],
-        "noInterest": false,
         "sortOrder": 2
       },
       {
@@ -108,7 +106,6 @@
           "Olinda",
           "Condominio"
         ],
-        "noInterest": false,
         "sortOrder": 3
       },
       {
@@ -131,8 +128,30 @@
         "corpName": "",
         "corpReimb": false,
         "holders": [],
-        "noInterest": false,
         "sortOrder": 4
+      },
+      {
+        "id": "0q5d9xa6u3rmnvsuk9a",
+        "name": "Porto Seg - cond",
+        "last4": "2025",
+        "holder": "Condominio",
+        "expiry": "12/28",
+        "limit": 15000,
+        "close": 14,
+        "due": 21,
+        "rate": 14.9,
+        "brand": "Visa",
+        "colorIdx": 1,
+        "dueHistory": [],
+        "limitHistory": [],
+        "due2": null,
+        "due2From": null,
+        "cardType": "personal",
+        "corpName": "",
+        "corpReimb": false,
+        "holders": [],
+        "sortOrder": 5,
+        "noInterest": false
       }
     ],
     "tx": [
@@ -12756,11 +12775,102 @@
         "estorno": 0
       }
     ],
-    "activeCardId": "ui6gdqec29mnsvvh7a",
+    "activeCardId": null,
     "budgets": {},
     "cashbacks": {},
     "monthlyGoal": 0,
-    "subscriptions": [],
+    "subscriptions": [
+      {
+        "name": "Netflix",
+        "icon": "📦",
+        "amount": 44.9,
+        "day": 15,
+        "cat": "Streaming",
+        "billing": "mensal",
+        "cardId": "9fpq2c00bmkmnjgpi66",
+        "active": true
+      },
+      {
+        "name": "Hbomax",
+        "icon": "📦",
+        "amount": 22.45,
+        "day": 2,
+        "cat": "Streaming",
+        "billing": "mensal",
+        "cardId": "9fpq2c00bmkmnjgpi66",
+        "active": true
+      },
+      {
+        "name": "Paramount",
+        "icon": "📦",
+        "amount": 24.43,
+        "day": 27,
+        "cat": "Streaming",
+        "billing": "mensal",
+        "cardId": "9fpq2c00bmkmnjgpi66",
+        "active": true
+      },
+      {
+        "name": "Amazon Prime",
+        "icon": "📦",
+        "amount": 166.8,
+        "day": 27,
+        "cat": "Outros",
+        "billing": "anual",
+        "cardId": "ui6gdqec29mnsvvh7a",
+        "active": true
+      },
+      {
+        "name": "Mercado Livre+",
+        "icon": "📦",
+        "amount": 19.9,
+        "day": 21,
+        "cat": "Streaming",
+        "billing": "mensal",
+        "cardId": "9fpq2c00bmkmnjgpi66",
+        "active": true
+      },
+      {
+        "name": "Premiere",
+        "icon": "📦",
+        "amount": 358.8,
+        "day": 29,
+        "cat": "Streaming",
+        "billing": "anual",
+        "cardId": "9fpq2c00bmkmnjgpi66",
+        "active": true
+      },
+      {
+        "name": "Globoplay + Telecine",
+        "icon": "📦",
+        "amount": 357.6,
+        "day": 27,
+        "cat": "Streaming",
+        "billing": "anual",
+        "cardId": "9fpq2c00bmkmnjgpi66",
+        "active": true
+      },
+      {
+        "name": "Globoplay (cancelada)",
+        "icon": "📦",
+        "amount": 454.8,
+        "day": 15,
+        "cat": "Streaming",
+        "billing": "anual",
+        "cardId": "9fpq2c00bmkmnjgpi66",
+        "active": true
+      },
+      {
+        "name": "Microsoft 365",
+        "icon": "📦",
+        "amount": 459,
+        "day": 5,
+        "cat": "Software",
+        "billing": "anual",
+        "cardId": "9fpq2c00bmkmnjgpi66",
+        "active": true
+      }
+    ],
     "savingsGoals": []
   }
 }
