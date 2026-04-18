@@ -89,6 +89,7 @@ document.addEventListener('visibilitychange', function(){
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js" crossorigin="anonymous" onerror="console.warn('jsPDF AutoTable não carregou')"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js" crossorigin="anonymous" onerror="console.warn('pdf.js não carregou');window.pdfjsLib={GlobalWorkerOptions:{}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" crossorigin="anonymous" onerror="console.warn('XLSX não carregou')"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" crossorigin="anonymous" onerror="console.warn('Tesseract não carregou');window.Tesseract=null"></script>
 <script>
 if(typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
@@ -2423,6 +2424,7 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
           <div id="hamburgerThemeGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px"></div>
           <button type="button" class="qb-action" onclick="showWidgetOverlay();closeHamburgerPopover()">⚡ Resumo rápido</button>
           <button type="button" class="qb-action" onclick="openGlobalSearch();closeHamburgerPopover()">🔍 Busca global</button>
+          <button type="button" class="qb-action" onclick="openOcrImport()">🧾 Importar fatura (OCR)</button>
         </div>
         <div id="sbSyncIndicator" title="Sync em nuvem — clique para abrir opções" onclick="cloudIndicatorClick()" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;color:var(--text3);white-space:nowrap;transition:all .3s;cursor:pointer;flex-shrink:0">
           <span id="sbSyncDot" style="width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s"></span>
@@ -2655,6 +2657,15 @@ function closeMobDrawer(){
         <span style="display:flex;flex-direction:column;gap:2px">
           <span style="font-size:var(--fs-sm);font-weight:700;color:var(--text2)">Não cobrar juros no rotativo</span>
           <span style="font-size:var(--fs-xs);color:var(--text3)">Ideal para cartões de controle interno, como valores que o condomínio te deve.</span>
+        </span>
+      </label>
+    </div>
+    <div class="fg" style="margin-top:-2px">
+      <label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--bg2);cursor:pointer">
+        <input type="checkbox" id="c-auto-debit" style="margin-top:2px;accent-color:var(--green)">
+        <span style="display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:var(--fs-sm);font-weight:700;color:var(--text2)">Débito automático</span>
+          <span style="font-size:var(--fs-xs);color:var(--text3)">Marca este cartão como pago automaticamente no vencimento. Ótimo para cartões principais do dia a dia.</span>
         </span>
       </label>
     </div>
@@ -6862,6 +6873,8 @@ return `<div class="set-card" draggable="true"
 <span>Fecha: dia ${c.close}</span>
 <span>Vence: dia ${c.due}${c.due2&&c.due2From?` <span style="color:var(--blue-m);font-size:var(--fs-nano)">→ dia ${c.due2} a partir de ${c.due2From}</span>`:''}</span>
 <span style="color:var(--blue)">Juros: ${c.rate}% a.m.</span>
+${c.noInterest?'<span style=\"color:var(--green)\">Sem juros</span>':''}
+${c.autoDebit?'<span style=\"color:var(--green-d)\">Débito automático</span>':''}
 <span>${c.brand}</span>
 </div>
 </div>
@@ -7388,6 +7401,7 @@ document.getElementById('cardModalTitle').textContent='Novo Cartão';
 document.getElementById('cardSaveBtn').textContent='Salvar Cartão';
 ['c-name','c-last4','c-holder','c-expiry','c-limit','c-close','c-due','c-rate','c-due2','c-due2-from'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 if(document.getElementById('c-no-interest')) document.getElementById('c-no-interest').checked=false;
+if(document.getElementById('c-auto-debit')) document.getElementById('c-auto-debit').checked=false;
 if(document.getElementById('due-change-panel'))document.getElementById('due-change-panel').style.display='none';
 if(document.getElementById('due-change-preview'))document.getElementById('due-change-preview').textContent='';
 if(document.getElementById('btn-toggle-due-change'))document.getElementById('btn-toggle-due-change').textContent='+ Registrar mudança';
@@ -7506,6 +7520,7 @@ document.getElementById('c-close').value=c.close;
 document.getElementById('c-due').value=c.due;
 document.getElementById('c-rate').value=c.rate;
 if(document.getElementById('c-no-interest')) document.getElementById('c-no-interest').checked=!!c.noInterest;
+if(document.getElementById('c-auto-debit')) document.getElementById('c-auto-debit').checked=!!c.autoDebit;
 document.getElementById('c-brand').value=c.brand;
 if(document.getElementById('c-corp-name')) document.getElementById('c-corp-name').value=c.corpName||'';
 if(document.getElementById('c-corp-reimb')) document.getElementById('c-corp-reimb').checked=c.corpReimb||false;
@@ -7532,6 +7547,7 @@ close:parseInt(document.getElementById('c-close').value)||20,
 due:parseInt(document.getElementById('c-due').value)||5,
 rate:parseFloat(document.getElementById('c-rate').value)||14.9,
 noInterest:document.getElementById('c-no-interest')?.checked||false,
+autoDebit:document.getElementById('c-auto-debit')?.checked||false,
 brand:document.getElementById('c-brand').value,
 colorIdx:S.selColor,
 // Historico de vencimentos e limites
@@ -7566,6 +7582,11 @@ document.getElementById('pay-encargos-total').style.display='none';
 document.getElementById('pp-rate').textContent=c.noInterest ? '0' : c.rate;
 const ppRateWrap=document.getElementById('pp-rate')?.closest('span')?.parentElement;
 if(ppRateWrap) ppRateWrap.innerHTML = c.noInterest ? '<span style="color:var(--green);font-weight:700">Sem juros rotativos neste cartão</span>' : `Juros rotativo (<span id="pp-rate">${c.rate}</span>% a.m.)`;
+const autoDebitHint=document.getElementById('pay-auto-debit-hint');
+if(autoDebitHint){
+  autoDebitHint.style.display = c.autoDebit ? 'block' : 'none';
+  autoDebitHint.innerHTML = c.autoDebit ? '💳 Débito automático ativo neste cartão. No vencimento, a fatura tende a ser quitada automaticamente.' : '';
+}
 const advPanel=document.querySelector('#modal-pay [style*="display:none;margin-top:12px"]');
 if(advPanel) advPanel.style.display='none';
 const advBtn=document.querySelector('#modal-pay button[onclick*="nextElementSibling"]');
@@ -8528,7 +8549,7 @@ doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(...ink);
 doc.text(`${c.name}  ····  ${c.last4}`,200,17,{align:'right'});
 doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...ink2);
 doc.text(c.holder,200,23,{align:'right'});
-doc.text(`${c.brand} · Fecha dia ${c.close} · Vence dia ${c.due} · ${c.noInterest ? 'Sem juros no rotativo' : 'Juros '+c.rate+'% a.m.'}`,200,29,{align:'right'});
+doc.text(`${c.brand} · Fecha dia ${c.close} · Vence dia ${c.due}${c.autoDebit ? ' · Débito automático' : ''} · ${c.noInterest ? 'Sem juros no rotativo' : 'Juros '+c.rate+'% a.m.'}`,200,29,{align:'right'});
 doc.text(monthLabel(m).toUpperCase(),200,35,{align:'right'});
 const boxes=[
 {l:'COMPRAS',   v:fmt(s.debits), c:ink},
@@ -9351,7 +9372,7 @@ function printCardReport(){
   <div style="text-align:right">
     <div style="font-size:11px;font-weight:700;color:#14141e;letter-spacing:.02em">${card.name}${card.last4?' &nbsp;····&nbsp; '+card.last4:''}</div>
     ${card.holder?`<div style="font-size:8px;color:#505068;margin-top:2px">${card.holder}</div>`:''}
-    ${card.brand?`<div style="font-size:7.5px;color:#5a5270;margin-top:2px">${card.brand}${card.close?' · Fecha dia '+card.close:''}${card.due?' · Vence dia '+card.due:''}${card.noInterest?' · Sem juros no rotativo':(card.rate?' · Juros '+card.rate+'% a.m.':'')}</div>`:''}
+    ${card.brand?`<div style="font-size:7.5px;color:#5a5270;margin-top:2px">${card.brand}${card.close?' · Fecha dia '+card.close:''}${card.due?' · Vence dia '+card.due:''}${card.autoDebit?' · Débito automático':''}${card.noInterest?' · Sem juros no rotativo':(card.rate?' · Juros '+card.rate+'% a.m.':'')}</div>`:''}
     <div style="font-size:7px;color:#706a70;margin-top:2px">Gerado em ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div>
   </div>
 </div>
@@ -16917,11 +16938,11 @@ function buildCycleTimeline(cards, compact){
       adviceIcon  = '⚠️';
     } else if(!inNextBill){
       badgeHtml   = `<span class="dcc-badge dcc-badge-warn">Aberta · fecha em ${daysToClose}d</span>`;
-      adviceText  = 'Compras agora entram nesta fatura.';
+      adviceText  = 'Compras agora entram nesta fatura.' + (c.autoDebit ? ' Pagamento automático ativo no vencimento.' : '');
       adviceIcon  = '📋';
     } else {
       badgeHtml   = `<span class="dcc-badge dcc-badge-ok">Fechada há ${daysAfterClose}d</span>`;
-      adviceText  = `Compras agora entram na próxima fatura (vence ${fmt(nextDueDate)}).`;
+      adviceText  = `Compras agora entram na próxima fatura (vence ${fmt(nextDueDate)}).${c.autoDebit ? ' Débito automático ativo.' : ''}`;
       adviceIcon  = '✅';
     }
 
@@ -16931,9 +16952,10 @@ function buildCycleTimeline(cards, compact){
 <div class="dcc-card">
   <div class="dcc-head" style="border-top:2.5px solid ${color}">
     <div class="dcc-dot" style="background:${color}"></div>
-    <span class="dcc-name">${c.name}${c.last4?`<span class="dcc-last4"> ···· ${c.last4}</span>`:''}</span>
+    <span class="dcc-name">${c.name}${c.last4?`<span class=\"dcc-last4\"> ···· ${c.last4}</span>`:''}</span>
     ${badgeHtml}
-    <span class="dcc-badge dcc-badge-neutral">Vence dia ${due}</span>
+    ${c.autoDebit?'<span class=\"dcc-badge dcc-badge-ok\">Débito automático</span>':''}
+    <span class=\"dcc-badge dcc-badge-neutral\">Vence dia ${due}</span>
   </div>
   <div class="dcc-metrics">
     <div class="dcc-metric">
@@ -17059,13 +17081,13 @@ function buildPlanCard(c, today){
     advice='Compras de hoje ainda entram nesta fatura; amanhã o ciclo vira para a próxima';
   } else if(!inNextBill){
     statusChip=`<span class="plan-badge plan-badge-orange">📋 Fatura aberta — ${Math.max(0,daysToClose)}d para fechar</span>`;
-    advice=`Compras agora ainda entram na fatura que vence em ${fmt(currentDueDate)}`;
+    advice=`Compras agora ainda entram na fatura que vence em ${fmt(currentDueDate)}${c.autoDebit ? ' e será quitada por débito automático.' : ''}`;
   } else if(daysToDue===0){
     statusChip='<span class="plan-badge plan-badge-green">💳 Vence hoje</span>';
     advice=`Compras a partir de agora já caminham para a fatura seguinte (vence em ${fmt(nextDueDate)})`;
   } else {
     statusChip=`<span class="plan-badge plan-badge-green">✅ Pós-fechamento — ${daysAfterClose}d atrás</span>`;
-    advice=`Compras agora vão para a próxima fatura (vence em ${fmt(nextDueDate)})`;
+    advice=`Compras agora vão para a próxima fatura (vence em ${fmt(nextDueDate)})${c.autoDebit ? ' e o pagamento automático permanece ativo.' : ''}`;
   }
 
   const used = (typeof monthNet==='function') ? monthNet(c.id,currentInvoiceMonth) : ((typeof monthDebits==='function') ? monthDebits(c.id,currentInvoiceMonth) : 0);
@@ -17095,7 +17117,8 @@ function buildPlanCard(c, today){
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
           ${statusChip}
-          <span class="plan-badge plan-badge-blue">💳 Vence em ${currentFaturaVence}</span>
+          ${c.autoDebit?'<span class=\"plan-badge plan-badge-green\">💳 Débito automático</span>':''}
+          <span class=\"plan-badge plan-badge-blue\">💳 Vence em ${currentFaturaVence}</span>
           ${limitVal>0?'<span class="plan-badge" style="background:linear-gradient(180deg,rgba(200,146,42,.26),rgba(200,146,42,.14));color:var(--gold-d);border:1px solid rgba(200,146,42,.52);box-shadow:inset 0 1px 0 rgba(255,255,255,.16)">'+fmtR(used)+' na fatura</span>':''}
         </div>
         ${limitVal>0?`<div style="margin-top:8px"><div style="height:4px;background:var(--bg4);border-radius:99px;overflow:hidden"><div style="height:100%;width:${realPct}%;background:${realBarColor};border-radius:99px;transition:width .5s"></div></div><div style="font-size:var(--fs-nano);color:var(--text3);margin-top:3px">Comprometido real · ${fmtR(realCommitted)} / ${fmtR(limitVal)} (${realPct}%)</div>${futureOnly>0?`<div style="font-size:var(--fs-nano);color:var(--text3);margin-top:2px">Inclui ${fmtR(futureOnly)} em parcelas futuras / saldo carregado</div>`:''}</div>`:''}
@@ -17117,7 +17140,8 @@ function buildPlanCard(c, today){
       </div>
       <div class="plan-cycle-badges">
         ${statusChip}
-        <span class="plan-badge plan-badge-blue">💳 Vence em ${currentFaturaVence}</span>
+        ${c.autoDebit?'<span class=\"plan-badge plan-badge-green\">💳 Débito automático</span>':''}
+        <span class=\"plan-badge plan-badge-blue\">💳 Vence em ${currentFaturaVence}</span>
       </div>
     </div>
     <div style="font-size:var(--fs-micro);font-weight:600;color:var(--text3);margin-bottom:8px;font-style:italic">${advice}</div>
@@ -19224,14 +19248,589 @@ document.addEventListener('click', function(e){
 </script>
 
 
+<style id="aurum-color-favorites-style">
+.color-opts{display:flex;flex-direction:column;gap:10px!important}
+.color-group{display:flex;flex-direction:column;gap:6px}
+.color-group-title{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);padding-left:2px}
+.color-swatches-row{display:flex;gap:8px;flex-wrap:wrap}
+.col-opt{position:relative;overflow:visible}
+.col-opt::after{content:attr(data-label);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:rgba(10,16,24,.92);color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;font-weight:700;line-height:1;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .16s ease,transform .16s ease;z-index:30;box-shadow:0 8px 18px rgba(0,0,0,.22)}
+.col-opt:hover::after{opacity:1;transform:translateX(-50%) translateY(-1px)}
+.col-fav-btn{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border:none;border-radius:999px;background:rgba(10,16,24,.82);color:#fff;font-size:11px;line-height:18px;text-align:center;cursor:pointer;opacity:0;transform:scale(.9);transition:all .18s ease;box-shadow:0 4px 10px rgba(0,0,0,.22);z-index:20}
+.col-opt:hover .col-fav-btn,.col-opt.is-favorite .col-fav-btn{opacity:1;transform:scale(1)}
+.col-opt.is-favorite .col-fav-btn{background:var(--gold);color:#111}
+.col-opt.is-favorite{box-shadow:0 0 0 2px rgba(200,146,42,.22)}
+.col-fav-hint{font-size:10px;color:var(--text3);padding-left:2px}
+</style>
+
+<script id="aurum-color-favorites-script">
+(function(){
+  const FAV_KEY='aurum-color-favorites-v1';
+  function ensureExtraGradients(){
+    if(typeof GRADS==='undefined' || !Array.isArray(GRADS)) return;
+    const hasLabel = (label) => GRADS.some(g => (g.label||'').toLowerCase() === label.toLowerCase());
+    if(!hasLabel('Banco do Brasil')){
+      GRADS.push({g:'linear-gradient(145deg,#7a5a00 0%,#ffcc00 45%,#9f7d0a 100%)',a:'#1f4fa3',label:'Banco do Brasil',dark:true});
+    }
+    if(!hasLabel('Banco Inter')){
+      GRADS.push({g:'linear-gradient(145deg,#7a2d00 0%,#ff7a00 45%,#a34700 100%)',a:'#ffd0a3',label:'Banco Inter'});
+    }
+  }
+  function getFavLabels(){
+    try{ const raw=localStorage.getItem(FAV_KEY); const arr=raw?JSON.parse(raw):[]; return Array.isArray(arr)?arr:[]; }catch(e){ return []; }
+  }
+  function saveFavLabels(arr){ try{ localStorage.setItem(FAV_KEY, JSON.stringify(arr)); }catch(e){} }
+  function isFavLabel(label){ return getFavLabels().includes(label); }
+  window.toggleColorFavorite = function(label){
+    const favs=getFavLabels();
+    const idx=favs.indexOf(label);
+    if(idx>=0) favs.splice(idx,1); else favs.unshift(label);
+    saveFavLabels(favs.slice(0,12));
+    if(typeof initColorPicker==='function') initColorPicker();
+  };
+  function buildColorOption(g, i){
+    const selected = S.selColor===i;
+    const label = g.label || ('Cor '+(i+1));
+    return `<div class="col-opt ${selected?'sel':''} ${isFavLabel(label)?'is-favorite':''}" title="${label}" data-label="${label}" style="background:${g.g};${g.dark?'border-color:rgba(0,0,0,.18)!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)':''}" onclick="selCol(${i})"><button type="button" class="col-fav-btn" title="${isFavLabel(label)?'Remover dos favoritos':'Favoritar cor'}" onclick="event.stopPropagation();toggleColorFavorite(${JSON.stringify(label)})">${isFavLabel(label)?'★':'☆'}</button></div>`;
+  }
+  function renderGroups(){
+    ensureExtraGradients();
+    const favs=getFavLabels();
+    const favorites=[]; const categorized={ bancos:[], premium:[], basicas:[], gradientes:[], outras:[] };
+
+    const byLabel = {
+      bancos: ['Banco do Brasil','Banco Inter','Caixa','Santander','Bradesco','Itaú'],
+      premium: ['Gold','Platinum','Titanium','Obsidian','Champagne','Esmeralda','Grafite','Cobre','Sky'],
+      basicas: ['Azul','Vermelho','Verde','Amarelo','Roxo','Ciano','Laranja','Preto','Branco','Rose','Índigo','Marrom'],
+      gradientes: ['Aurora','Sunset','Neon','Fire','Lux Gold','Deep Blue','Royal','Emerald Glow','Sunrise']
+    };
+
+    function detectCategory(label){
+      if(byLabel.bancos.includes(label)) return 'bancos';
+      if(byLabel.premium.includes(label)) return 'premium';
+      if(byLabel.basicas.includes(label)) return 'basicas';
+      if(byLabel.gradientes.includes(label)) return 'gradientes';
+      return 'outras';
+    }
+
+    GRADS.forEach((g,i)=>{
+      const label=g.label || ('Cor '+(i+1));
+      const item={g,i,label};
+      if(favs.includes(label)) favorites.push(item);
+      else categorized[detectCategory(label)].push(item);
+    });
+
+    const sectionNames = {
+      bancos: 'Bancos',
+      premium: 'Premium',
+      basicas: 'Básicas',
+      gradientes: 'Gradientes',
+      outras: 'Outras'
+    };
+
+    const parts=[];
+    if(favorites.length){
+      parts.push(`<div class="color-group"><div class="color-group-title">Favoritas</div><div class="color-swatches-row">${favorites.map(o=>buildColorOption(o.g,o.i)).join('')}</div></div>`);
+    }
+
+    ['bancos','premium','basicas','gradientes','outras'].forEach(key=>{
+      const arr=categorized[key];
+      if(arr && arr.length){
+        parts.push(`<div class="color-group"><div class="color-group-title">${sectionNames[key]}</div><div class="color-swatches-row">${arr.map(o=>buildColorOption(o.g,o.i)).join('')}</div></div>`);
+      }
+    });
+
+    parts.push('<div class="col-fav-hint">Passe o mouse para ver o nome. Clique na estrela para favoritar.</div>');
+    return parts.join('');
+  }
+  const _origInitColorPicker = window.initColorPicker;
+  window.initColorPicker = function(){
+    ensureExtraGradients();
+    const el=document.getElementById('colorOpts');
+    if(!el){ if(typeof _origInitColorPicker==='function') return _origInitColorPicker(); return; }
+    el.innerHTML = renderGroups();
+  };
+  const _origOpenAddCardModal = window.openAddCardModal;
+  if(typeof _origOpenAddCardModal==='function'){
+    window.openAddCardModal = function(){ const r=_origOpenAddCardModal.apply(this, arguments); try{initColorPicker();}catch(e){} return r; };
+  }
+  const _origEditCard = window.editCard;
+  if(typeof _origEditCard==='function'){
+    window.editCard = function(){ const r=_origEditCard.apply(this, arguments); try{initColorPicker();}catch(e){} return r; };
+  }
+  document.addEventListener('DOMContentLoaded', function(){ try{initColorPicker();}catch(e){} });
+})();
+</script>
+
+
 <script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js').catch(function(err){
-      console.warn('SW falhou', err);
+window.__ocrFaturaState = window.__ocrFaturaState || { items: [], meta: {}, busy: false };
+
+function openOcrImport(){
+  try{ closeHamburgerPopover && closeHamburgerPopover(); }catch(e){}
+  const sel = document.getElementById('ocr-card');
+  if(sel){
+    sel.innerHTML = (S.cards||[]).map(c => `<option value="${c.id}" ${c.id===S.activeCardId?'selected':''}>${c.name} ···· ${c.last4||'0000'}</option>`).join('');
+  }
+  const file = document.getElementById('ocr-file');
+  const raw = document.getElementById('ocr-raw');
+  const list = document.getElementById('ocr-list');
+  const meta = document.getElementById('ocr-meta');
+  const status = document.getElementById('ocr-status');
+  if(file) file.value = '';
+  if(raw) raw.value = '';
+  if(list) list.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:12px">Nenhum lançamento extraído ainda.</div>';
+  if(meta) meta.textContent = 'Nenhum arquivo processado ainda.';
+  if(status) status.textContent = 'Aguardando arquivo.';
+  window.__ocrFaturaState = { items: [], meta: {}, busy: false };
+  openModal('ocrfatura');
+}
+function ocrStatus(msg, tone){
+  const el = document.getElementById('ocr-status');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.color = tone==='error' ? 'var(--red)' : tone==='ok' ? 'var(--green)' : 'var(--text2)';
+}
+function parsePtBrMoney(v){
+  let s = String(v||'').replace(/[^\d,.\-]/g,'').trim();
+  if(!s) return 0;
+  if(s.includes(',') && s.includes('.')) s = s.replace(/\./g,'').replace(',', '.');
+  else if(s.includes(',')) s = s.replace(',', '.');
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+}
+function normalizeOcrDate(dateStr){
+  const now = new Date();
+  const m = String(dateStr||'').trim();
+  const parts = m.split('/');
+  if(parts.length < 2) return now.toISOString().slice(0,10);
+  let d = parseInt(parts[0],10)||1;
+  let mo = parseInt(parts[1],10)||1;
+  let y = parts[2] ? parseInt(parts[2],10) : now.getFullYear();
+  if(y < 100) y += 2000;
+  if(mo < 1 || mo > 12) mo = now.getMonth()+1;
+  const dt = new Date(y, mo-1, d, 12, 0, 0);
+  return dt.toISOString().slice(0,10);
+}
+function ocrExtractMeta(text){
+  const meta = {};
+  const due = text.match(/venc(?:imento)?\s*[:\-]?\s*(\d{2}\/\d{2}(?:\/\d{2,4})?)/i);
+  if(due) meta.due = due[1];
+  const total = text.match(/(?:total(?:\s+da)?\s+fatura|valor\s+total|total)\s*[:\-]?\s*R?\$?\s*([\d\.\,]+)/i);
+  if(total) meta.total = parsePtBrMoney(total[1]);
+  return meta;
+}
+function ocrParseText(text){
+  const lines = String(text||'').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  const items = [];
+  const seen = new Set();
+  lines.forEach(line => {
+    if(/^(subtotal|total|pagamento|vencimento|encargos|limite|saldo|anterior|próx|proxim|fatura\s+fechada)/i.test(line)) return;
+    const match = line.match(/^\s*(\d{2}\/\d{2}(?:\/\d{2,4})?)\s+(.+?)\s+(-?\s*R?\$?\s*[\d\.\,]+)\s*$/i);
+    if(!match) return;
+    const rawDate = match[1];
+    let desc = match[2].replace(/\s{2,}/g,' ').trim();
+    const amount = parsePtBrMoney(match[3]);
+    if(!amount) return;
+    let instNum = 1, totalInst = 1;
+    const inst = desc.match(/(?:\(|\b)(\d{1,2})\s*\/\s*(\d{1,2})(?:\)|\b)/);
+    if(inst){
+      instNum = parseInt(inst[1],10)||1;
+      totalInst = parseInt(inst[2],10)||1;
+    }
+    if(desc.length < 2) return;
+    const key = [rawDate, desc.toLowerCase(), amount.toFixed(2), instNum, totalInst].join('|');
+    if(seen.has(key)) return;
+    seen.add(key);
+    items.push({
+      key, checked: true, rawDate,
+      date: normalizeOcrDate(rawDate),
+      desc, amount,
+      totalInst, instNum,
+      category: '🛍️ Outros',
+      note: 'Importado por OCR'
     });
   });
+  return items;
 }
+function ocrRenderMeta(meta){
+  const el = document.getElementById('ocr-meta');
+  if(!el) return;
+  const bits = [];
+  if(meta.due) bits.push(`Vencimento detectado: <strong>${meta.due}</strong>`);
+  if(meta.total!=null) bits.push(`Total detectado: <strong>${Number(meta.total).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</strong>`);
+  bits.push(`Linhas válidas: <strong>${(window.__ocrFaturaState.items||[]).length}</strong>`);
+  el.innerHTML = bits.join('<br>');
+}
+function ocrRenderItems(){
+  const list = document.getElementById('ocr-list');
+  const items = window.__ocrFaturaState.items || [];
+  if(!list) return;
+  if(!items.length){
+    list.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:12px">Nenhum lançamento detectado. Tente outra imagem/PDF mais nítido.</div>';
+    return;
+  }
+  list.innerHTML = items.map((it, idx) => `
+    <label style="display:grid;grid-template-columns:26px 90px minmax(0,1fr) 110px 78px;gap:10px;align-items:center;padding:9px 10px;border-bottom:1px solid var(--border);cursor:pointer">
+      <input type="checkbox" ${it.checked?'checked':''} onchange="window.__ocrFaturaState.items[${idx}].checked=this.checked">
+      <div style="font-size:12px;color:var(--text2);font-weight:700">${it.rawDate}</div>
+      <input class="input" style="min-width:0" value="${String(it.desc).replace(/"/g,'&quot;')}" onchange="window.__ocrFaturaState.items[${idx}].desc=this.value">
+      <input class="input" style="text-align:right" value="${Number(it.amount).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}" onchange="window.__ocrFaturaState.items[${idx}].amount=parsePtBrMoney(this.value)">
+      <div style="font-size:11px;color:var(--text3);text-align:right">${it.totalInst>1 ? `${it.instNum}/${it.totalInst}` : 'à vista'}</div>
+    </label>
+  `).join('');
+}
+function ocrSelectAll(flag){
+  (window.__ocrFaturaState.items||[]).forEach(it => it.checked = !!flag);
+  ocrRenderItems();
+}
+async function ocrHandleFile(event){
+  const file = event && event.target && event.target.files ? event.target.files[0] : null;
+  if(!file) return;
+  if(typeof Tesseract === 'undefined' || !Tesseract){
+    ocrStatus('OCR indisponível: Tesseract não carregou.', 'error');
+    return;
+  }
+  ocrStatus('Processando arquivo… isso pode levar alguns instantes.');
+  const raw = document.getElementById('ocr-raw');
+  if(raw) raw.value = '';
+  try{
+    let text = '';
+    if((file.type||'').includes('pdf') || /\.pdf$/i.test(file.name||'')){
+      text = await ocrExtractFromPdf(file);
+    }else{
+      text = await ocrExtractFromImage(file);
+    }
+    window.__ocrFaturaState.items = ocrParseText(text);
+    window.__ocrFaturaState.meta = ocrExtractMeta(text);
+    if(raw) raw.value = text;
+    ocrRenderMeta(window.__ocrFaturaState.meta);
+    ocrRenderItems();
+    ocrStatus(`Leitura concluída: ${window.__ocrFaturaState.items.length} linhas detectadas.`, 'ok');
+    if(!window.__ocrFaturaState.items.length) showToast && showToast('OCR concluído, mas não encontrei linhas válidas. Tente outra imagem.', 'error');
+  }catch(err){
+    console.error(err);
+    ocrStatus('Falha ao processar o arquivo OCR.', 'error');
+    showToast && showToast('Falha no OCR da fatura.', 'error');
+  }
+}
+async function ocrExtractFromImage(file){
+  const dataUrl = await new Promise((resolve,reject)=>{
+    const fr = new FileReader();
+    fr.onload = ()=>resolve(fr.result);
+    fr.onerror = reject;
+    fr.readAsDataURL(file);
+  });
+  return await ocrRecognizeDataUrl(dataUrl, 'imagem');
+}
+async function ocrExtractFromPdf(file){
+  if(typeof pdfjsLib === 'undefined') throw new Error('pdf.js indisponível');
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+  let text = '';
+  const pages = Math.min(pdf.numPages, 5);
+  for(let i=1;i<=pages;i++){
+    ocrStatus(`Lendo PDF… página ${i}/${pages}`);
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({scale: 2});
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({canvasContext: ctx, viewport}).promise;
+    text += '\n' + await ocrRecognizeDataUrl(canvas.toDataURL('image/png'), 'página '+i);
+  }
+  return text;
+}
+async function ocrRecognizeDataUrl(dataUrl, label){
+  let lastProgress = 0;
+  const result = await Tesseract.recognize(dataUrl, 'por', {
+    logger: m => {
+      if(m && m.status === 'recognizing text'){
+        const p = Math.round((m.progress||0) * 100);
+        if(p !== lastProgress){
+          lastProgress = p;
+          ocrStatus(`OCR ${label}: ${p}%`);
+        }
+      }
+    }
+  });
+  return result && result.data ? (result.data.text || '') : '';
+}
+function ocrImportSelected(){
+  const sel = document.getElementById('ocr-card');
+  const cardId = sel ? sel.value : '';
+  const card = getCard(cardId);
+  if(!card){
+    showToast && showToast('Selecione um cartão para importar.', 'error');
+    return;
+  }
+  const chosen = (window.__ocrFaturaState.items||[]).filter(it => it.checked);
+  if(!chosen.length){
+    showToast && showToast('Nenhum lançamento selecionado.', 'error');
+    return;
+  }
+  let added = 0;
+  chosen.forEach(it => {
+    const instNum = Math.max(1, Number(it.instNum)||1);
+    const totalInst = Math.max(instNum, Number(it.totalInst)||1);
+    const invoiceMonth = calcInvoiceMonthForTx(it.date, card, instNum);
+    const exists = (S.tx||[]).some(t =>
+      t.cardId===card.id &&
+      t.date===it.date &&
+      String(t.desc||'').trim().toLowerCase()===String(it.desc||'').trim().toLowerCase() &&
+      Math.abs((Number(t.amount)||0) - Number(it.amount||0)) < 0.01 &&
+      (Number(t.instNum)||1)===instNum &&
+      (Number(t.totalInst)||1)===totalInst
+    );
+    if(exists) return;
+    S.tx.push({
+      id: uid(),
+      gid: uid(),
+      cardId: card.id,
+      desc: totalInst>1 && !/\(\d+\s*\/\s*\d+\)/.test(it.desc) ? `${it.desc} (${instNum}/${totalInst})` : it.desc,
+      amount: Number(it.amount)||0,
+      type: 'debit',
+      category: it.category || '🛍️ Outros',
+      date: it.date,
+      invoiceMonth,
+      totalInst,
+      instNum,
+      note: it.note || 'Importado por OCR',
+      portador: '',
+      recurring: false
+    });
+    added++;
+  });
+  if(added){
+    try{ save(); }catch(e){}
+    try{ renderContent(); }catch(e){}
+    try{ renderCarousel(); }catch(e){}
+    showToast && showToast(`${added} lançamento(s) importado(s) por OCR.`, 'success');
+    markQuickBackupDirty && markQuickBackupDirty();
+    closeModal('ocrfatura');
+  }else{
+    showToast && showToast('Nada novo para importar. Os lançamentos já existiam.', 'error');
+  }
+}
+</script>
+
+
+<style>
+#lt-card-suggestion-wrap{margin-top:10px;padding:12px 12px 10px;border:1.5px solid rgba(200,146,42,.35);border-radius:var(--r);background:linear-gradient(180deg,var(--gold-l),rgba(255,255,255,.65));box-shadow:var(--sh)}
+.lt-sg-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.lt-sg-title{font-size:var(--fs-xs);font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.lt-sg-badge{font-size:var(--fs-nano);font-weight:800;padding:3px 8px;border-radius:999px;background:rgba(200,146,42,.12);color:var(--gold);border:1px solid rgba(200,146,42,.28)}
+.lt-sg-main{display:flex;flex-direction:column;gap:6px}
+.lt-sg-card{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.lt-sg-name{font-size:var(--fs-base);font-weight:800;color:var(--text)}
+.lt-sg-score{font-size:var(--fs-micro);font-weight:800;color:var(--text3);font-family:var(--mono)}
+.lt-sg-reason{font-size:var(--fs-xs);line-height:1.45;color:var(--text2)}
+.lt-sg-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+.lt-sg-btn{padding:7px 10px;border-radius:10px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:var(--fs-xs);font-weight:700;cursor:pointer;transition:all .18s ease}
+.lt-sg-btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 10px rgba(20,64,138,.18)}
+.lt-sg-btn:hover{transform:translateY(-1px);border-color:var(--gold-m);background:var(--gold-l);color:var(--gold)}
+.lt-sg-btn.primary:hover{background:var(--blue-d);border-color:var(--blue-d);color:#fff}
+.lt-sg-secondary{margin-top:6px;padding-top:8px;border-top:1px dashed rgba(100,70,15,.25);font-size:var(--fs-xs);color:var(--text3)}
+.lt-sg-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.lt-sg-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:999px;background:var(--bg2);border:1px solid var(--border);font-size:var(--fs-micro);font-weight:700;color:var(--text2);cursor:pointer}
+.lt-sg-empty{font-size:var(--fs-xs);color:var(--text3);line-height:1.45}
+</style>
+<script>
+(function(){
+  function ltNormalizeCat(cat){
+    return String(cat||'').replace(/^\S+\s*/,'').trim().toLowerCase();
+  }
+  function ltCardCashback(card, cat){
+    const c=Number(card && (card.cashbackPct ?? card.cashback ?? card.cbPct ?? 0) || 0);
+    let bonus=0;
+    const raw=String(card && (card.cashbackCats || card.cashbackCategory || card.benefitCats || '') || '').toLowerCase();
+    if(raw && cat && raw.includes(cat)) bonus += 0.5;
+    return c + bonus;
+  }
+  function ltCardNoInterest(card){
+    return !!(card && (card.noInterest || card.installNoInterest || card.parcelNoInterest || card.noRotativo));
+  }
+  function ltHistoryAffinity(cardId, cat){
+    if(!window.S || !Array.isArray(S.tx) || !cat) return 0;
+    const recent = S.tx.filter(function(t){
+      return t && t.cardId===cardId && t.type==='debit' && ltNormalizeCat(t.category)===cat;
+    }).slice(-120);
+    const count=recent.length;
+    const amount=recent.reduce(function(s,t){ return s + (Number(t.amount)||0); },0);
+    return Math.min(22, count*2 + amount/800);
+  }
+  function ltAvailableFor(card, dateStr){
+    try{
+      const invoiceMonth = (typeof window.calcInvoiceMonthForTx==='function') ? calcInvoiceMonthForTx(dateStr, card, 1) : '';
+      const committed = invoiceMonth && typeof window.monthNet==='function' ? monthNet(card.id, invoiceMonth) : 0;
+      return Math.max(0, Number(card.limit||0) - Number(committed||0));
+    }catch(e){
+      return Math.max(0, Number(card && card.limit || 0));
+    }
+  }
+  function ltSuggestCards(){
+    if(!window.S || !Array.isArray(S.cards)) return [];
+    const amount = Number((document.getElementById('lt-amount')||{}).value||0);
+    const dateStr = (document.getElementById('lt-date')||{}).value || new Date().toISOString().slice(0,10);
+    const categoryRaw = (document.getElementById('lt-cat')||{}).value || '';
+    const category = ltNormalizeCat(categoryRaw);
+    const inst = Math.max(1, Number((document.getElementById('lt-inst')||{}).value||1));
+    const currentId = (document.getElementById('lt-card')||{}).value || (window.S && S.activeCardId);
+    return (S.cards||[]).map(function(card){
+      const available = ltAvailableFor(card, dateStr);
+      const cashback = ltCardCashback(card, category);
+      const affinity = ltHistoryAffinity(card.id, category);
+      const noInterest = ltCardNoInterest(card);
+      let score = 0;
+      const reasons=[];
+      if(amount>0){
+        if(available >= amount){
+          score += 35;
+          reasons.push('limite disponível suficiente');
+        }else{
+          score -= 80;
+          reasons.push('limite apertado para esse valor');
+        }
+        const slack = available - amount;
+        score += Math.max(0, Math.min(18, slack/500));
+      }else{
+        score += Math.min(15, available/1500);
+      }
+      if(cashback>0){
+        score += Math.min(24, cashback*12);
+        reasons.push('cashback mais favorável');
+      }
+      if(affinity>0){
+        score += affinity;
+        reasons.push('bom histórico para essa categoria');
+      }
+      if(inst>1){
+        if(noInterest){
+          score += 14;
+          reasons.push('parcelamento sem juros habilitado');
+        }else{
+          score -= 8;
+        }
+      }
+      if(card.id===currentId) score += 2;
+      return {card:card, score:Math.round(score), available:available, cashback:cashback, affinity:affinity, reasons:reasons};
+    }).sort(function(a,b){ return b.score-a.score; });
+  }
+  function ltApplySuggestedCard(cardId){
+    var sel=document.getElementById('lt-card');
+    if(!sel) return;
+    sel.value = cardId;
+    try{ if(typeof window.ltUpdateGradient==='function') ltUpdateGradient(); }catch(e){}
+    try{ if(typeof window.updateLtPortador==='function') updateLtPortador(); }catch(e){}
+    try{ if(typeof window.syncLtCardFilter==='function') syncLtCardFilter(); }catch(e){}
+    try{ if(typeof window.ltRefreshList==='function') ltRefreshList(); }catch(e){}
+    try{ if(typeof window.ltUpdateInvoiceInsights==='function') ltUpdateInvoiceInsights(); }catch(e){}
+    try{ window.ltRefreshCardSuggestion(); }catch(e){}
+  }
+  window.ltRefreshCardSuggestion = function(){
+    var mount = document.getElementById('lt-card-suggestion');
+    if(!mount) return;
+    var amount = Number((document.getElementById('lt-amount')||{}).value||0);
+    var cat = (document.getElementById('lt-cat')||{}).value || '';
+    if(!amount && !cat){
+      mount.innerHTML = '<div class="lt-sg-empty">Preencha <strong>valor</strong> e/ou <strong>categoria</strong> para o app sugerir o melhor cartão.</div>';
+      return;
+    }
+    var ranked = ltSuggestCards();
+    if(!ranked.length){
+      mount.innerHTML = '<div class="lt-sg-empty">Nenhum cartão elegível encontrado.</div>';
+      return;
+    }
+    var best = ranked[0];
+    var others = ranked.slice(1,3);
+    var reason = best.reasons.length ? best.reasons.slice(0,3).join(' · ') : 'melhor combinação entre limite e histórico';
+    mount.innerHTML = ''+
+      '<div class="lt-sg-head">'+
+        '<div class="lt-sg-title">Sugestão inteligente</div>'+
+        '<div class="lt-sg-badge">Fase 1</div>'+
+      '</div>'+
+      '<div class="lt-sg-main">'+
+        '<div class="lt-sg-card">'+
+          '<div>'+
+            '<div class="lt-sg-name">'+best.card.name+'</div>'+
+            '<div class="lt-sg-reason">'+reason+'. Disponível aproximado: <strong>'+(typeof fmtR==='function'?fmtR(best.available):best.available)+'</strong>.</div>'+
+          '</div>'+
+          '<div class="lt-sg-score">Score '+best.score+'</div>'+
+        '</div>'+
+        '<div class="lt-sg-actions">'+
+          '<button type="button" class="lt-sg-btn primary" onclick="ltApplySuggestedCard(''+best.card.id+'')">Usar sugestão</button>'+
+          '<button type="button" class="lt-sg-btn" onclick="ltRefreshCardSuggestion()">Recalcular</button>'+
+        '</div>'+
+      '</div>';
+    if(others.length){
+      var sec=document.createElement('div');
+      sec.className='lt-sg-secondary';
+      sec.innerHTML='<div>Outras boas opções</div>';
+      var list=document.createElement('div');
+      list.className='lt-sg-list';
+      others.forEach(function(item){
+        var chip=document.createElement('button');
+        chip.type='button';
+        chip.className='lt-sg-chip';
+        chip.title=(item.reasons[0]||'Boa alternativa')+' · Disponível '+(typeof fmtR==='function'?fmtR(item.available):item.available);
+        chip.innerHTML='<span>'+item.card.name+'</span><strong>'+item.score+'</strong>';
+        chip.onclick=function(){ ltApplySuggestedCard(item.card.id); };
+        list.appendChild(chip);
+      });
+      sec.appendChild(list);
+      mount.appendChild(sec);
+    }
+  };
+  window.ltApplySuggestedCard = ltApplySuggestedCard;
+
+  function ensureSuggestionBox(){
+    var cardSelect = document.getElementById('lt-card');
+    if(!cardSelect) return;
+    var wrap = document.getElementById('lt-card-suggestion-wrap');
+    if(wrap) return;
+    var cardBlock = cardSelect.closest('div');
+    if(!cardBlock || !cardBlock.parentElement) return;
+    wrap = document.createElement('div');
+    wrap.id = 'lt-card-suggestion-wrap';
+    wrap.innerHTML = '<div id="lt-card-suggestion"></div>';
+    cardBlock.parentElement.insertBefore(wrap, cardBlock.nextSibling);
+  }
+  function bindSuggestionEvents(){
+    ['lt-amount','lt-date','lt-inst','lt-card','lt-cat','lt-desc'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el || el.dataset.sgBound==='1') return;
+      var evt = (id==='lt-card' || id==='lt-date' || id==='lt-cat') ? 'change' : 'input';
+      el.addEventListener(evt, function(){ setTimeout(function(){ try{ window.ltRefreshCardSuggestion(); }catch(e){} }, 0); });
+      if(evt!=='input') el.addEventListener('input', function(){ setTimeout(function(){ try{ window.ltRefreshCardSuggestion(); }catch(e){} }, 0); });
+      el.dataset.sgBound='1';
+    });
+  }
+  function afterRenderLancamentos(){
+    ensureSuggestionBox();
+    bindSuggestionEvents();
+    setTimeout(function(){ try{ window.ltRefreshCardSuggestion(); }catch(e){} }, 20);
+  }
+  var oldRenderLancamentos = window.renderLancamentos;
+  if(typeof oldRenderLancamentos === 'function'){
+    window.renderLancamentos = function(el){
+      var r = oldRenderLancamentos.apply(this, arguments);
+      try{ afterRenderLancamentos(); }catch(e){ console.warn('Sugestão inteligente falhou', e); }
+      return r;
+    };
+  }
+  var oldLtInstPrev = window.ltInstPrev;
+  if(typeof oldLtInstPrev === 'function'){
+    window.ltInstPrev = function(){
+      var r = oldLtInstPrev.apply(this, arguments);
+      try{ window.ltRefreshCardSuggestion(); }catch(e){}
+      return r;
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){ try{ afterRenderLancamentos(); }catch(e){} }, 200);
+  });
+})();
 </script>
 
 </body>
@@ -19847,6 +20446,59 @@ body.fpanel-focus-mode .sidebar {
      MODAL: RELATÓRIO DE HISTÓRICO DE COMPRAS
      Adicionado como feature extra — não altera código existente
      ══════════════════════════════════════════════════════════════ -->
+
+<div id="modal-ocrfatura" class="modal-overlay" style="z-index:410" onclick="closeOuter(event,'ocrfatura')">
+  <div class="modal" style="max-width:980px;width:min(980px,96vw)">
+    <div class="mhd">
+      <div>
+        <div class="modal-title">🧾 Importar fatura (OCR fase 1)</div>
+        <div class="modal-sub">Envie uma imagem ou PDF. O app extrai linhas de compra, identifica parcelas e cria lançamentos após sua confirmação.</div>
+      </div>
+      <button class="close-x" onclick="closeModal('ocrfatura')">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:320px 1fr;gap:14px;align-items:start">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="field">
+          <label>Cartão de destino</label>
+          <select id="ocr-card" class="input"></select>
+        </div>
+        <div class="field">
+          <label>Arquivo da fatura</label>
+          <input id="ocr-file" class="input" type="file" accept="image/*,application/pdf" onchange="ocrHandleFile(event)">
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">Fase 1: imagem ou PDF. O app extrai e deixa você revisar antes de importar.</div>
+        </div>
+        <div class="field">
+          <label>Resumo detectado</label>
+          <div id="ocr-meta" style="padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg3);font-size:12px;color:var(--text2)">
+            Nenhum arquivo processado ainda.
+          </div>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <div id="ocr-status" style="padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);font-size:12px;color:var(--text2)">Aguardando arquivo.</div>
+        </div>
+        <div class="field">
+          <label>Texto bruto (referência)</label>
+          <textarea id="ocr-raw" class="input" style="min-height:180px;font-family:var(--mono);font-size:11px" placeholder="O texto extraído aparecerá aqui para conferência."></textarea>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="font-size:12px;color:var(--text3);font-weight:700">Prévia de lançamentos detectados</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" type="button" onclick="ocrSelectAll(true)">Selecionar tudo</button>
+            <button class="btn" type="button" onclick="ocrSelectAll(false)">Limpar seleção</button>
+            <button class="btn primary" type="button" onclick="ocrImportSelected()">Importar selecionados</button>
+          </div>
+        </div>
+        <div id="ocr-list" style="border:1px solid var(--border);border-radius:var(--rl);background:var(--bg2);min-height:420px;max-height:62vh;overflow:auto;padding:8px">
+          <div style="padding:16px;color:var(--text3);font-size:12px">Nenhum lançamento extraído ainda.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="modal-hist-relatorio" class="modal-overlay" style="z-index:400" onclick="if(event.target===this)closeHistRelatorio()">
   <div class="modal" style="max-width:760px;width:100%;max-height:92vh;overflow-y:auto;padding:0">
     <!-- CABEÇALHO FIXO -->
@@ -20530,7 +21182,10 @@ function hrPrint(){
   }
   const{cardId,from,to,type,txs,estornoTxs=[],months,totalDeb,totalCr,countTx,avgMonth,cardMap,portador}=d;
   const appS=_hrGetS();
-  const cardName=cardId?((appS&&appS.cards)||[]).find(c=>c.id===cardId)?.name||'':'Todos os cartões';
+  const selectedCard=cardId?((appS&&appS.cards)||[]).find(c=>c.id===cardId):null;
+  const cardName=selectedCard?.name|| (cardId?'':'Todos os cartões');
+  const autoDebitBadge=selectedCard?.autoDebit?'<br><span style="display:inline-block;margin-top:4px;padding:3px 8px;border-radius:999px;background:#e7f6ec;color:#146c43;font-size:8pt;font-weight:800;letter-spacing:.04em">Débito automático ativo</span>':'';
+  const autoDebitLine=selectedCard?.autoDebit?'<br>Débito automático: Ativo':'';
   const typeLabel=type==='debit'?'Débitos':type==='credit'?'Créditos':'Débitos e Créditos';
   const portadorLabel=portador?(portador==='__titular__'?'Titular':portador):'Todos os portadores';
   const portadorShow=!!portador;
@@ -20568,9 +21223,9 @@ function hrPrint(){
     <div>
       <div class="pr-logo">Aurum <span>Pro</span></div>
       <div class="pr-title">Relatório de Compras</div>
-      <div class="pr-subtitle">${periodLabel} · ${cardName} · ${typeLabel}${portadorShow?' · '+portadorLabel:''}</div>
+      <div class="pr-subtitle">${periodLabel} · ${cardName} · ${typeLabel}${portadorShow?' · '+portadorLabel:''}${selectedCard?.autoDebit?' · Débito automático':''}</div>
     </div>
-    <div class="pr-meta">Emitido em ${nowStr}<br>Período: ${periodLabel}<br>Cartão: ${cardName}${portadorShow?'<br>Portador: '+portadorLabel:''}</div>
+    <div class="pr-meta">Emitido em ${nowStr}<br>Período: ${periodLabel}<br>Cartão: ${cardName}${autoDebitLine}${portadorShow?'<br>Portador: '+portadorLabel:''}${autoDebitBadge}</div>
   </div>
   <table class="pr-stats"><tr>
     <td class="pr-stat">
@@ -20807,3 +21462,237 @@ function hrPrint(){
   setTimeout(()=>{ document.body.classList.remove('printing-hist-relatorio'); }, 1200);
 }
 </script>
+
+<!-- ===== AURUM SCROLLBAR PREMIUM v1 ===== -->
+<style id="aurum-scrollbar-premium">
+/*
+  Barra de rolagem vertical visível e confortável para uso com mouse.
+  Aplica-se à área de conteúdo principal (.content-scroll) e ao sidebar.
+*/
+
+/* ── Área de conteúdo principal ── */
+.content-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-m) transparent;
+}
+.content-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.content-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.content-scroll::-webkit-scrollbar-thumb {
+  background: var(--gold-m);
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  min-height: 48px;
+}
+.content-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+.content-scroll::-webkit-scrollbar-thumb:active {
+  background: var(--gold-d);
+}
+
+/* ── Sidebar nav (já existia fino, engrossamos um pouco) ── */
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--gold-m);
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+
+/* ── Painel de cards: recua da borda para o scrollbar vertical ficar FORA ── */
+.cards-tray {
+  margin-right: 8px;
+}
+
+/* Classe usada pelo JS para esconder o scrollbar sobre o painel dos cards */
+.content-scroll.hide-vscroll {
+  scrollbar-width: none !important;
+}
+.content-scroll.hide-vscroll::-webkit-scrollbar {
+  width: 0 !important;
+}
+
+/* ── Painel de cards: mantém barra horizontal, sem barra vertical ── */
+.cards-carousel,
+#cardsCarousel {
+  overflow-y: hidden !important;   /* evita barra vertical gerada pelo browser */
+  scrollbar-width: thin !important;
+}
+.cards-carousel::-webkit-scrollbar,
+#cardsCarousel::-webkit-scrollbar {
+  width: 0 !important;    /* sem barra vertical */
+  height: 5px !important; /* mantém barra horizontal */
+}
+.cards-carousel::-webkit-scrollbar-thumb,
+#cardsCarousel::-webkit-scrollbar-thumb {
+  background: var(--border2);
+  border-radius: 99px;
+}
+.cards-carousel::-webkit-scrollbar-track,
+#cardsCarousel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ── Scrollbars dentro de modais / listas ── */
+.modal::-webkit-scrollbar,
+[style*="overflow-y:auto"]::-webkit-scrollbar,
+[style*="overflow-y: auto"]::-webkit-scrollbar {
+  width: 8px;
+}
+.modal::-webkit-scrollbar-thumb,
+[style*="overflow-y:auto"]::-webkit-scrollbar-thumb,
+[style*="overflow-y: auto"]::-webkit-scrollbar-thumb {
+  background: var(--border2);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.modal::-webkit-scrollbar-thumb:hover,
+[style*="overflow-y:auto"]::-webkit-scrollbar-thumb:hover,
+[style*="overflow-y: auto"]::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-m);
+}
+
+/* ── Tema escuro: ajusta cores da track ── */
+body.theme-dark .content-scroll::-webkit-scrollbar-track,
+body.theme-system.is-dark .content-scroll::-webkit-scrollbar-track {
+  background: var(--bg3);
+  border-left-color: var(--border);
+}
+body.theme-dark .content-scroll::-webkit-scrollbar-thumb,
+body.theme-system.is-dark .content-scroll::-webkit-scrollbar-thumb {
+  border-color: var(--bg3);
+}
+
+/* Firefox: content-scroll com largura melhor */
+@supports (scrollbar-width: thin) {
+  .content-scroll {
+    scrollbar-width: auto;
+    scrollbar-color: var(--gold-m) var(--bg3);
+  }
+  .sidebar-nav {
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold-m) transparent;
+  }
+}
+</style>
+<!-- ===== /AURUM SCROLLBAR PREMIUM v1 ===== -->
+
+<!-- ===== AURUM CARDS-VSCROLL HIDE ===== -->
+<script>
+(function(){
+  function init(){
+    var tray = document.querySelector('.cards-tray');
+    var scroll = document.querySelector('.content-scroll');
+    if(!tray || !scroll) return;
+    tray.addEventListener('mouseenter', function(){
+      scroll.classList.add('hide-vscroll');
+    });
+    tray.addEventListener('mouseleave', function(){
+      scroll.classList.remove('hide-vscroll');
+    });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  // Reinit após render do carrossel (caso o tray seja recriado)
+  window.addEventListener('load', function(){ setTimeout(init, 500); });
+})();
+</script>
+<!-- ===== /AURUM CARDS-VSCROLL HIDE ===== -->
+
+<!-- ===== AURUM CARD-THUMB FIX v1 ===== -->
+<style id="aurum-cardthumb-fix">
+/* Corrige cards sumindo por overflow:hidden + translateY do card ativo */
+.cards-tray {
+  overflow: visible !important;
+}
+/* Garante que o carousel não clipa o card ativo que sobe com translateY */
+.cards-carousel,
+#cardsCarousel {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  /* Espaço extra no topo para o card ativo não ser clipado */
+  padding-top: 18px !important;
+  padding-bottom: 14px !important;
+  /* Alinha os cards pela base, não pelo centro, para o card ativo subir visualmente */
+  align-items: flex-end !important;
+}
+/* Garante que card-thumb não some por z-index ou clip inesperado */
+.card-thumb {
+  flex-shrink: 0 !important;
+  position: relative !important;
+}
+</style>
+<script id="aurum-cardthumb-fix-script">
+(function(){
+  /* Remove o conflito de patches de snap que se cancelam mutuamente */
+  var snapScript = document.getElementById('aurum-snap-premium-script');
+  var snapStyle  = document.getElementById('aurum-snap-premium-patch');
+  if(snapScript) snapScript.remove();
+  if(snapStyle)  snapStyle.remove();
+
+  /* Desfaz o wrap duplo de renderCarousel — usa sempre a versão base */
+  /* Aguarda o DOM pronto para garantir que todos os scripts anteriores rodaram */
+  function fixRenderCarousel(){
+    /* Percorre a cadeia de wraps e extrai a função original */
+    var fn = window.renderCarousel;
+    var max = 10;
+    while(fn && fn.__original && max-- > 0){
+      fn = fn.__original;
+    }
+    /* Se a função base foi marcada com __original, restaura */
+    if(fn && fn !== window.renderCarousel){
+      window.renderCarousel = fn;
+    }
+
+    /* Garante overflow correto após cada renderCarousel */
+    var base = window.renderCarousel;
+    if(typeof base === 'function' && !base.__aurumFixApplied){
+      window.renderCarousel = function(){
+        var r = base.apply(this, arguments);
+        requestAnimationFrame(function(){
+          var tray = document.querySelector('.cards-tray');
+          var carousel = document.getElementById('cardsCarousel');
+          if(tray){
+            tray.style.overflow = 'visible';
+          }
+          if(carousel){
+            carousel.style.overflowX = 'auto';
+            carousel.style.overflowY = 'hidden';
+            carousel.style.alignItems = 'flex-end';
+          }
+        });
+        return r;
+      };
+      window.renderCarousel.__aurumFixApplied = true;
+    }
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', fixRenderCarousel);
+  } else {
+    fixRenderCarousel();
+  }
+  window.addEventListener('load', function(){
+    fixRenderCarousel();
+    /* Força um render para aplicar o fix imediatamente */
+    setTimeout(function(){
+      if(typeof window.renderCarousel === 'function') window.renderCarousel();
+    }, 100);
+  });
+})();
+</script>
+<!-- ===== /AURUM CARD-THUMB FIX v1 ===== -->
