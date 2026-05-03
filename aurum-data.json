@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-04-16T01:21:24.498Z",
+  "syncedAt": "2026-05-03T12:48:21.227Z",
   "profile": "u1",
-  "lastModified": "2026-04-16T01:21:02.356Z",
+  "lastModified": "2026-05-03T02:23:21.823Z",
   "data": {
     "cards": [
       {
@@ -29,86 +29,6 @@
         "sortOrder": 0
       },
       {
-        "id": "vs0llp2ohzmnsvu3kq",
-        "name": "Itaú Uniclass",
-        "last4": "7460",
-        "holder": "Carlos",
-        "expiry": "10/30",
-        "limit": 48657,
-        "close": 14,
-        "due": 21,
-        "rate": 14.9,
-        "brand": "Visa",
-        "colorIdx": 8,
-        "dueHistory": [],
-        "limitHistory": [
-          {
-            "limit": 14916,
-            "from": "05/2026"
-          }
-        ],
-        "due2": null,
-        "due2From": null,
-        "cardType": "personal",
-        "corpName": "",
-        "corpReimb": false,
-        "holders": [
-          "Olinda",
-          "Condominio"
-        ],
-        "sortOrder": 1
-      },
-      {
-        "id": "x96p92fwvtmnsutu3c",
-        "name": "Inter",
-        "last4": "2713",
-        "holder": "Carlos",
-        "expiry": "11/29",
-        "limit": 22530,
-        "close": 18,
-        "due": 25,
-        "rate": 14.9,
-        "brand": "Mastercard",
-        "colorIdx": 4,
-        "dueHistory": [],
-        "limitHistory": [],
-        "due2": null,
-        "due2From": null,
-        "cardType": "personal",
-        "corpName": "",
-        "corpReimb": false,
-        "holders": [
-          "Olinda",
-          "Condominio"
-        ],
-        "sortOrder": 2
-      },
-      {
-        "id": "ui6gdqec29mnsvvh7a",
-        "name": "Nubank",
-        "last4": "3952",
-        "holder": "Carlos",
-        "expiry": "12/30",
-        "limit": 7650,
-        "close": 18,
-        "due": 26,
-        "rate": 14.9,
-        "brand": "Visa",
-        "colorIdx": 5,
-        "dueHistory": [],
-        "limitHistory": [],
-        "due2": null,
-        "due2From": null,
-        "cardType": "personal",
-        "corpName": "",
-        "corpReimb": false,
-        "holders": [
-          "Olinda",
-          "Condominio"
-        ],
-        "sortOrder": 3
-      },
-      {
         "id": "0ahds3kadi5imnsvz6b7",
         "name": "Itaú Bussines",
         "last4": "2701",
@@ -128,7 +48,93 @@
         "corpName": "",
         "corpReimb": false,
         "holders": [],
-        "sortOrder": 4
+        "sortOrder": 1
+      },
+      {
+        "id": "vs0llp2ohzmnsvu3kq",
+        "name": "Itaú Uniclass",
+        "last4": "7460",
+        "holder": "Carlos",
+        "expiry": "10/30",
+        "limit": 48657,
+        "close": 14,
+        "due": 21,
+        "rate": 14.9,
+        "brand": "Visa",
+        "colorIdx": 28,
+        "dueHistory": [],
+        "limitHistory": [
+          {
+            "limit": 14916,
+            "from": "05/2026"
+          }
+        ],
+        "due2": null,
+        "due2From": null,
+        "cardType": "personal",
+        "corpName": "",
+        "corpReimb": false,
+        "holders": [
+          "Olinda",
+          "Condominio"
+        ],
+        "sortOrder": 2,
+        "noInterest": false,
+        "autoDebit": false
+      },
+      {
+        "id": "x96p92fwvtmnsutu3c",
+        "name": "Inter",
+        "last4": "2713",
+        "holder": "Carlos",
+        "expiry": "11/29",
+        "limit": 22530,
+        "close": 18,
+        "due": 25,
+        "rate": 14.9,
+        "brand": "Mastercard",
+        "colorIdx": 39,
+        "dueHistory": [],
+        "limitHistory": [],
+        "due2": null,
+        "due2From": null,
+        "cardType": "personal",
+        "corpName": "",
+        "corpReimb": false,
+        "holders": [
+          "Olinda",
+          "Condominio"
+        ],
+        "sortOrder": 3,
+        "noInterest": false,
+        "autoDebit": false
+      },
+      {
+        "id": "ui6gdqec29mnsvvh7a",
+        "name": "Nubank",
+        "last4": "3952",
+        "holder": "Carlos",
+        "expiry": "12/30",
+        "limit": 7650,
+        "close": 18,
+        "due": 26,
+        "rate": 14.9,
+        "brand": "Visa",
+        "colorIdx": 26,
+        "dueHistory": [],
+        "limitHistory": [],
+        "due2": null,
+        "due2From": null,
+        "cardType": "personal",
+        "corpName": "",
+        "corpReimb": false,
+        "holders": [
+          "Olinda",
+          "Condominio"
+        ],
+        "sortOrder": 4,
+        "noInterest": false,
+        "autoDebit": false
       },
       {
         "id": "0q5d9xa6u3rmnvsuk9a",
@@ -141,7 +147,7 @@
         "due": 21,
         "rate": 14.9,
         "brand": "Visa",
-        "colorIdx": 1,
+        "colorIdx": 18,
         "dueHistory": [],
         "limitHistory": [],
         "due2": null,
@@ -150,8 +156,7 @@
         "corpName": "",
         "corpReimb": false,
         "holders": [],
-        "sortOrder": 5,
-        "noInterest": false
+        "sortOrder": 5
       }
     ],
     "tx": [
@@ -12775,7 +12780,7 @@
         "estorno": 0
       }
     ],
-    "activeCardId": null,
+    "activeCardId": "vs0llp2ohzmnsvu3kq",
     "budgets": {},
     "cashbacks": {},
     "monthlyGoal": 0,
