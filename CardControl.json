@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-05-03T15:38:28.922Z",
+  "syncedAt": "2026-05-04T10:59:57.398Z",
   "profile": "u1",
-  "lastModified": "2026-05-03T15:05:55.300Z",
+  "lastModified": "2026-05-04T10:59:48.468Z",
   "data": {
     "cards": [
       {
@@ -12736,6 +12736,102 @@
         "note": "02 Boias elétricas",
         "portador": "",
         "recurring": false
+      },
+      {
+        "id": "oxotdwhf1c9mor37fqy",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "desc": "Tratamento varizes (1/6)",
+        "amount": 52,
+        "type": "debit",
+        "category": "💊 Saúde",
+        "date": "2026-05-04",
+        "invoiceMonth": "2026-05",
+        "totalInst": 6,
+        "instNum": 1,
+        "gid": "1ilzgew1gzujmor37fqx",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "1cwbjq0wyavmor37fqy",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "desc": "Tratamento varizes (2/6)",
+        "amount": 52,
+        "type": "debit",
+        "category": "💊 Saúde",
+        "date": "2026-05-04",
+        "invoiceMonth": "2026-06",
+        "totalInst": 6,
+        "instNum": 2,
+        "gid": "1ilzgew1gzujmor37fqx",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "kupl9xmafemor37fqy",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "desc": "Tratamento varizes (3/6)",
+        "amount": 52,
+        "type": "debit",
+        "category": "💊 Saúde",
+        "date": "2026-05-04",
+        "invoiceMonth": "2026-07",
+        "totalInst": 6,
+        "instNum": 3,
+        "gid": "1ilzgew1gzujmor37fqx",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "6vpwt90vvivmor37fqy",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "desc": "Tratamento varizes (4/6)",
+        "amount": 52,
+        "type": "debit",
+        "category": "💊 Saúde",
+        "date": "2026-05-04",
+        "invoiceMonth": "2026-08",
+        "totalInst": 6,
+        "instNum": 4,
+        "gid": "1ilzgew1gzujmor37fqx",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "gnr02raa3ohmor37fqy",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "desc": "Tratamento varizes (5/6)",
+        "amount": 52,
+        "type": "debit",
+        "category": "💊 Saúde",
+        "date": "2026-05-04",
+        "invoiceMonth": "2026-09",
+        "totalInst": 6,
+        "instNum": 5,
+        "gid": "1ilzgew1gzujmor37fqx",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "fp2rirlisspmor37fqy",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "desc": "Tratamento varizes (6/6)",
+        "amount": 52,
+        "type": "debit",
+        "category": "💊 Saúde",
+        "date": "2026-05-04",
+        "invoiceMonth": "2026-10",
+        "totalInst": 6,
+        "instNum": 6,
+        "gid": "1ilzgew1gzujmor37fqx",
+        "note": "",
+        "portador": "",
+        "recurring": false
       }
     ],
     "payments": [
@@ -12927,7 +13023,7 @@
         "estorno": 0
       }
     ],
-    "activeCardId": "9fpq2c00bmkmnjgpi66",
+    "activeCardId": "0ahds3kadi5imnsvz6b7",
     "budgets": {},
     "cashbacks": {},
     "monthlyGoal": 0,
