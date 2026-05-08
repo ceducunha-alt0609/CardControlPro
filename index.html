@@ -4038,6 +4038,28 @@ function closeMobDrawer(){
 {g:'linear-gradient(145deg,#0c4a6e 0%,#38bdf8 45%,#082f49 100%)',a:'#bae6fd',label:'Sky'},
 {g:'linear-gradient(145deg,#4a2511 0%,#b87333 45%,#241108 100%)',a:'#f6ad7b',label:'Cobre'}
 ];
+
+function sanitizeCardColors(){
+  try{
+    if(!S || !Array.isArray(S.cards) || !Array.isArray(GRADS)) return;
+    S.cards.forEach(function(c){
+      var n=Number(c && c.colorIdx);
+      if(!Number.isFinite(n) || n<0 || n>=GRADS.length) c.colorIdx=0;
+      else c.colorIdx=Math.floor(n);
+    });
+  }catch(e){}
+}
+
+function safeGrad(idx){
+  var fallback={g:'linear-gradient(135deg,#c8922a,#5a3c06)',a:'#c8922a',label:'Aurum',dark:false};
+  try{
+    var n=Number(idx);
+    if(!Number.isFinite(n) || n<0) n=0;
+    n=Math.floor(n);
+    return (Array.isArray(GRADS) && GRADS[n]) ? GRADS[n] : ((Array.isArray(GRADS) && GRADS[0]) ? GRADS[0] : fallback);
+  }catch(e){ return fallback; }
+}
+
 let S = {
 cards:[],tx:[],payments:[],
 activeCardId:null,tab:'invoice',month:curMonth(),
@@ -4679,7 +4701,7 @@ if(!dot||!colorEl||!nameEl) return;
 const c=activeCard();
 const showDot=c&&S.tab!=='settings'&&S.tab!=='charts'&&S.tab!=='annual';
 if(showDot){
-const g=GRADS[c.colorIdx||0];
+const g=safeGrad(c&&c.colorIdx);
 const m=g.g.match(/#[0-9a-fA-F]{6}/);
 colorEl.style.background=m?m[0]:'var(--blue)';
 nameEl.textContent=c.name;
@@ -4723,6 +4745,7 @@ return shouldShow;
 }
 
 function render(){
+sanitizeCardColors();
 renderAlerts();
 renderCarousel();
 renderDetail();
@@ -4763,6 +4786,7 @@ function brandLogo(brand, ghost){
 }
 
 function renderCarousel(){
+sanitizeCardColors();
 const trayEl=document.querySelector('.cards-tray');
 if(trayEl) trayEl.style.display=aurumShouldShowCardsTray(S.tab)?'':'none';
 const el=document.getElementById('cardsCarousel');
@@ -4789,8 +4813,7 @@ const _barGlow = _barFillPct > 85 ? 'rgba(239,68,68,.6)' : _barFillPct > 60 ? 'r
 const _limiteDisp = _effLimit > 0 ? fmtR(Math.max(0, _effLimit - _realUsed)) : '—';
 const _holderShort = (c.holder||'').split(' ')[0] || '';
 // Variáveis de estilo/glow
-const _colorIdx = Number.isFinite(Number(c.colorIdx)) ? Number(c.colorIdx) : 0;
-const g = (Array.isArray(GRADS) && GRADS[_colorIdx]) ? GRADS[_colorIdx] : (Array.isArray(GRADS) && GRADS[0] ? GRADS[0] : {g:'linear-gradient(135deg,#c8922a,#5a3c06)',a:'#c8922a',dark:false});
+const g=safeGrad(c&&c.colorIdx);
 const isActive=c.id===S.activeCardId;
 const glowColor=g.a||"#c9a84c";
 const isCorp=c.cardType==='corp';
@@ -4877,7 +4900,7 @@ const _realUsed=cardCommitted(c.id);
 const _effLimitDetail=effectiveLimit(c,_om2);
 const pct=Math.min(100,_effLimitDetail>0?_realUsed/_effLimitDetail*100:0);
 const barGrad=pct>85?'linear-gradient(90deg,#f97316,#ef4444)':pct>60?'linear-gradient(90deg,#fbbf24,#f97316)':'linear-gradient(90deg,#4ade80,#22c55e)';
-const g=GRADS[c.colorIdx||0];
+const g=safeGrad(c&&c.colorIdx);
 const cur=curMonth();
 // Breakdown: compras atuais vs saldo anterior
 const _today=new Date().toISOString().slice(0,10);
@@ -4935,7 +4958,7 @@ ${totalCards>1&&totalDebt>0?`
       if(cdue<=0) return '';
       const cpct=Math.min(100,card.limit>0?((cms.debits||0)+(cms.carried||0))/card.limit*100:0);
       const ccarried=cms.carried||0;
-      const ccolor=GRADS[card.colorIdx||0].a||'var(--gold)';
+      const ccolor=safeGrad(card&&card.colorIdx).a||'var(--gold)';
       const ctxt=cdue>3000?'var(--red)':'var(--text)';
       const bcolor=cpct>85?'var(--red)':cpct>60?'var(--amber)':'var(--green)';
       return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:0.5px solid var(--border)">'
@@ -5218,7 +5241,7 @@ el.innerHTML=`
 ${renderIntegratedCardsPanel('invoice',{title:'Cartões em destaque',subtitle:'Segue o mês selecionado: mostra o valor a pagar de cada cartão. Pagou, atualiza.',pill:((S.cards||[]).length+' cartões · fatura '+(typeof monthLabel==='function'?monthLabel(S.month):S.month))})}
 <!-- ── PAINEL UNIFICADO (mobile-first) ── -->
 <div class="inv-panel">
-<div style="height:4px;background:${GRADS[c.colorIdx||0].g}"></div>
+<div style="height:4px;background:${safeGrad(c&&c.colorIdx).g}"></div>
 <div class="inv-panel-outer">
 <button class="inv-panel-nav" onclick="prevM()" aria-label="Mês anterior">‹</button>
 <div class="inv-panel-body">
@@ -5555,7 +5578,7 @@ el.innerHTML=`
 <!-- ── COLUNA ESQUERDA: FORMULÁRIO ── -->
 <div style="background:var(--bg2);border:var(--bw) solid var(--border);border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh2)">
 <!-- header com faixa gradiente -->
-<div style="height:4px;background:${GRADS[S.cards.find(c=>c.id===S.activeCardId)?.colorIdx||0]?.g||GRADS[0].g}"></div>
+<div style="height:4px;background:${safeGrad(S.cards.find(c=>c.id===S.activeCardId)?.colorIdx).g}"></div>
 <div style="padding:20px 22px 0">
 <div style="font-family:var(--display);font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px">Novo Lançamento</div>
 <div style="font-size:var(--fs-xs);color:var(--text3);margin-bottom:18px">Preencha os dados abaixo</div>
@@ -5901,7 +5924,7 @@ const card = getCard(cardId);
 if(!card) return;
 const bar = document.querySelector('#tabContent .inv-panel-top')?.previousElementSibling;
 const gradBar = document.querySelector('#tabContent [style*="height:4px"]');
-if(gradBar) gradBar.style.background = GRADS[card.colorIdx||0]?.g || GRADS[0].g;
+if(gradBar) gradBar.style.background = safeGrad(card&&card.colorIdx).g;
 }
 function ltInstPrev(){
 const amt = parseFloat(document.getElementById('lt-amount')?.value)||0;
@@ -6597,7 +6620,7 @@ profiles.forEach(p => {
   <!-- Cards de fatura -->
   <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
     ${pCardSummaries.map(({card,ms})=>{
-      const g = GRADS[card.colorIdx||0];
+      const g = safeGrad(card&&card.colorIdx);
       const pct = Math.min(100, card.limit>0?(ms.debits||0)/card.limit*100:0);
       const barColor = pct>85?'var(--red)':pct>60?'var(--amber)':'var(--green)';
       return `<div style="background:var(--bg2);border-radius:var(--r);border:var(--bw) solid var(--border);overflow:hidden">
@@ -7702,7 +7725,7 @@ ${S.cards.length===0?`<div class="es-wrap">
 <p class="es-sub">Adicione seu primeiro cartão para começar</p>
 </div>`:
 S.cards.map(c=>{
-const g=GRADS[c.colorIdx||0];
+const g=safeGrad(c&&c.colorIdx);
 return `<div class="set-card" draggable="true"
   ondragstart="cardDragStart(event,'${c.id}')"
   ondragover="cardDragOver(event)"
@@ -9164,7 +9187,7 @@ doc.text('RESUMO POR CARTÃO',12,y);y+=6;
 activeCards.forEach(c=>{
 const s=monthSummary(c.id,m);
 totalDebits+=s.debits;totalPaid+=s.paid;totalDue+=s.due;
-const g=GRADS[c.colorIdx||0];
+const g=safeGrad(c&&c.colorIdx);
 const accentObj=hexToRgb(g?.a||'#0062cc')||{r:0,g:98,b:204};
 doc.setFillColor(accentObj.r,accentObj.g,accentObj.b);
 doc.rect(12,y,3,14,'F');
@@ -9254,7 +9277,7 @@ let grandTotal=0,grandPaid=0,grandDue=0;
 S.cards.forEach(c=>{
 const s=monthSummary(c.id,cur);
 grandTotal+=s.debits;grandPaid+=s.paid;grandDue+=s.due;
-const g=GRADS[c.colorIdx||0];
+const g=safeGrad(c&&c.colorIdx);
 const acc=hexToRgb(g?.a||'#0062cc')||{r:200,g:146,b:42};
 doc.setFillColor(acc.r,acc.g,acc.b);doc.rect(30,cy,3,12,'F');
 doc.setFillColor(22,37,64);doc.rect(33,cy,147,12,'F');
@@ -9287,7 +9310,7 @@ doc.text('RESUMO POR CARTÃO — '+new Date(cur+'-01T12:00:00').toLocaleDateStri
 S.cards.forEach(c=>{
 if(y>260){doc.addPage();y=20;}
 const s=monthSummary(c.id,cur);
-const g=GRADS[c.colorIdx||0];
+const g=safeGrad(c&&c.colorIdx);
 const acc=hexToRgb(g?.a||'#0062cc')||{r:0,g:98,b:204};
 doc.setFillColor(acc.r,acc.g,acc.b);doc.rect(12,y,3,18,'F');
 doc.setFillColor(...offwhite);doc.rect(15,y,183,18,'F');
@@ -9354,7 +9377,7 @@ doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...ink3);
 doc.text('AURUM PRO · LANÇAMENTOS',12,8);
 doc.text(c.name.toUpperCase()+' ···· '+c.last4,W-12,8,{align:'right'});
 y=20;
-const g=GRADS[c.colorIdx||0];
+const g=safeGrad(c&&c.colorIdx);
 const acc=hexToRgb(g?.a||'#0062cc')||{r:0,g:98,b:204};
 doc.autoTable({
 startY:y,margin:{left:10,right:10},tableWidth:190,
@@ -9427,7 +9450,7 @@ const W=210;
 const white=[255,255,255],offwhite=[248,248,250],rule=[220,220,228];
 const ink=[20,20,30],ink2=[80,80,100],ink3=[140,140,160];
 const blue=[0,80,180],green=[20,120,80],red=[180,30,30],amber=[160,100,0];
-const g=GRADS[c.colorIdx||0];
+const g=safeGrad(c&&c.colorIdx);
 doc.setFillColor(...white);doc.rect(0,0,W,297,'F');
 const accentObj=hexToRgb(g.a||'#0062cc')||{r:0,g:98,b:204};
 const accentRgb=[accentObj.r,accentObj.g,accentObj.b];
@@ -10179,7 +10202,7 @@ function printCardReport(){
   histData.forEach(d=>Object.entries(d.cats).forEach(([k,v])=>{allCats[k]=(allCats[k]||0)+v;}));
   const topCats=Object.entries(allCats).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const barMax=Math.max(...histData.map(d=>d.total),1);
-  const g=GRADS[card.colorIdx||0];
+  const g=safeGrad(card&&card.colorIdx);
   const accentHex=g?.a||'#0062cc';
   const overMonths=histData.filter(d=>limit>0&&d.total>limit*0.9).length;
 
@@ -10546,7 +10569,7 @@ const amber=cs.getPropertyValue('--amber').trim()||'#c97000';
 const text3=cs.getPropertyValue('--text3').trim()||'#8fa3bc';
 const bg2=cs.getPropertyValue('--bg2').trim()||'#ffffff';
 function cardRgba(idx,alpha=1){
-const g=GRADS[S.cards[idx]?.colorIdx||0];
+const g=safeGrad(S.cards[idx]?.colorIdx);
 const o=hexToRgb(g?.a||blue)||{r:0,g:98,b:204};
 return `rgba(${o.r},${o.g},${o.b},${alpha})`;
 }
@@ -18331,8 +18354,8 @@ function buildPlanCard(c, today){
 
 function getCardColor(c){
   const GRADS_FALLBACK=['#c8922a','#3a7bd5','#3db97a','#e05a4e','#9060d0','#2a9fd0','#06b6d4','#4f46e5','#111111','#6d4c41','#00c6ff','#ffffff','#ff6b81','#facc15','#7b1e3c','#2f3640','#10b981','#38bdf8','#b87333'];
-  if(typeof GRADS!=='undefined'&&GRADS[c.colorIdx||0]){
-    return GRADS[c.colorIdx||0].a||GRADS_FALLBACK[0];
+  if(typeof GRADS!=='undefined'&&safeGrad(c&&c.colorIdx)){
+    return safeGrad(c&&c.colorIdx).a||GRADS_FALLBACK[0];
   }
   return GRADS_FALLBACK[(c.colorIdx||0)%GRADS_FALLBACK.length];
 }
@@ -20015,7 +20038,7 @@ function ghScheduleSync(){
           ? 'Ritmo acima do mês anterior. O painel ajuda a entender rapidamente o que puxou a fatura para cima.'
           : 'Situação controlada. Você pode usar este painel como atalho executivo para acompanhar tendência e risco.';
     return `
-      <div class="card-insights-hero" style="background:${GRADS[c.colorIdx||0].g}">
+      <div class="card-insights-hero" style="background:${safeGrad(c&&c.colorIdx).g}">
         <div class="card-insights-hero-grid">
           <div>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -20074,7 +20097,7 @@ function ghScheduleSync(){
     const sub=document.getElementById('cardInsightsSub');
     const chip=document.getElementById('cardInsightsChip');
     if(!overlay||!drawer||!body||!title||!sub||!chip) return;
-    const g=GRADS[c.colorIdx||0];
+    const g=safeGrad(c&&c.colorIdx);
     title.textContent=c.name||'Cartão';
     sub.textContent='Painel flutuante · '+monthLabel(S.month||curMonth());
     chip.style.background=g.g;
