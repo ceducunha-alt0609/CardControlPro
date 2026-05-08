@@ -12813,7 +12813,7 @@ method:'PUT',
 headers:{'Content-Type':'application/json','X-Master-Key':JB.key},
 body: JSON.stringify(getJbData()),
 });
-if(!res.ok) throw new Error(`HTTP ${res.status}`);
+if(!res.ok) throw new Error(res.status===401?'JSONBin não autorizado (legado desativado; use GitHub Sync)':`HTTP ${res.status}`);
 JB.status='ok'; JB.lastSync=new Date().toISOString();
 saveJbConfig();
 jbLog('✅ Dados enviados para a nuvem');
@@ -12825,6 +12825,11 @@ if(manual) showToast('Erro ao sincronizar: '+err.message,'error');
 }
 if(S.tab==='settings') renderContent();
 }
+
+(function(){
+  window.__jsonbinLegacyDisabledEarly = true;
+  try{ if(typeof S!=='undefined') S.jbAuto=false; }catch(e){}
+})();
 async function jbPull(manual=false){
 if(!JB.key||!JB.binId){ if(manual) showToast('Configure API Key e Bin ID primeiro','error'); return; }
 JB.status='syncing'; renderSyncBtn(); if(S.tab==='settings') renderContent();
@@ -14799,7 +14804,7 @@ if(sessionStorage.getItem('ccp-locked')){
 sessionStorage.removeItem('ccp-locked');
 lockApp();
 }
-if(S.jbAuto && JB.key && JB.binId){
+if(false && S.jbAuto && JB.key && JB.binId){
 const last=JB.lastSync?new Date(JB.lastSync).getTime():0;
 if(Date.now()-last > 5*60*1000) jbPull(false);
 }
@@ -14937,7 +14942,9 @@ setInterval(updateClock, 60000);
 scheduleNotifCheck();
 checkFirstUse();
 }, 400);
-if(JB.key && JB.binId){ jbPull(false); }</script>
+/* JSONBin legado desativado: evitar 401 automático. Use GitHub Sync. */
+try{ if(typeof S!=='undefined') S.jbAuto=false; }catch(e){}
+if(false && JB.key && JB.binId){ jbPull(false); }</script>
 
 <script>
 (function(){
@@ -15906,7 +15913,7 @@ code,.mono{font-family:var(--mono)}
         window.setTab(nav.dataset.tab);
         return;
       }
-    }, {passive:true});
+    }, {passive:false});
   }
 
   // ----- debounce utility -----
