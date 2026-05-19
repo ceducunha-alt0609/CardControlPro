@@ -84,39 +84,78 @@ document.addEventListener('visibilitychange', function(){
 <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="screenshots/splash-2048x2732.png">
 <meta name="apple-mobile-web-app-title" content="Aurum">
 <!-- apple-touch-icon injected by JS when not file:// -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" onerror="console.warn('jsPDF não carregou')"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js" crossorigin="anonymous" onerror="console.warn('jsPDF AutoTable não carregou')"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js" crossorigin="anonymous" onerror="console.warn('pdf.js não carregou');window.pdfjsLib={GlobalWorkerOptions:{}}"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" crossorigin="anonymous" onerror="console.warn('XLSX não carregou')"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" crossorigin="anonymous" onerror="console.warn('Tesseract não carregou');window.Tesseract=null"></script>
-<script>
-if(typeof pdfjsLib !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-}
+<script id="aurum-lazy-libs-ciclo1">
+/* Ciclo 1 Performance: bibliotecas pesadas deixam de bloquear a abertura.
+   Elas são carregadas sob demanda em relatórios, Excel, gráficos e OCR. */
 (function(){
   const originalWarn = console.warn.bind(console);
-  const filteredPdfWarn = function(...args){
+  console.warn = function(...args){
     const msg = String(args[0] || '');
     if(msg.includes('Deprecated API')) return;
     return originalWarn(...args);
   };
-  console.warn = filteredPdfWarn;
-  window.addEventListener('DOMContentLoaded', function(){
-    const missing = [];
-    if(typeof window.Chart === 'undefined') missing.push('Chart.js');
-    if(typeof window.XLSX === 'undefined') missing.push('XLSX');
-    if(typeof window.jsPDF === 'undefined' && !(window.jspdf && window.jspdf.jsPDF)) missing.push('jsPDF');
-    if(typeof window.pdfjsLib === 'undefined') missing.push('pdf.js');
-    if(missing.length){
-      const msg = 'Bibliotecas ausentes: ' + missing.join(', ');
-      window.__aurumDiagnostics = window.__aurumDiagnostics || { errors: [], warnings: [] };
-      window.__aurumDiagnostics.warnings.push({ type: 'libs', message: msg });
-      console.error('[Aurum libs]', msg);
-      if(typeof window.showToast === 'function') {
-        setTimeout(function(){ window.showToast(msg, 'error'); }, 600);
+
+  const CDN = {
+    chart: ['https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js'],
+    xlsx: ['https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'],
+    pdfjs: ['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js'],
+    tesseract: ['https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'],
+    jspdf: [
+      'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js'
+    ]
+  };
+
+  const loaded = {};
+  function already(kind){
+    if(kind === 'chart') return typeof window.Chart !== 'undefined';
+    if(kind === 'xlsx') return typeof window.XLSX !== 'undefined';
+    if(kind === 'pdfjs') return typeof window.pdfjsLib !== 'undefined';
+    if(kind === 'tesseract') return typeof window.Tesseract !== 'undefined' && !!window.Tesseract;
+    if(kind === 'jspdf') return !!(window.jspdf && window.jspdf.jsPDF) || typeof window.jsPDF !== 'undefined';
+    return false;
+  }
+  function inject(src){
+    return new Promise(function(resolve,reject){
+      const existing = document.querySelector('script[data-aurum-lib="' + src + '"]');
+      if(existing){
+        existing.addEventListener('load', resolve, {once:true});
+        existing.addEventListener('error', reject, {once:true});
+        return;
       }
-    }
-  });
+      const s = document.createElement('script');
+      s.src = src;
+      s.defer = true;
+      s.crossOrigin = 'anonymous';
+      s.dataset.aurumLib = src;
+      s.onload = resolve;
+      s.onerror = function(){ reject(new Error('Falha ao carregar ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+  window.__aurumEnsureLib = function(kind){
+    if(already(kind)) return Promise.resolve(true);
+    if(loaded[kind]) return loaded[kind];
+    const list = CDN[kind] || [];
+    loaded[kind] = list.reduce(function(p, src){
+      return p.then(function(){ return inject(src); });
+    }, Promise.resolve()).then(function(){
+      if(kind === 'pdfjs' && window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions){
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+      }
+      return true;
+    }).catch(function(err){
+      console.warn('[Aurum lazy lib]', kind, err && err.message ? err.message : err);
+      window.__aurumDiagnostics = window.__aurumDiagnostics || { errors: [], warnings: [] };
+      window.__aurumDiagnostics.warnings.push({ type:'lazy-lib', lib:kind, message:String(err && err.message || err) });
+      throw err;
+    });
+    return loaded[kind];
+  };
+
+  window.__aurumLazyToast = function(txt, tone){
+    try{ if(typeof window.showToast === 'function') window.showToast(txt, tone || 'success'); }catch(e){}
+  };
 })();
 </script>
 
@@ -1501,7 +1540,6 @@ code,.mono{font-family:var(--mono)}
 </style>
 
 
-<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" crossorigin="anonymous" onerror="console.warn('Chart.js não carregou')"></script>
 <style id="aurum-contrast-hotfix">
 .card-thumb{isolation:isolate;overflow:hidden}
 .card-thumb::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(5,10,18,.18),rgba(5,10,18,.12));pointer-events:none;z-index:1}
@@ -2481,9 +2519,376 @@ body.theme-system.is-dark .aurum-insight-card.is-blue{--ins-accent:#5b8fe0}
 }
 </style>
 
+
+<style id="aurum-ciclo1-performance-css">
+/* Ciclo 1 — Premium leve: preserva identidade visual, reduz custo de pintura no mobile */
+@media (max-width: 768px){
+  body.aurum-premium-lite *,
+  body.aurum-premium-lite *::before,
+  body.aurum-premium-lite *::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    scroll-behavior:auto!important;
+  }
+  body.aurum-premium-lite .bank-ticker-track,
+  body.aurum-premium-lite .bank-live-dot,
+  body.aurum-premium-lite .card-thumb.active::after,
+  body.aurum-premium-lite .card-glow-ring,
+  body.aurum-premium-lite .voice-btn.listening,
+  body.aurum-premium-lite .voice-btn.listening::before{
+    animation:none!important;
+  }
+  body.aurum-premium-lite .modal,
+  body.aurum-premium-lite .panel,
+  body.aurum-premium-lite .card-detail,
+  body.aurum-premium-lite .bank-alert-hero,
+  body.aurum-premium-lite .cards-tray,
+  body.aurum-premium-lite .topbar,
+  body.aurum-premium-lite .bottom-nav{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    box-shadow:0 6px 18px rgba(0,0,0,.16)!important;
+  }
+  body.aurum-premium-lite .card-thumb,
+  body.aurum-premium-lite .nav-item,
+  body.aurum-premium-lite .btn,
+  body.aurum-premium-lite .tool-btn,
+  body.aurum-premium-lite .tx-item{
+    transition:transform .12s ease, opacity .12s ease, border-color .12s ease, background .12s ease!important;
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
+}
+</style>
+<script id="aurum-ciclo1-performance-runtime">
+(function(){
+  function isMobile(){ return window.matchMedia && window.matchMedia('(max-width: 768px)').matches; }
+  function lowMemory(){
+    try{
+      return (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+             (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+    }catch(e){ return false; }
+  }
+  function apply(){
+    const shouldLite = isMobile() || lowMemory();
+    document.body && document.body.classList.toggle('aurum-premium-lite', !!shouldLite);
+    window.__aurumCiclo1 = window.__aurumCiclo1 || {};
+    window.__aurumCiclo1.premiumLite = !!shouldLite;
+  }
+  window.addEventListener('DOMContentLoaded', apply);
+  window.addEventListener('resize', (window.__aurumDebounce || function(fn){return fn;})(apply, 180));
+})();
+</script>
+
+
+
+<style id="aurum-ciclo7-premium-fluido-css">
+/* Ciclo 7 — Premium Fluido
+   Mantém identidade premium com menos custo: efeitos estáticos, animações curtas e sem loops visuais pesados. */
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode){
+  --sh:0 1px 3px rgba(0,0,0,.13),0 6px 18px rgba(0,0,0,.10);
+  --sh2:0 4px 14px rgba(0,0,0,.16),0 10px 28px rgba(0,0,0,.12);
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode),
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) *{
+  scroll-behavior:auto!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) *,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) *::before,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) *::after{
+  animation-duration:.16s!important;
+  animation-iteration-count:1!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bank-ticker-track,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bank-live-dot,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .card-thumb.active::after,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .card-glow-ring,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .voice-btn.listening,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .voice-btn.listening::before,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) [class*="shimmer"],
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) [class*="sheen"],
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) [class*="pulse"]{
+  animation:none!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bank-ticker-track{
+  transform:none!important;
+  will-change:auto!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bank-ticker-shell{
+  overflow-x:auto!important;
+  scrollbar-width:thin;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bank-ticker-shell::before,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bank-ticker-shell::after{
+  opacity:.55!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bank-alert-hero-glow,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .card-glow-ring,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .aurum-bg-glow,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .aurum-glow{
+  display:none!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .modal,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .panel,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .card-detail,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .cards-tray,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .topbar,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .sidebar,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bottom-nav,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bank-alert-hero,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .inv-panel,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .tx-item{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  filter:none!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .card-thumb,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .nav-item,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bn-item,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .btn,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .tool-btn,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .tx-item,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .tab-btn,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .mnb{
+  transition:background-color .12s ease,border-color .12s ease,color .12s ease,opacity .12s ease,transform .12s ease!important;
+  will-change:auto!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .card-thumb:hover{
+  transform:translateY(-2px)!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .card-thumb.active{
+  transform:translateY(-3px) scale(1.01)!important;
+  box-shadow:0 10px 26px rgba(0,0,0,.20),0 0 0 1px var(--card-edge,rgba(255,255,255,.14))!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .nav-item:hover,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bn-item:hover,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .btn:hover,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .tool-btn:hover,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bank-alert-hero:hover,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) #fabBtn:hover{
+  transform:translateY(-1px)!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .bank-alert-hero::after,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .card-thumb::after{
+  opacity:0!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .fpanel-backdrop{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .fpanel{
+  box-shadow:0 14px 42px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.05)!important;
+}
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .content-scroll,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) #tabContent,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .tx-list,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .hist-list,
+body.aurum-premium-fluid:not(.aurum-diagnostic-mode) .cards-carousel{
+  contain:layout paint;
+}
+#visualModeBtn{
+  width:34px;
+  height:34px;
+  border-radius:var(--r);
+  border:calc(var(--bw) * 1.5) solid var(--border);
+  background:var(--bg2);
+  color:var(--text2);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:var(--fs-md2);
+  line-height:1;
+  flex-shrink:0;
+  transition:all .18s;
+  position:relative;
+}
+#visualModeBtn:hover{border-color:var(--gold);background:var(--gold-l);color:var(--gold)}
+#visualModeBtn .visual-mode-dot{
+  position:absolute;
+  right:4px;
+  top:4px;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+  opacity:.9;
+}
+#visualModeShort{
+  position:absolute;
+  left:4px;
+  bottom:2px;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:-.03em;
+  color:var(--text3);
+}
+body.aurum-premium-total #visualModeBtn .visual-mode-dot{background:var(--gold);}
+body.aurum-premium-total #visualModeShort{color:var(--gold);}
+.visual-mode-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  height:24px;
+  padding:0 9px;
+  border-radius:999px;
+  border:1px solid rgba(46,160,91,.35);
+  background:rgba(46,160,91,.10);
+  color:var(--green);
+  font-size:var(--fs-micro);
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+body.aurum-premium-total .visual-mode-pill{
+  border-color:rgba(200,146,42,.35);
+  background:rgba(200,146,42,.10);
+  color:var(--gold);
+}
+body.aurum-diagnostic-mode .visual-mode-pill{display:none!important}
+@media(max-width:768px){
+  #visualModeBtn{width:30px!important;height:30px!important;font-size:var(--fs-sm)!important}
+  .visual-mode-pill{display:none!important}
+}
+</style>
+
+<style id="aurum-diagnostic-mode-css">
+/* Ciclo 6 — Modo Diagnóstico/Operacional
+   Objetivo: desligar efeitos visuais não essenciais para medir se animações/glass/glow causam peso. */
+body.aurum-diagnostic-mode{
+  --sh:none!important;
+  --sh2:none!important;
+}
+body.aurum-diagnostic-mode,
+body.aurum-diagnostic-mode *{
+  scroll-behavior:auto!important;
+}
+body.aurum-diagnostic-mode *,
+body.aurum-diagnostic-mode *::before,
+body.aurum-diagnostic-mode *::after{
+  animation:none!important;
+  transition:none!important;
+  animation-duration:.01ms!important;
+  animation-iteration-count:1!important;
+  filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  text-shadow:none!important;
+  box-shadow:none!important;
+  will-change:auto!important;
+}
+body.aurum-diagnostic-mode .card-thumb::after,
+body.aurum-diagnostic-mode .bank-alert-hero::after,
+body.aurum-diagnostic-mode .bank-alert-hero-glow,
+body.aurum-diagnostic-mode .card-glow-ring,
+body.aurum-diagnostic-mode .aurum-bg-glow,
+body.aurum-diagnostic-mode .aurum-glow,
+body.aurum-diagnostic-mode .shine,
+body.aurum-diagnostic-mode .shimmer,
+body.aurum-diagnostic-mode [class*="glow"],
+body.aurum-diagnostic-mode [class*="sheen"]{
+  display:none!important;
+}
+body.aurum-diagnostic-mode .card-thumb,
+body.aurum-diagnostic-mode .card-thumb:hover,
+body.aurum-diagnostic-mode .card-thumb.active,
+body.aurum-diagnostic-mode .nav-item:hover,
+body.aurum-diagnostic-mode .bn-item:hover,
+body.aurum-diagnostic-mode .btn:hover,
+body.aurum-diagnostic-mode .tool-btn:hover,
+body.aurum-diagnostic-mode .bank-alert-hero:hover,
+body.aurum-diagnostic-mode #fabBtn:hover{
+  transform:none!important;
+}
+body.aurum-diagnostic-mode .bank-ticker-track,
+body.aurum-diagnostic-mode .cards-carousel,
+body.aurum-diagnostic-mode .tx-list,
+body.aurum-diagnostic-mode .hist-list{
+  contain:layout paint!important;
+}
+body.aurum-diagnostic-mode .modal,
+body.aurum-diagnostic-mode .panel,
+body.aurum-diagnostic-mode .card-detail,
+body.aurum-diagnostic-mode .cards-tray,
+body.aurum-diagnostic-mode .topbar,
+body.aurum-diagnostic-mode .sidebar,
+body.aurum-diagnostic-mode .bottom-nav,
+body.aurum-diagnostic-mode .bank-alert-hero,
+body.aurum-diagnostic-mode .inv-panel,
+body.aurum-diagnostic-mode .tx-item,
+body.aurum-diagnostic-mode .card-thumb{
+  box-shadow:none!important;
+  filter:none!important;
+}
+body.aurum-diagnostic-mode #diagnosticModeBtn{
+  border-color:rgba(192,57,43,.72)!important;
+  background:linear-gradient(180deg,rgba(192,57,43,.18),rgba(192,57,43,.08))!important;
+  color:var(--red)!important;
+}
+body.aurum-diagnostic-mode .diagnostic-status-pill{
+  display:inline-flex!important;
+}
+#diagnosticModeBtn{
+  width:34px;
+  height:34px;
+  border-radius:var(--r);
+  border:calc(var(--bw) * 1.5) solid var(--border);
+  background:var(--bg2);
+  color:var(--text2);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:var(--fs-md2);
+  line-height:1;
+  flex-shrink:0;
+  transition:all .18s;
+  position:relative;
+}
+#diagnosticModeBtn:hover{border-color:var(--gold);background:var(--gold-l);color:var(--gold)}
+#diagnosticModeBtn .diag-dot{
+  position:absolute;
+  right:4px;
+  top:4px;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--text3);
+  opacity:.45;
+}
+body.aurum-diagnostic-mode #diagnosticModeBtn .diag-dot{background:var(--red);opacity:1}
+.diagnostic-status-pill{
+  display:none;
+  align-items:center;
+  gap:6px;
+  height:24px;
+  padding:0 9px;
+  border-radius:999px;
+  border:1px solid rgba(192,57,43,.35);
+  background:rgba(192,57,43,.10);
+  color:var(--red);
+  font-size:var(--fs-micro);
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+@media(max-width:768px){
+  #diagnosticModeBtn{width:30px!important;height:30px!important;font-size:var(--fs-sm)!important}
+  .diagnostic-status-pill{display:none!important}
+}
+</style>
+
 </head>
 <script>
-var APP_VERSION = '2.2.2';
+var APP_VERSION = '2.2.5';
 var APP_BUILD   = new Date().toISOString().slice(0,10).replace(/-/g,'.');
 </script>
 <script id="aurum-mobile-postpaint-pwa">
@@ -3361,6 +3766,15 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
             </svg>
           </span>
         </button>
+
+        <button id="visualModeBtn" onclick="toggleVisualMode()" title="Visual: Premium Fluido — clique para alternar com Premium Total" aria-pressed="true">
+          💎<span class="visual-mode-dot"></span><span id="visualModeShort">F</span>
+        </button>
+        <span class="visual-mode-pill" id="visualModePill">Premium fluido</span>
+        <button id="diagnosticModeBtn" onclick="toggleDiagnosticMode()" title="Diagnóstico: desliga animações e efeitos visuais para testar fluidez" aria-pressed="false">
+          🧪<span class="diag-dot"></span>
+        </button>
+        <span class="diagnostic-status-pill" id="diagnosticStatusPill">Diagnóstico ativo</span>
         <button id="quickProfileBtn" onclick="toggleQuickProfileMenu()" title="Troca rápida de perfil">
           <span id="quickProfileBtnAvatar"></span><span id="quickProfileBtnText">Perfis</span>
         </button>
@@ -3408,6 +3822,8 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
           <div id="hamburgerInsights" style="display:grid;gap:6px;margin-bottom:10px"></div>
           <div style="font-size:var(--fs-micro);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:2px 0 6px">Tema</div>
           <div id="hamburgerThemeGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px"></div>
+          <button type="button" class="qb-action" onclick="toggleVisualMode();closeHamburgerPopover()">💎 Alternar Premium Fluido/Total</button>
+          <button type="button" class="qb-action" onclick="toggleDiagnosticMode();closeHamburgerPopover()">🧪 Alternar diagnóstico</button>
           <button type="button" class="qb-action" onclick="showWidgetOverlay();closeHamburgerPopover()">⚡ Resumo rápido</button>
           <button type="button" class="qb-action" onclick="openGlobalSearch();closeHamburgerPopover()">🔍 Busca global</button>
           <button type="button" class="qb-action" onclick="openOcrImport()">🧾 Importar fatura (OCR)</button>
@@ -4863,6 +5279,17 @@ tray.style.display='none';
 return shouldShow;
 }
 
+function scheduleSave(){
+try{
+  if(window.__aurumSaveTimer) clearTimeout(window.__aurumSaveTimer);
+  window.__aurumSaveTimer = setTimeout(function(){
+    window.__aurumSaveTimer = null;
+    try{ save(); }catch(e){ console.warn('[Aurum] save agendado falhou', e); }
+  }, 220);
+}catch(e){
+  try{ save(); }catch(_e){}
+}
+}
 function render(){
 sanitizeCardColors();
 renderAlerts();
@@ -4871,7 +5298,7 @@ renderDetail();
 renderContent();
 renderThemePicker();
 renderTopbarCardDot();
-save();
+scheduleSave();
 }
 function renderUI(){
 renderAlerts();
@@ -9379,7 +9806,10 @@ if(b){b.classList.toggle('open');if(a)a.textContent=b.classList.contains('open')
 }
 async function genMonthlyReport(month){
 const m=month||S.month;
-if(!window.jspdf){showToast('Biblioteca PDF não disponível','error');return;}
+if(!window.jspdf){
+  if(window.__aurumEnsureLib){ showToast('Carregando módulo PDF…','success'); try{ await window.__aurumEnsureLib('jspdf'); }catch(e){ showToast('PDF não carregou — verifique sua conexão','error'); return; } }
+  else { showToast('Biblioteca PDF não disponível','error'); return; }
+}
 const{jsPDF}=window.jspdf;
 if(typeof jsPDF==='undefined'){showToast('PDF não disponível — verifique sua conexão','red');return;}
 const doc=new jsPDF({unit:'mm',format:'a4'});
@@ -9466,7 +9896,10 @@ showToast('📄 Relatório gerado!','success');
 
 // ── FEATURE 4: PDF Consolidado (todos os cartões, múltiplos meses) ──
 async function genConsolidatedReport(){
-if(!window.jspdf){showToast('Biblioteca PDF não disponível','error');return;}
+if(!window.jspdf){
+  if(window.__aurumEnsureLib){ showToast('Carregando módulo PDF…','success'); try{ await window.__aurumEnsureLib('jspdf'); }catch(e){ showToast('PDF não carregou — verifique sua conexão','error'); return; } }
+  else { showToast('Biblioteca PDF não disponível','error'); return; }
+}
 const{jsPDF}=window.jspdf;
 if(typeof jsPDF==='undefined'){showToast('PDF não disponível','red');return;}
 if(!S.cards.length){showToast('Nenhum cartão cadastrado','error');return;}
@@ -9656,7 +10089,10 @@ showToast('📊 Relatório consolidado gerado!','success');
 async function genPDF(){
 const c=activeCard();
 if(!c){showToast('Selecione um cartão primeiro','error');return}
-if(!window.jspdf){showToast('Biblioteca PDF não disponível. Verifique a conexão.','error');return}
+if(!window.jspdf){
+  if(window.__aurumEnsureLib){ showToast('Carregando módulo PDF…','success'); try{ await window.__aurumEnsureLib('jspdf'); }catch(e){ showToast('PDF não carregou — verifique sua conexão','error'); return; } }
+  else { showToast('Biblioteca PDF não disponível. Verifique a conexão.','error'); return; }
+}
 const{jsPDF}=window.jspdf;
 if(typeof jsPDF==='undefined'){showToast('PDF não disponível — verifique sua conexão','red');return;}
 const doc=new jsPDF({unit:'mm',format:'a4'});
@@ -10024,7 +10460,14 @@ a.click();URL.revokeObjectURL(url);
 showToast('📊 CSV exportado','green');
 }
 function exportXLSX(){
-if(!window.XLSX){showToast('Biblioteca XLSX não disponível','error');return;}
+if(!window.XLSX){
+  if(window.__aurumEnsureLib){
+    window.__aurumLazyToast && window.__aurumLazyToast('Carregando Excel…','success');
+    window.__aurumEnsureLib('xlsx').then(function(){ exportXLSX(); }).catch(function(){ showToast('Excel não carregou — verifique sua conexão','error'); });
+    return;
+  }
+  showToast('Biblioteca XLSX não disponível','error');return;
+}
 const c=activeCard();if(!c)return;
 if(typeof XLSX==='undefined'){showToast('Excel não disponível — verifique sua conexão','red');return;}
 const wb=XLSX.utils.book_new();
@@ -10916,7 +11359,20 @@ ${catEntries.map(([cat,amt])=>`
 <div class="chart-legend" id="projLegend"></div>
 <div id="projSummary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px"></div>
 </div>`;
-if(typeof Chart==='undefined'){el.innerHTML+='<div style="padding:20px;text-align:center;color:var(--text3);font-size:var(--fs-sm)">Gráficos indisponíveis — conecte-se à internet</div>';return;}
+if(typeof Chart==='undefined'){
+  el.innerHTML+='<div style="padding:20px;text-align:center;color:var(--text3);font-size:var(--fs-sm)">Carregando gráficos…</div>';
+  if(window.__aurumEnsureLib){
+    window.__aurumEnsureLib('chart').then(function(){
+      try{
+        if(S && S.tab === 'analytics' && typeof render === 'function') render();
+        else if(el && document.body.contains(el)) renderCharts(el);
+      }catch(e){}
+    }).catch(function(){
+      if(el && document.body.contains(el)) el.innerHTML+='<div style="padding:12px;text-align:center;color:var(--red);font-size:var(--fs-sm)">Gráficos indisponíveis — verifique sua conexão</div>';
+    });
+  }
+  return;
+}
 if(_chartInst){try{_chartInst.forEach(ch=>{if(ch&&typeof ch.destroy==='function')ch.destroy();})}catch(e){}}_chartInst=[];
 /* Destrói qualquer instância Chart.js residual nos canvas para evitar "canvas already in use" */
 ['mainChart','lineChart','projChart','donutChart','gastosChart'].forEach(id=>{const cv=document.getElementById(id);if(cv){const prev=Chart.getChart(cv);if(prev)try{prev.destroy()}catch(e){}}});
@@ -20837,8 +21293,14 @@ async function ocrHandleFile(event){
   const file = event && event.target && event.target.files ? event.target.files[0] : null;
   if(!file) return;
   if(typeof Tesseract === 'undefined' || !Tesseract){
-    ocrStatus('OCR indisponível: Tesseract não carregou.', 'error');
-    return;
+    if(window.__aurumEnsureLib){
+      ocrStatus('Carregando motor OCR…');
+      try{ await window.__aurumEnsureLib('tesseract'); }
+      catch(e){ ocrStatus('OCR indisponível: Tesseract não carregou.', 'error'); return; }
+    }else{
+      ocrStatus('OCR indisponível: Tesseract não carregou.', 'error');
+      return;
+    }
   }
   ocrStatus('Processando arquivo… isso pode levar alguns instantes.');
   const raw = document.getElementById('ocr-raw');
@@ -20873,7 +21335,14 @@ async function ocrExtractFromImage(file){
   return await ocrRecognizeDataUrl(dataUrl, 'imagem');
 }
 async function ocrExtractFromPdf(file){
-  if(typeof pdfjsLib === 'undefined') throw new Error('pdf.js indisponível');
+  if(typeof pdfjsLib === 'undefined'){
+    if(window.__aurumEnsureLib){
+      ocrStatus('Carregando leitor de PDF…');
+      await window.__aurumEnsureLib('pdfjs');
+    }else{
+      throw new Error('pdf.js indisponível');
+    }
+  }
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({data: buf}).promise;
   let text = '';
@@ -21447,6 +21916,174 @@ body.theme-dark .hist-active-card-hint button,body.theme-system.is-dark .hist-ac
 })();
 </script>
 <!-- ===== /AURUM HISTORY DEFAULT ACTIVE CARD PATCH v1 ===== -->
+
+
+<script id="aurum-ciclo1-save-flush">
+window.addEventListener('pagehide', function(){
+  try{
+    if(window.__aurumSaveTimer){
+      clearTimeout(window.__aurumSaveTimer);
+      window.__aurumSaveTimer = null;
+      if(typeof save === 'function') save();
+    }
+  }catch(e){}
+});
+</script>
+
+
+
+<script id="aurum-ciclo7-premium-fluido-runtime">
+(function(){
+  'use strict';
+  var KEY = 'aurum_visual_mode';
+  var DEFAULT_MODE = 'fluid';
+
+  function readMode(){
+    try{
+      var v = localStorage.getItem(KEY);
+      return (v === 'total' || v === 'fluid') ? v : DEFAULT_MODE;
+    }catch(e){ return DEFAULT_MODE; }
+  }
+  function writeMode(mode){
+    try{ localStorage.setItem(KEY, mode === 'total' ? 'total' : 'fluid'); }catch(e){}
+  }
+  function updateUi(mode){
+    var fluid = mode !== 'total';
+    var btn = document.getElementById('visualModeBtn');
+    var shortEl = document.getElementById('visualModeShort');
+    var pill = document.getElementById('visualModePill');
+    if(shortEl) shortEl.textContent = fluid ? 'F' : 'T';
+    if(pill) pill.textContent = fluid ? 'Premium fluido' : 'Premium total';
+    if(btn){
+      btn.setAttribute('aria-pressed', fluid ? 'true' : 'false');
+      btn.title = fluid
+        ? 'Visual: Premium Fluido — mais rápido. Clique para Premium Total.'
+        : 'Visual: Premium Total — mais efeitos. Clique para Premium Fluido.';
+    }
+  }
+  function applyMode(mode, silent){
+    if(mode !== 'total') mode = 'fluid';
+    if(!document.documentElement) return;
+    var fluid = mode !== 'total';
+    document.documentElement.classList.toggle('aurum-premium-fluid', fluid);
+    document.documentElement.classList.toggle('aurum-premium-total', !fluid);
+    if(document.body){
+      document.body.classList.toggle('aurum-premium-fluid', fluid);
+      document.body.classList.toggle('aurum-premium-total', !fluid);
+    }
+    try{
+      if(window.Chart && Chart.defaults){
+        Chart.defaults.animation = fluid ? false : undefined;
+        Chart.defaults.responsiveAnimationDuration = fluid ? 0 : undefined;
+      }
+    }catch(e){}
+    writeMode(mode);
+    updateUi(mode);
+    window.__aurumVisualMode = mode;
+    if(!silent && typeof window.showToast === 'function'){
+      window.showToast(fluid ? 'Premium Fluido ativo: visual bonito com máxima fluidez' : 'Premium Total ativo: efeitos completos restaurados', 'success');
+    }
+  }
+  window.setVisualMode = function(mode){ applyMode(mode === 'total' ? 'total' : 'fluid', false); };
+  window.toggleVisualMode = function(){
+    var current = readMode();
+    applyMode(current === 'total' ? 'fluid' : 'total', false);
+  };
+  window.getVisualMode = function(){ return window.__aurumVisualMode || readMode(); };
+  function boot(){
+    applyMode(readMode(), true);
+    setTimeout(function(){ updateUi(readMode()); }, 140);
+    setTimeout(function(){ updateUi(readMode()); }, 750);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot, {passive:true});
+})();
+</script>
+
+<script id="aurum-diagnostic-mode-runtime">
+(function(){
+  'use strict';
+  var KEY = 'aurum_diagnostic_mode_enabled';
+  var measure = { enabledAt: 0, clicks: 0, renders: 0 };
+
+  function readEnabled(){
+    try{ return localStorage.getItem(KEY) === '1'; }catch(e){ return false; }
+  }
+  function writeEnabled(v){
+    try{ localStorage.setItem(KEY, v ? '1' : '0'); }catch(e){}
+  }
+  function updateUi(enabled){
+    var btn = document.getElementById('diagnosticModeBtn');
+    if(btn){
+      btn.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+      btn.title = enabled
+        ? 'Diagnóstico ATIVO: efeitos desligados. Clique para voltar ao visual premium.'
+        : 'Diagnóstico: desliga animações e efeitos visuais para testar fluidez';
+    }
+    var pill = document.getElementById('diagnosticStatusPill');
+    if(pill) pill.style.display = enabled ? 'inline-flex' : '';
+  }
+  function apply(enabled, silent){
+    if(!document.body) return;
+    document.body.classList.toggle('aurum-diagnostic-mode', !!enabled);
+    document.documentElement.classList.toggle('aurum-diagnostic-mode', !!enabled);
+    if(enabled){
+      measure.enabledAt = Date.now();
+      try{
+        if(window.Chart && Chart.defaults){
+          Chart.defaults.animation = false;
+          Chart.defaults.responsiveAnimationDuration = 0;
+        }
+      }catch(e){}
+    }
+    writeEnabled(!!enabled);
+    updateUi(!!enabled);
+    window.__aurumDiagnosticMode = !!enabled;
+    if(!silent && typeof window.showToast === 'function'){
+      window.showToast(enabled ? 'Diagnóstico ativo: efeitos visuais desligados' : 'Diagnóstico desligado: visual premium restaurado', enabled ? 'success' : 'success');
+    }
+  }
+
+  window.setDiagnosticMode = function(enabled){ apply(!!enabled, false); };
+  window.toggleDiagnosticMode = function(){
+    apply(!document.body.classList.contains('aurum-diagnostic-mode'), false);
+  };
+  window.getDiagnosticModeStats = function(){
+    return {
+      active: !!window.__aurumDiagnosticMode,
+      activeSeconds: measure.enabledAt ? Math.round((Date.now() - measure.enabledAt)/1000) : 0,
+      clicks: measure.clicks,
+      renders: measure.renders,
+      mode: window.__aurumDiagnosticMode ? 'operacional/sem efeitos' : 'premium normal'
+    };
+  };
+
+  document.addEventListener('click', function(){ measure.clicks++; }, {capture:true, passive:true});
+
+  function installRenderCounter(){
+    if(typeof window.render === 'function' && !window.render.__aurumDiagnosticWrapped){
+      var base = window.render;
+      var wrapped = function(){
+        measure.renders++;
+        return base.apply(this, arguments);
+      };
+      wrapped.__aurumDiagnosticWrapped = true;
+      window.render = wrapped;
+    }
+  }
+
+  function boot(){
+    apply(readEnabled(), true);
+    installRenderCounter();
+    setTimeout(function(){ updateUi(readEnabled()); installRenderCounter(); }, 120);
+    setTimeout(function(){ updateUi(readEnabled()); installRenderCounter(); }, 700);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot, {passive:true});
+})();
+</script>
 
 </body>
 </html>
@@ -23311,3 +23948,1048 @@ body.theme-system.is-dark .content-scroll::-webkit-scrollbar-thumb {
 })();
 </script>
 <!-- ===== /AURUM CARD-THUMB FIX v1 ===== -->
+
+<!-- ===== AURUM CICLO 2 — RENDERIZAÇÃO INTELIGENTE v1 ===== -->
+<style id="aurum-cycle2-render-css">
+@supports (content-visibility:auto){
+  .tx-item,
+  .inv-panel,
+  .set-acc,
+  .annual-card,
+  .metric-card,
+  .chart-card,
+  .card-detail{
+    content-visibility:auto;
+    contain-intrinsic-size: 92px;
+  }
+  .tx-list,
+  .cards-carousel,
+  #cardsCarousel{
+    contain: layout paint style;
+  }
+}
+body.performance-lite .card-thumb::after,
+body.performance-lite .bank-ticker-track,
+body.performance-lite .bank-live-dot,
+body.performance-lite .card-glow-ring{
+  animation:none!important;
+}
+body.performance-lite .card-thumb,
+body.performance-lite .inv-panel,
+body.performance-lite .card-detail,
+body.performance-lite .bank-alert-hero{
+  transition:transform 120ms ease, opacity 120ms ease, box-shadow 120ms ease!important;
+}
+body.performance-lite .tab-enter{
+  animation:none!important;
+}
+</style>
+<script id="aurum-cycle2-render-script">
+(function(){
+  if(window.__aurumCycle2Installed) return;
+  window.__aurumCycle2Installed = true;
+
+  var C2 = window.__aurumCycle2 = window.__aurumCycle2 || {
+    carouselSig: '',
+    contentSig: '',
+    txIndex: null,
+    txIndexBuiltAt: 0,
+    renderPass: 0,
+    skipCarousel: 0,
+    skipContent: 0
+  };
+
+  function hasState(){
+    try{ return typeof S !== 'undefined' && S && Array.isArray(S.cards); }catch(e){ return false; }
+  }
+  function safeLen(arr){ return Array.isArray(arr) ? arr.length : 0; }
+  function compactCard(c){
+    if(!c) return '';
+    return [c.id,c.name,c.last4,c.holder,c.colorIdx,c.limit,c.due,c.due2,c.due2From,c.close,c.cardType,c.corpName,c.corpReimb,
+      Array.isArray(c.limitHistory)?c.limitHistory.length:0,
+      Array.isArray(c.dueHistory)?c.dueHistory.length:0
+    ].join('~');
+  }
+  function dataMark(){
+    if(!hasState()) return 'nostate';
+    var firstTx = (S.tx&&S.tx[0]) ? [S.tx[0].id,S.tx[0].amount,S.tx[0].invoiceMonth,S.tx[0].date].join('/') : '';
+    var lastTx  = (S.tx&&S.tx.length) ? (function(t){ return [t.id,t.amount,t.invoiceMonth,t.date,t.type].join('/'); })(S.tx[S.tx.length-1]) : '';
+    var firstPay = (S.payments&&S.payments[0]) ? [S.payments[0].id,S.payments[0].amount,S.payments[0].invoiceMonth].join('/') : '';
+    var lastPay  = (S.payments&&S.payments.length) ? (function(p){ return [p.id,p.amount,p.invoiceMonth,p.date].join('/'); })(S.payments[S.payments.length-1]) : '';
+    return [safeLen(S.cards), safeLen(S.tx), safeLen(S.payments), S.lastModified||'', firstTx, lastTx, firstPay, lastPay].join('§');
+  }
+  function carouselSignature(){
+    if(!hasState()) return 'nostate';
+    var cards = (S.cards||[]).map(compactCard).join('||');
+    return ['carousel', S.tab||'', S.month||'', S.activeCardId||'', cards, dataMark(), document.body && document.body.classList.contains('privacy-on')?'p1':'p0'].join('§');
+  }
+  function contentSignature(){
+    if(!hasState()) return 'nostate';
+    return ['content', S.tab||'', S.month||'', S.activeCardId||'', S.invSearch||'', S.invSort||'', S.histSearch||'', S.histSort||'', S.histCard||'', S.histCat||'', S.histPeriod||'', dataMark()].join('§');
+  }
+  function invalidateCalcCaches(){
+    C2.txIndex = null;
+    C2.carouselSig = '';
+    C2.contentSig = '';
+    try{ if(window.__aurumMemo){ window.__aurumMemo.monthSummary = {}; window.__aurumMemo.cardCommitted = {}; } }catch(e){}
+    try{ if(typeof window.__aurumInvalidateMemo === 'function') window.__aurumInvalidateMemo(); }catch(e){}
+    try{ if(typeof _invalidateTxCache === 'function') _invalidateTxCache(); }catch(e){}
+  }
+  window.__aurumCycle2Invalidate = invalidateCalcCaches;
+
+  function buildTxIndex(){
+    var map = Object.create(null);
+    try{
+      (S.tx||[]).forEach(function(t){
+        if(!t) return;
+        var key = String(t.cardId||'') + '|' + String(t.invoiceMonth||'');
+        (map[key] || (map[key]=[])).push(t);
+      });
+      Object.keys(map).forEach(function(k){
+        map[k].sort(function(a,b){
+          var ad=(a.date||'')+'T12:00:00';
+          var bd=(b.date||'')+'T12:00:00';
+          var diff = new Date(ad)-new Date(bd);
+          if(diff!==0) return diff;
+          return String(a.createdAt||'').localeCompare(String(b.createdAt||''));
+        });
+      });
+    }catch(e){}
+    C2.txIndex = map;
+    C2.txIndexBuiltAt = Date.now();
+  }
+
+  function install(){
+    if(!hasState()) return;
+
+    if(typeof window.monthTx === 'function' && !window.monthTx.__aurumCycle2Wrapped){
+      var baseMonthTx = window.monthTx;
+      var fastMonthTx = function(cardId, month){
+        try{
+          if(!C2.txIndex) buildTxIndex();
+          var key = String(cardId||'') + '|' + String(month||'');
+          var arr = C2.txIndex && C2.txIndex[key];
+          return arr ? arr.slice() : [];
+        }catch(e){
+          return baseMonthTx.apply(this, arguments);
+        }
+      };
+      fastMonthTx.__aurumCycle2Wrapped = true;
+      fastMonthTx.__original = baseMonthTx;
+      window.monthTx = fastMonthTx;
+    }
+
+    if(typeof window.renderCarousel === 'function' && !window.renderCarousel.__aurumCycle2Wrapped){
+      var baseCarousel = window.renderCarousel;
+      var smartCarousel = function(force){
+        try{
+          var el = document.getElementById('cardsCarousel');
+          var sig = carouselSignature();
+          var hasCards = el && el.children && el.children.length > 0;
+          var hasEmpty = document.querySelector('.cards-tray-empty,.cards-error-box,.cards-empty-box');
+          var tray = document.querySelector('.cards-tray');
+          if(force !== true && sig === C2.carouselSig && hasCards && !hasEmpty){
+            C2.skipCarousel++;
+            if(tray){
+              tray.style.display = (typeof aurumShouldShowCardsTray === 'function' && !aurumShouldShowCardsTray(S.tab)) ? 'none' : '';
+              tray.style.overflow = 'visible';
+            }
+            if(el){
+              el.style.display='flex';
+              el.style.overflowX='auto';
+              el.style.overflowY='hidden';
+              el.style.alignItems='flex-end';
+            }
+            return;
+          }
+          C2.carouselSig = sig;
+        }catch(e){}
+        C2.txIndex = null;
+        return baseCarousel.apply(this, arguments);
+      };
+      smartCarousel.__aurumCycle2Wrapped = true;
+      smartCarousel.__original = baseCarousel;
+      window.renderCarousel = smartCarousel;
+    }
+
+    if(typeof window.renderContent === 'function' && !window.renderContent.__aurumCycle2Wrapped){
+      var baseContent = window.renderContent;
+      var smartContent = function(force){
+        try{
+          var el = document.getElementById('tabContent');
+          var sig = contentSignature();
+          var canSkip = force !== true && sig === C2.contentSig && el && el.innerHTML && !document.querySelector('.modal-overlay.show,.modal-overlay[style*="display: flex"]');
+          if(canSkip){
+            C2.skipContent++;
+            document.querySelectorAll('.nav-item[data-tab]').forEach(function(b){ b.classList.toggle('active', b.dataset.tab===S.tab); });
+            document.querySelectorAll('.bn-item[data-tab]').forEach(function(b){ b.classList.toggle('active', b.dataset.tab===S.tab); });
+            return;
+          }
+          C2.contentSig = sig;
+        }catch(e){}
+        C2.txIndex = null;
+        return baseContent.apply(this, arguments);
+      };
+      smartContent.__aurumCycle2Wrapped = true;
+      smartContent.__original = baseContent;
+      window.renderContent = smartContent;
+    }
+
+    if(typeof window.render === 'function' && !window.render.__aurumCycle2Wrapped){
+      var baseRender = window.render;
+      var smartRender = function(){
+        C2.renderPass++;
+        C2.txIndex = null;
+        return baseRender.apply(this, arguments);
+      };
+      smartRender.__aurumCycle2Wrapped = true;
+      smartRender.__original = baseRender;
+      window.render = smartRender;
+    }
+
+    if(typeof window.setTab === 'function' && !window.setTab.__aurumCycle2Wrapped){
+      var baseSetTab = window.setTab;
+      var smartSetTab = function(t){
+        try{
+          if(hasState() && t && S.tab === t){
+            var sc = document.querySelector('.content-scroll');
+            if(sc) sc.scrollTo ? sc.scrollTo({top:0, behavior:'smooth'}) : (sc.scrollTop = 0);
+            document.querySelectorAll('.nav-item[data-tab]').forEach(function(el){ el.classList.toggle('active', el.dataset.tab===t); });
+            document.querySelectorAll('.bn-item[data-tab]').forEach(function(el){ el.classList.toggle('active', el.dataset.tab===t); });
+            return;
+          }
+        }catch(e){}
+        C2.txIndex = null;
+        C2.contentSig = '';
+        return baseSetTab.apply(this, arguments);
+      };
+      smartSetTab.__aurumCycle2Wrapped = true;
+      smartSetTab.__original = baseSetTab;
+      window.setTab = smartSetTab;
+    }
+
+    if(typeof window.aurumRefreshPremiumCardPanel === 'function' && !window.aurumRefreshPremiumCardPanel.__aurumCycle2Wrapped){
+      var smartRefresh = function(){
+        try{ if(typeof scheduleSave === 'function') scheduleSave(); }catch(e){}
+        try{ C2.txIndex = null; }catch(e){}
+        try{ if(typeof renderCarousel === 'function') renderCarousel(); }catch(e){}
+        try{ if(typeof renderContent === 'function') renderContent(); }catch(e){}
+        try{ if(typeof renderTopbarCardDot === 'function') renderTopbarCardDot(); }catch(e){}
+        try{ if(typeof renderAlerts === 'function') renderAlerts(); }catch(e){}
+        var tray=document.querySelector('.cards-tray');
+        if(tray && typeof aurumShouldShowCardsTray === 'function') tray.style.display = aurumShouldShowCardsTray(S.tab) ? '' : 'none';
+        var detail=document.getElementById('cardDetail');
+        if(detail){ detail.innerHTML=''; detail.style.display='none'; }
+      };
+      smartRefresh.__aurumCycle2Wrapped = true;
+      window.aurumRefreshPremiumCardPanel = smartRefresh;
+    }
+
+    if(typeof window.save === 'function' && !window.save.__aurumCycle2Wrapped){
+      var baseSave = window.save;
+      var smartSave = function(){
+        invalidateCalcCaches();
+        var r = baseSave.apply(this, arguments);
+        invalidateCalcCaches();
+        return r;
+      };
+      smartSave.__aurumCycle2Wrapped = true;
+      smartSave.__original = baseSave;
+      window.save = smartSave;
+    }
+  }
+
+  function deferredInstall(){
+    install();
+    setTimeout(install, 80);
+    setTimeout(install, 420);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', deferredInstall);
+  else deferredInstall();
+  window.addEventListener('load', function(){ setTimeout(deferredInstall, 120); }, {passive:true});
+})();
+</script>
+<!-- ===== /AURUM CICLO 2 — RENDERIZAÇÃO INTELIGENTE v1 ===== -->
+
+
+<!-- ===== AURUM CICLO 3 — REFATORAÇÃO ESTRUTURAL LEVE v1 ===== -->
+<style id="aurum-cycle3-struct-css">
+/* Ciclo 3: reduz custo de pintura/layout durante reconstruções grandes, sem descaracterizar o visual premium. */
+body.aurum-rendering .card-thumb,
+body.aurum-rendering .tx-item,
+body.aurum-rendering .inv-panel,
+body.aurum-rendering .card-detail,
+body.aurum-rendering .bank-alert-hero,
+body.aurum-rendering .set-acc,
+body.aurum-rendering .tab-enter{
+  transition-duration:0ms!important;
+  animation-duration:0ms!important;
+}
+body.aurum-page-hidden *,
+body.aurum-paused-animations *{
+  animation-play-state:paused!important;
+}
+@supports (content-visibility:auto){
+  .tx-list > .tx-item,
+  .annual-total-card,
+  .budget-row,
+  .sub-item,
+  .history-month,
+  .report-section,
+  .stat-tile,
+  .dash-card{
+    content-visibility:auto;
+    contain-intrinsic-size:96px;
+  }
+  #tabContent,
+  .content-inner,
+  .content-scroll{
+    contain:layout style;
+  }
+}
+body.lite-mode .bank-ticker-track,
+body.low-end-device .bank-ticker-track{
+  animation-duration:64s!important;
+}
+body.lite-mode .card-thumb.active::after,
+body.low-end-device .card-thumb.active::after{
+  animation:none!important;
+}
+body.lite-mode .modal,
+body.low-end-device .modal{
+  backdrop-filter:none!important;
+}
+</style>
+<script id="aurum-cycle3-struct-script">
+(function(){
+  if(window.__aurumCycle3Installed) return;
+  window.__aurumCycle3Installed = true;
+
+  var C3 = window.__aurumCycle3 = window.__aurumCycle3 || {
+    frame:0,
+    pending:false,
+    queued:false,
+    lastFullRender:0,
+    coalesced:0,
+    scheduled:0,
+    syncRenders:0,
+    asyncRenders:0,
+    dataVersion:0
+  };
+
+  function hasState(){
+    try{ return typeof S !== 'undefined' && !!S; }catch(e){ return false; }
+  }
+  function safe(label, fn){
+    try{ if(typeof fn === 'function') return fn(); }
+    catch(e){ console.warn('[Aurum Ciclo 3]', label, e && e.message ? e.message : e); }
+  }
+  function raf(cb){
+    if(window.requestAnimationFrame) return window.requestAnimationFrame(cb);
+    return setTimeout(cb, 16);
+  }
+  function markRendering(){
+    try{
+      document.body.classList.add('aurum-rendering');
+      clearTimeout(C3.renderingTimer);
+      C3.renderingTimer = setTimeout(function(){
+        try{ document.body.classList.remove('aurum-rendering'); }catch(e){}
+      }, 140);
+    }catch(e){}
+  }
+  function invalidateVisualCaches(){
+    C3.dataVersion++;
+    try{ if(window.__aurumCycle2Invalidate) window.__aurumCycle2Invalidate(); }catch(e){}
+    try{
+      if(window.__aurumCycle2){
+        window.__aurumCycle2.carouselSig = '';
+        window.__aurumCycle2.contentSig = '';
+        window.__aurumCycle2.txIndex = null;
+      }
+    }catch(e){}
+  }
+  window.__aurumCycle3Invalidate = invalidateVisualCaches;
+
+  function runBaseRender(baseRender, ctx, args, asyncMode){
+    if(C3.pending){
+      C3.queued = true;
+      C3.coalesced++;
+      return;
+    }
+    C3.pending = true;
+    markRendering();
+    try{
+      if(asyncMode) C3.asyncRenders++; else C3.syncRenders++;
+      return baseRender.apply(ctx || window, args || []);
+    }finally{
+      C3.pending = false;
+      if(C3.queued){
+        C3.queued = false;
+        if(!C3.frame){
+          C3.frame = raf(function(){
+            C3.frame = 0;
+            try{ runBaseRender(baseRender, ctx, args, true); }catch(e){}
+          });
+        }
+      }
+    }
+  }
+
+  function install(){
+    if(!hasState()) return;
+
+    if(typeof window.render === 'function' && !window.render.__aurumCycle3Wrapped){
+      var baseRender = window.render;
+      var smartRender = function(opts){
+        opts = opts || {};
+        var forceSync = opts === true || opts.sync === true || window.__aurumForceSyncRender;
+        var now = (window.performance && performance.now) ? performance.now() : Date.now();
+        /* Chamadas de render em rajada viram 1 render por frame. Isso reduz travadas ao trocar cartão/guia. */
+        if(!forceSync && (now - C3.lastFullRender) < 24){
+          C3.coalesced++;
+          if(!C3.frame){
+            C3.scheduled++;
+            C3.frame = raf(function(){
+              C3.frame = 0;
+              C3.lastFullRender = (window.performance && performance.now) ? performance.now() : Date.now();
+              runBaseRender(baseRender, this, [], true);
+            });
+          }
+          return;
+        }
+        C3.lastFullRender = now;
+        return runBaseRender(baseRender, this, arguments, false);
+      };
+      smartRender.__aurumCycle3Wrapped = true;
+      smartRender.__original = baseRender;
+      window.render = smartRender;
+    }
+
+    if(typeof window.renderUI === 'function' && !window.renderUI.__aurumCycle3Wrapped){
+      var baseRenderUI = window.renderUI;
+      var smartRenderUI = function(opts){
+        opts = opts || {};
+        var forceSync = opts === true || opts.sync === true;
+        if(forceSync) return baseRenderUI.apply(this, arguments);
+        if(C3.frame){ C3.coalesced++; return; }
+        C3.scheduled++;
+        C3.frame = raf(function(){
+          C3.frame = 0;
+          markRendering();
+          baseRenderUI();
+        });
+      };
+      smartRenderUI.__aurumCycle3Wrapped = true;
+      smartRenderUI.__original = baseRenderUI;
+      window.renderUI = smartRenderUI;
+    }
+
+    if(typeof window.save === 'function' && !window.save.__aurumCycle3Wrapped){
+      var baseSave = window.save;
+      var smartSave = function(){
+        invalidateVisualCaches();
+        return baseSave.apply(this, arguments);
+      };
+      smartSave.__aurumCycle3Wrapped = true;
+      smartSave.__original = baseSave;
+      window.save = smartSave;
+    }
+
+    if(typeof window.focusTickerCard === 'function' && !window.focusTickerCard.__aurumCycle3Wrapped){
+      var baseFocusTickerCard = window.focusTickerCard;
+      window.focusTickerCard = function(cardId){
+        /* Mantém comportamento original, mas permite que renders repetidos internos sejam unidos pelo wrapper acima. */
+        return baseFocusTickerCard.apply(this, arguments);
+      };
+      window.focusTickerCard.__aurumCycle3Wrapped = true;
+      window.focusTickerCard.__original = baseFocusTickerCard;
+    }
+
+    if(typeof window.refreshInvoiceMonthUI === 'function' && !window.refreshInvoiceMonthUI.__aurumCycle3Wrapped){
+      var baseRefreshInvoiceMonthUI = window.refreshInvoiceMonthUI;
+      window.refreshInvoiceMonthUI = function(){
+        invalidateVisualCaches();
+        markRendering();
+        return baseRefreshInvoiceMonthUI.apply(this, arguments);
+      };
+      window.refreshInvoiceMonthUI.__aurumCycle3Wrapped = true;
+      window.refreshInvoiceMonthUI.__original = baseRefreshInvoiceMonthUI;
+    }
+
+    if(typeof window.launchFireworks === 'function' && !window.launchFireworks.__aurumCycle3Wrapped){
+      var baseFireworks = window.launchFireworks;
+      window.launchFireworks = function(){
+        try{
+          if(document.body.classList.contains('lite-mode') || document.body.classList.contains('low-end-device') || document.body.classList.contains('reduced-motion')){
+            return;
+          }
+        }catch(e){}
+        return baseFireworks.apply(this, arguments);
+      };
+      window.launchFireworks.__aurumCycle3Wrapped = true;
+      window.launchFireworks.__original = baseFireworks;
+    }
+
+    if(typeof window.setTab === 'function' && !window.setTab.__aurumCycle3Wrapped){
+      var baseSetTab = window.setTab;
+      window.setTab = function(t){
+        invalidateVisualCaches();
+        markRendering();
+        return baseSetTab.apply(this, arguments);
+      };
+      window.setTab.__aurumCycle3Wrapped = true;
+      window.setTab.__original = baseSetTab;
+    }
+  }
+
+  function installSoon(){
+    install();
+    setTimeout(install, 60);
+    setTimeout(install, 300);
+    setTimeout(install, 900);
+  }
+
+  try{
+    document.addEventListener('visibilitychange', function(){
+      document.body.classList.toggle('aurum-page-hidden', document.visibilityState === 'hidden');
+    }, {passive:true});
+    window.addEventListener('blur', function(){ document.body.classList.add('aurum-paused-animations'); }, {passive:true});
+    window.addEventListener('focus', function(){ document.body.classList.remove('aurum-paused-animations'); }, {passive:true});
+  }catch(e){}
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installSoon);
+  else installSoon();
+  window.addEventListener('load', function(){ setTimeout(installSoon, 120); }, {passive:true});
+})();
+</script>
+<!-- ===== /AURUM CICLO 3 — REFATORAÇÃO ESTRUTURAL LEVE v1 ===== -->
+
+
+<!-- ===== AURUM CICLO 4 — FLUXO LEVE + HISTÓRICO PROGRESSIVO v1 ===== -->
+<style id="aurum-cycle4-flow-css">
+/* Ciclo 4: reduz DOM pesado em histórico, diminui memória de composição no mobile e mantém a estética premium. */
+.aurum-history-status{
+  margin:12px 0 20px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  background:var(--bg2);
+  color:var(--text3);
+  font-size:var(--fs-xs);
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.aurum-history-status strong{color:var(--text2)}
+.aurum-history-loader{
+  width:18px;height:18px;border-radius:50%;
+  border:2px solid var(--border);
+  border-top-color:var(--gold);
+  animation:aurumHistSpin .85s linear infinite;
+  flex:0 0 auto;
+}
+@keyframes aurumHistSpin{to{transform:rotate(360deg)}}
+@supports (content-visibility:auto){
+  .history-month,
+  .tx-list > .tx-item{
+    content-visibility:auto;
+    contain-intrinsic-size:96px;
+  }
+}
+@media (max-width:768px){
+  body.aurum-premium-lite .card-thumb,
+  body.aurum-premium-lite .tx-item,
+  body.aurum-premium-lite .nav-item,
+  body.aurum-premium-lite .bn-item,
+  body.aurum-premium-lite .btn,
+  body.aurum-premium-lite .tool-btn{
+    will-change:auto!important;
+  }
+  body.aurum-premium-lite .card-thumb,
+  body.aurum-premium-lite .bank-alert-hero,
+  body.aurum-premium-lite .inv-panel,
+  body.aurum-premium-lite .card-detail{
+    filter:none!important;
+  }
+  body.aurum-premium-lite .aurum-history-loader{animation:none!important}
+}
+</style>
+<script id="aurum-cycle4-flow-script">
+(function(){
+  if(window.__aurumCycle4Installed) return;
+  window.__aurumCycle4Installed = true;
+
+  var C4 = window.__aurumCycle4 = window.__aurumCycle4 || {
+    histToken:0,
+    histJobs:0,
+    histRenderedMonths:0,
+    histRenderedItems:0,
+    histFullRenders:0,
+    histProgressiveRenders:0,
+    histSearchDebounces:0,
+    saveDebounces:0
+  };
+
+  function hasState(){ try{ return typeof S !== 'undefined' && !!S; }catch(e){ return false; } }
+  function idle(cb){
+    if(window.requestIdleCallback) return window.requestIdleCallback(cb, {timeout:420});
+    return setTimeout(function(){ cb({timeRemaining:function(){return 8;}, didTimeout:true}); }, 24);
+  }
+  function htmlAttr(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  function normalizeTx(t){
+    t = t || {};
+    var dt = String(t.date || '');
+    return Object.assign({}, t, {
+      desc: String(t.desc || 'Lançamento'),
+      category: String(t.category || '🛍️ Outros'),
+      note: String(t.note || ''),
+      type: t.type === 'credit' ? 'credit' : 'debit',
+      amount: Number(t.amount) || 0,
+      invoiceMonth: (typeof t.invoiceMonth === 'string' && /^\d{4}-\d{2}$/.test(t.invoiceMonth)) ? t.invoiceMonth : (dt.slice(0,7) || new Date().toISOString().slice(0,7))
+    });
+  }
+  function renderMonthBlock(m, byM){
+    var rows = byM[m] || [];
+    var debitTotal = rows.reduce(function(s,t){ return s + ((t.type === 'credit' ? -1 : 1) * (Number(t.amount)||0)); }, 0);
+    var label = (typeof monthLabel === 'function') ? monthLabel(m) : m;
+    var total = (typeof fmtR === 'function') ? fmtR(debitTotal) : String(debitTotal.toFixed ? debitTotal.toFixed(2) : debitTotal);
+    var body = rows.map(function(t){ return (typeof txHTML === 'function') ? txHTML(t) : ''; }).join('');
+    return '<div class="history-month" style="margin-bottom:24px" data-hist-month="'+htmlAttr(m)+'">'+
+      '<div style="font-size:var(--fs-micro);letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;justify-content:space-between">'+
+      '<span>'+label+'</span><span>'+total+'</span></div><div class="tx-list">'+body+'</div></div>';
+  }
+
+  var histSearchTimer = 0;
+  window.aurumHistorySearchInput = function(value){
+    if(!hasState()) return;
+    S.histSearch = value || '';
+    C4.histSearchDebounces++;
+    clearTimeout(histSearchTimer);
+    histSearchTimer = setTimeout(function(){
+      try{ if(S.tab === 'history' && typeof renderContent === 'function') renderContent(true); }catch(e){}
+    }, 180);
+  };
+
+  function renderHistoryC4(el){
+    if(!hasState() || !el) return;
+    C4.histToken++;
+    var token = C4.histToken;
+    try{ if(typeof _invalidateTxCache === 'function') _invalidateTxCache(); }catch(e){}
+
+    var q = String(S.histSearch || '').toLowerCase().trim();
+    var sortH = S.histSort || 'date-desc';
+    var filterCard = S.histCard || '';
+    var filterCat = S.histCat || '';
+    var filterPeriod = S.histPeriod || 'all';
+    var all = (Array.isArray(S.tx) ? S.tx : []).map(normalizeTx);
+    var cur = (typeof curMonth === 'function') ? curMonth() : new Date().toISOString().slice(0,7);
+
+    if(filterPeriod === 'thismonth') all = all.filter(function(t){ return t.invoiceMonth === cur; });
+    else if(filterPeriod === 'lastmonth') all = all.filter(function(t){ return t.invoiceMonth === addM(cur,-1); });
+    else if(filterPeriod === '3months') { var min3 = addM(cur,-2); all = all.filter(function(t){ return t.invoiceMonth >= min3; }); }
+    else if(filterPeriod === '6months') { var min6 = addM(cur,-5); all = all.filter(function(t){ return t.invoiceMonth >= min6; }); }
+    else if(filterPeriod === 'year') { var min12 = addM(cur,-11); all = all.filter(function(t){ return t.invoiceMonth >= min12; }); }
+    if(filterCard) all = all.filter(function(t){ return t.cardId === filterCard; });
+    if(filterCat) all = all.filter(function(t){ return (t.category || '') === filterCat; });
+    if(q){
+      var qNum = parseFloat(q.replace(',','.'));
+      all = all.filter(function(t){
+        return t.desc.toLowerCase().includes(q) ||
+          (t.category || '').toLowerCase().includes(q) ||
+          (t.note || '').toLowerCase().includes(q) ||
+          (!isNaN(qNum) && Math.abs(t.amount - qNum) < 0.01) ||
+          ((typeof fmt === 'function') ? fmt(t.amount).includes(q) : false);
+      });
+    }
+    all = (typeof sortTxList === 'function') ? sortTxList(all, sortH) : all;
+
+    var cardOpts = '<option value="">Todos os cartões</option>' + (S.cards || []).map(function(c){
+      return '<option value="'+htmlAttr(c.id)+'" '+(c.id===filterCard?'selected':'')+'>'+htmlAttr(c.name)+'</option>';
+    }).join('');
+    var cats = (typeof getCats === 'function') ? getCats() : [];
+    var catOpts = '<option value="">Todas as categorias</option>' + cats.map(function(c){
+      return '<option value="'+htmlAttr(c)+'" '+(c===filterCat?'selected':'')+'>'+htmlAttr(c)+'</option>';
+    }).join('');
+    var periodOpts = [
+      {v:'all',l:'Todo período'},
+      {v:'thismonth',l:'Este mês'},
+      {v:'lastmonth',l:'Mês passado'},
+      {v:'3months',l:'Últimos 3 meses'},
+      {v:'6months',l:'Últimos 6 meses'},
+      {v:'year',l:'Último ano'}
+    ].map(function(o){ return '<option value="'+o.v+'" '+(filterPeriod===o.v?'selected':'')+'>'+o.l+'</option>'; }).join('');
+    var totalShown = all.reduce(function(s,t){ return s + ((t.type === 'credit' ? -1 : 1) * (Number(t.amount)||0)); }, 0);
+    var searchBar = '<div class="search-bar">'+
+      '<input class="search-input" placeholder="🔍  Buscar..." oninput="aurumHistorySearchInput(this.value)" value="'+htmlAttr(S.histSearch || '')+'">'+
+      '<select class="sort-sel" onchange="S.histPeriod=this.value;renderContent(true)">'+periodOpts+'</select>'+
+      '<select class="sort-sel" onchange="S.histCard=this.value;renderContent(true)">'+cardOpts+'</select>'+
+      '<select class="sort-sel" onchange="S.histCat=this.value;renderContent(true)">'+catOpts+'</select>'+
+      '<select class="sort-sel" onchange="S.histSort=this.value;renderContent(true)">'+
+      '<option value="date-desc" '+(sortH==='date-desc'?'selected':'')+'>Data ↓</option>'+
+      '<option value="date-asc" '+(sortH==='date-asc'?'selected':'')+'>Data ↑</option>'+
+      '<option value="amt-desc" '+(sortH==='amt-desc'?'selected':'')+'>Valor ↓</option>'+
+      '<option value="amt-asc" '+(sortH==='amt-asc'?'selected':'')+'>Valor ↑</option>'+
+      '<option value="name-asc" '+(sortH==='name-asc'?'selected':'')+'>A→Z</option>'+
+      '</select></div>'+
+      (all.length>0 ? '<div style="font-size:var(--fs-xs);color:var(--text3);margin-bottom:10px;padding:0 2px">'+all.length+' lançamento'+(all.length!==1?'s':'')+' · Total líquido: <strong style="color:var(--text2)">'+((typeof fmtR==='function')?fmtR(totalShown):totalShown)+'</strong></div>' : '');
+
+    if(all.length === 0){
+      el.innerHTML = searchBar + '<div class="es-wrap">'+
+        '<svg class="es-svg" width="64" height="64" viewBox="0 0 56 56" fill="none"><circle cx="24" cy="24" r="14" stroke="var(--text3)" stroke-width="1.5" stroke-dasharray="4 2"/><line x1="34" y1="34" x2="48" y2="48" stroke="var(--text3)" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="24" x2="28" y2="24" stroke="var(--text3)" stroke-width="1.5" stroke-linecap="round"/></svg>'+
+        '<p class="es-title">Nenhum resultado</p><p class="es-sub">Tente outros termos ou filtros</p></div>';
+      return;
+    }
+
+    var byM = {};
+    all.forEach(function(t){ (byM[t.invoiceMonth] || (byM[t.invoiceMonth] = [])).push(t); });
+    var months = Object.keys(byM).sort(function(a,b){ return b.localeCompare(a); });
+    var smallList = all.length <= 180 || months.length <= 3;
+    if(smallList){
+      C4.histFullRenders++;
+      el.innerHTML = searchBar + months.map(function(m){ return renderMonthBlock(m, byM); }).join('');
+      C4.histRenderedMonths = months.length;
+      C4.histRenderedItems = all.length;
+      return;
+    }
+
+    C4.histProgressiveRenders++;
+    var isLite = false;
+    try{ isLite = document.body.classList.contains('aurum-premium-lite') || document.body.classList.contains('lite-mode') || document.body.classList.contains('low-end-device') || (matchMedia && matchMedia('(max-width:768px)').matches); }catch(e){}
+    var firstBatch = isLite ? 1 : 2;
+    var batchSize = isLite ? 1 : 2;
+    var idx = 0;
+    el.innerHTML = searchBar + '<div id="aurumHistoryList"></div><div id="aurumHistoryStatus" class="aurum-history-status"><span><strong>Histórico leve ativo</strong> · carregando em partes para manter a fluidez</span><span class="aurum-history-loader"></span></div>';
+    var list = el.querySelector('#aurumHistoryList');
+    var status = el.querySelector('#aurumHistoryStatus');
+
+    function appendSome(initial){
+      if(token !== C4.histToken || !hasState() || S.tab !== 'history') return;
+      var n = initial ? firstBatch : batchSize;
+      var html = '';
+      var items = 0;
+      for(var count=0; count<n && idx<months.length; count++, idx++){
+        var m = months[idx];
+        items += (byM[m] || []).length;
+        html += renderMonthBlock(m, byM);
+      }
+      if(html && list) list.insertAdjacentHTML('beforeend', html);
+      C4.histRenderedMonths = idx;
+      C4.histRenderedItems += items;
+      if(status){
+        if(idx < months.length){
+          status.querySelector('span:first-child').innerHTML = '<strong>Histórico leve ativo</strong> · '+idx+' de '+months.length+' meses carregados';
+        }else{
+          status.remove();
+        }
+      }
+      if(idx < months.length){
+        C4.histJobs++;
+        idle(function(){ appendSome(false); });
+      }
+    }
+    appendSome(true);
+  }
+
+  function install(){
+    if(typeof window.renderHistory === 'function' && !window.renderHistory.__aurumCycle4Wrapped){
+      renderHistoryC4.__aurumCycle4Wrapped = true;
+      renderHistoryC4.__original = window.renderHistory;
+      window.renderHistory = renderHistoryC4;
+    }
+    if(typeof window.scheduleSave === 'function' && !window.scheduleSave.__aurumCycle4Wrapped){
+      var smartScheduleSave = function(){
+        C4.saveDebounces++;
+        try{
+          clearTimeout(window.__aurumSaveTimer);
+          window.__aurumSaveTimer = setTimeout(function(){
+            window.__aurumSaveTimer = null;
+            var doSave = function(){ try{ if(typeof save === 'function') save(); }catch(e){ console.warn('[Aurum Ciclo 4] save agendado falhou', e); } };
+            if(window.requestIdleCallback) window.requestIdleCallback(doSave, {timeout:1500});
+            else doSave();
+          }, 520);
+        }catch(e){ try{ if(typeof save === 'function') save(); }catch(_e){} }
+      };
+      smartScheduleSave.__aurumCycle4Wrapped = true;
+      smartScheduleSave.__original = window.scheduleSave;
+      window.scheduleSave = smartScheduleSave;
+    }
+    if(typeof window.setTab === 'function' && !window.setTab.__aurumCycle4Wrapped){
+      var baseSetTab = window.setTab;
+      window.setTab = function(t){
+        C4.histToken++;
+        C4.histRenderedItems = 0;
+        C4.histRenderedMonths = 0;
+        return baseSetTab.apply(this, arguments);
+      };
+      window.setTab.__aurumCycle4Wrapped = true;
+      window.setTab.__original = baseSetTab;
+    }
+  }
+
+  window.__aurumCycle4Stats = function(){ return Object.assign({}, C4); };
+  function installSoon(){ install(); setTimeout(install,80); setTimeout(install,380); setTimeout(install,1000); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installSoon);
+  else installSoon();
+  window.addEventListener('load', function(){ setTimeout(installSoon, 160); }, {passive:true});
+})();
+</script>
+<!-- ===== /AURUM CICLO 4 — FLUXO LEVE + HISTÓRICO PROGRESSIVO v1 ===== -->
+
+<!-- ===== AURUM CICLO 5 — EVENTOS + MEMÓRIA LEVE v1 ===== -->
+<style id="aurum-cycle5-events-css">
+/* Ciclo 5: evita rajadas de cliques/renders, pausa efeitos fora da tela e reduz custo de imagens/DOM dinâmico. */
+body.aurum-input-burst .card-thumb,
+body.aurum-input-burst .aurum-card-mini,
+body.aurum-input-burst .inv-panel,
+body.aurum-input-burst .tx-item,
+body.aurum-input-burst .tab-enter{
+  transition-duration:0ms!important;
+  animation-duration:0ms!important;
+}
+.aurum-offscreen-pause,
+.aurum-offscreen-pause *{
+  animation-play-state:paused!important;
+}
+@supports (content-visibility:auto){
+  .aurum-offscreen-pause{
+    content-visibility:auto;
+    contain-intrinsic-size:220px;
+  }
+  .modal:not(.show) .tx-list,
+  .modal:not(.show) .chart-wrap,
+  .modal:not(.show) .aurum-cards-panel{
+    content-visibility:auto;
+  }
+}
+@media (max-width:768px){
+  body.aurum-premium-lite .bank-ticker-track,
+  body.aurum-premium-lite .card-thumb.active::after,
+  body.aurum-premium-lite .aurum-card-mini,
+  body.aurum-premium-lite .aurum-card-mini *{
+    animation-duration:0ms!important;
+  }
+  body.aurum-premium-lite .aurum-card-mini,
+  body.aurum-premium-lite .aurum-cards-panel,
+  body.aurum-premium-lite .cards-tray{
+    backdrop-filter:none!important;
+  }
+}
+</style>
+<script id="aurum-cycle5-events-script">
+(function(){
+  if(window.__aurumCycle5Installed) return;
+  window.__aurumCycle5Installed = true;
+
+  var C5 = window.__aurumCycle5 = window.__aurumCycle5 || {
+    duplicateTabs:0,
+    duplicateCards:0,
+    duplicateTickerFocus:0,
+    mutationPasses:0,
+    offscreenObserved:0,
+    optimizedImages:0,
+    renderBursts:0,
+    topbarBatches:0,
+    alertsBatches:0
+  };
+
+  function now(){ return (window.performance && performance.now) ? performance.now() : Date.now(); }
+  function raf(cb){ return window.requestAnimationFrame ? requestAnimationFrame(cb) : setTimeout(cb,16); }
+  function idle(cb, timeout){
+    if(window.requestIdleCallback) return requestIdleCallback(cb,{timeout:timeout||700});
+    return setTimeout(cb, timeout && timeout < 80 ? timeout : 80);
+  }
+  function hasBody(){ return !!document.body; }
+  function markInputBurst(){
+    if(!hasBody()) return;
+    document.body.classList.add('aurum-input-burst');
+    clearTimeout(markInputBurst._t);
+    markInputBurst._t = setTimeout(function(){
+      try{ document.body.classList.remove('aurum-input-burst'); }catch(e){}
+    }, 130);
+  }
+  function invalidateCaches(){
+    try{ if(window.__aurumCycle3Invalidate) window.__aurumCycle3Invalidate(); }catch(e){}
+    try{ if(window.__aurumCycle2Invalidate) window.__aurumCycle2Invalidate(); }catch(e){}
+    try{ if(window.__aurumInvalidateMemo) window.__aurumInvalidateMemo(); }catch(e){}
+  }
+
+  function optimizeMedia(root){
+    try{
+      var scope = root && root.querySelectorAll ? root : document;
+      scope.querySelectorAll('img:not([data-aurum-media-optimized])').forEach(function(img){
+        img.setAttribute('loading', img.getAttribute('loading') || 'lazy');
+        img.setAttribute('decoding', img.getAttribute('decoding') || 'async');
+        img.dataset.aurumMediaOptimized = '1';
+        C5.optimizedImages++;
+      });
+    }catch(e){}
+  }
+
+  var mutationTimer = 0;
+  function scheduleDomOptimize(root){
+    clearTimeout(mutationTimer);
+    mutationTimer = setTimeout(function(){
+      C5.mutationPasses++;
+      optimizeMedia(root || document);
+      observeOffscreen();
+    }, 180);
+  }
+
+  var observed = false;
+  var offscreenObserver = null;
+  function observeOffscreen(){
+    if(observed && offscreenObserver) return;
+    if(!('IntersectionObserver' in window)) return;
+    observed = true;
+    offscreenObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        try{
+          entry.target.classList.toggle('aurum-offscreen-pause', !entry.isIntersecting);
+        }catch(e){}
+      });
+    }, {root:null, rootMargin:'220px 0px', threshold:0.01});
+    document.querySelectorAll('.bank-ticker-shell,.cards-tray,.aurum-cards-panel,.chart-wrap,.dash-chart-card,.history-month').forEach(function(el){
+      if(!el.dataset.aurumOffscreenObserved){
+        el.dataset.aurumOffscreenObserved = '1';
+        offscreenObserver.observe(el);
+        C5.offscreenObserved++;
+      }
+    });
+  }
+
+  function makeFrameBatcher(fnName, statName){
+    var base = window[fnName];
+    if(typeof base !== 'function' || base.__aurumCycle5Wrapped) return;
+    var frame = 0, ctx = null, args = null;
+    var wrapped = function(){
+      ctx = this;
+      args = arguments;
+      if(frame){
+        C5[statName] = (C5[statName]||0) + 1;
+        return;
+      }
+      frame = raf(function(){
+        frame = 0;
+        try{ base.apply(ctx || window, args || []); }catch(e){ console.warn('[Aurum Ciclo 5]', fnName, e && e.message ? e.message : e); }
+      });
+    };
+    wrapped.__aurumCycle5Wrapped = true;
+    wrapped.__original = base;
+    window[fnName] = wrapped;
+  }
+
+  function installWrappers(){
+    if(typeof window.setTab === 'function' && !window.setTab.__aurumCycle5Wrapped){
+      var baseSetTab = window.setTab;
+      var lastTab = '', lastAt = 0;
+      window.setTab = function(t){
+        var ts = now();
+        if(t && t === lastTab && (ts-lastAt) < 140){
+          C5.duplicateTabs++;
+          return;
+        }
+        lastTab = t || '';
+        lastAt = ts;
+        markInputBurst();
+        return baseSetTab.apply(this, arguments);
+      };
+      window.setTab.__aurumCycle5Wrapped = true;
+      window.setTab.__original = baseSetTab;
+    }
+
+    if(typeof window.selectCard === 'function' && !window.selectCard.__aurumCycle5Wrapped){
+      var baseSelectCard = window.selectCard;
+      var lastCard = '', lastCardAt = 0;
+      window.selectCard = function(id){
+        var ts = now();
+        if(id && id === lastCard && (ts-lastCardAt) < 260){
+          C5.duplicateCards++;
+          return;
+        }
+        lastCard = id || '';
+        lastCardAt = ts;
+        markInputBurst();
+        return baseSelectCard.apply(this, arguments);
+      };
+      window.selectCard.__aurumCycle5Wrapped = true;
+      window.selectCard.__original = baseSelectCard;
+    }
+
+    if(typeof window.focusTickerCard === 'function' && !window.focusTickerCard.__aurumCycle5Wrapped){
+      var baseFocusTicker = window.focusTickerCard;
+      var lastFocus = '', lastFocusAt = 0;
+      window.focusTickerCard = function(cardId){
+        var ts = now();
+        if(cardId && cardId === lastFocus && (ts-lastFocusAt) < 260){
+          C5.duplicateTickerFocus++;
+          return;
+        }
+        lastFocus = cardId || '';
+        lastFocusAt = ts;
+        markInputBurst();
+        return baseFocusTicker.apply(this, arguments);
+      };
+      window.focusTickerCard.__aurumCycle5Wrapped = true;
+      window.focusTickerCard.__original = baseFocusTicker;
+    }
+
+    makeFrameBatcher('renderTopbarCardDot','topbarBatches');
+    makeFrameBatcher('renderTopbarCardIndicator','topbarBatches');
+    makeFrameBatcher('renderAlerts','alertsBatches');
+
+    ['saveCard','saveTx','ltSave','savePayment','deleteTx','deleteCard','confirmDeleteCard','restoreBackup','importBackup','resetDemo'].forEach(function(fnName){
+      var base = window[fnName];
+      if(typeof base === 'function' && !base.__aurumCycle5DataWrapped){
+        var wrapped = function(){
+          invalidateCaches();
+          var ret = base.apply(this, arguments);
+          invalidateCaches();
+          return ret;
+        };
+        wrapped.__aurumCycle5DataWrapped = true;
+        wrapped.__original = base;
+        window[fnName] = wrapped;
+      }
+    });
+  }
+
+  function installMutationObserver(){
+    try{
+      if(window.__aurumCycle5MutationObserver) return;
+      var mo = new MutationObserver(function(mutations){
+        var root = document;
+        for(var i=0;i<mutations.length;i++){
+          if(mutations[i].addedNodes && mutations[i].addedNodes.length){ root = mutations[i].target || document; break; }
+        }
+        scheduleDomOptimize(root);
+      });
+      mo.observe(document.documentElement, {childList:true, subtree:true});
+      window.__aurumCycle5MutationObserver = mo;
+    }catch(e){}
+  }
+
+  function boot(){
+    installWrappers();
+    optimizeMedia(document);
+    observeOffscreen();
+    installMutationObserver();
+  }
+
+  function installSoon(){
+    boot();
+    setTimeout(boot, 80);
+    setTimeout(boot, 420);
+    setTimeout(boot, 1200);
+    idle(boot, 1800);
+  }
+
+  window.__aurumCycle5Stats = function(){ return Object.assign({}, C5); };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installSoon);
+  else installSoon();
+  window.addEventListener('load', function(){ setTimeout(installSoon, 120); }, {passive:true});
+})();
+</script>
+<!-- ===== /AURUM CICLO 5 — EVENTOS + MEMÓRIA LEVE v1 ===== -->
+
