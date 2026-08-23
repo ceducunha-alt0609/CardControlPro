@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-08-22T21:00:34.696Z",
+  "syncedAt": "2026-08-23T15:42:33.012Z",
   "profile": "u1",
-  "lastModified": "2026-08-22T20:55:37.461Z",
+  "lastModified": "2026-08-23T15:04:01.004Z",
   "data": {
     "cards": [
       {
@@ -16507,6 +16507,70 @@
         "note": "",
         "portador": "Olinda",
         "recurring": false
+      },
+      {
+        "id": "5sm49eqjsyimt5xr6vg",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre",
+        "amount": 0.02,
+        "type": "credit",
+        "category": "🛒 Alimentação",
+        "date": "2026-08-15",
+        "invoiceMonth": "2026-09",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "hs16d0qv9xmt5xr6vg",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "jh1hg6brsaemt5xrmr8",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Leroy Merlin",
+        "amount": 0.14,
+        "type": "credit",
+        "category": "🏠 Casa/Moradia",
+        "date": "2026-08-18",
+        "invoiceMonth": "2026-09",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "zkbcnza60hqmt5xrmr8",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "i95rtuzsiqmt5xs7lf",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre",
+        "amount": 0.04,
+        "type": "credit",
+        "category": "🛒 Alimentação",
+        "date": "2026-08-18",
+        "invoiceMonth": "2026-09",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "2glyw6lapj3mt5xs7lf",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "ri6i3n26zfmt5xt119",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mar Paulista",
+        "amount": 0.04,
+        "type": "credit",
+        "category": "🛍️ Outros",
+        "date": "2026-08-22",
+        "invoiceMonth": "2026-09",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "qurwbd3td9jmt5xt119",
+        "note": "",
+        "portador": "",
+        "recurring": false
       }
     ],
     "payments": [
@@ -16962,7 +17026,7 @@
         "estorno": 0
       }
     ],
-    "activeCardId": "vs0llp2ohzmnsvu3kq",
+    "activeCardId": "0ahds3kadi5imnsvz6b7",
     "budgets": {},
     "cashbacks": {},
     "monthlyGoal": 0,
