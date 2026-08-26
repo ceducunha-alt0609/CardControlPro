@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -7,6 +7,7 @@
 <link rel="icon" type="image/png" sizes="96x96" href="icons/icon-96x96.png">
 <script>
 window.__aurumDiagnostics = window.__aurumDiagnostics || { errors: [], warnings: [] };
+window.__aurumDataReady = false;
 window.addEventListener('error', function(event){
   const details = {
     type: 'error',
@@ -42,7 +43,7 @@ window.addEventListener('unhandledrejection', function(event){
 // Salva dados ao fechar/recarregar a página para evitar perda de lançamentos em edição
 window.addEventListener('beforeunload', function(){
   try{
-    if(typeof window.save === 'function' && typeof window.S !== 'undefined' && window.S && window.S.tx){
+    if(window.__aurumDataReady === true && typeof window.save === 'function' && typeof window.S !== 'undefined' && window.S && window.S.tx){
       window.save();
     }
   }catch(e){}
@@ -51,7 +52,7 @@ window.addEventListener('beforeunload', function(){
 document.addEventListener('visibilitychange', function(){
   if(document.visibilityState === 'hidden'){
     try{
-      if(typeof window.save === 'function' && typeof window.S !== 'undefined' && window.S && window.S.tx){
+      if(window.__aurumDataReady === true && typeof window.save === 'function' && typeof window.S !== 'undefined' && window.S && window.S.tx){
         window.save();
       }
     }catch(e){}
@@ -6731,9 +6732,11 @@ ${renderProfileAvatar(p.name,p.avatar,{size:'lg'})}
 document.getElementById('profileScreen').style.display = 'flex';
 }
 function selectProfile(id){
+window.__aurumDataReady = false;
 _activeProfile = id;
 document.getElementById('profileScreen').style.display = 'none';
 loadJbConfig();
+loadGhConfig();
 load();
 lockApp();
 const hasPin = !!localStorage.getItem(profileKey('ccp-pin'));
@@ -10365,12 +10368,16 @@ applyPerformanceMode();
 }
 function load(){
 try{
+window.__aurumDataReady = false;
 const raw=localStorage.getItem(profileKey('ccp'));
-if(!raw) return;
+if(!raw){ window.__aurumDataReady = true; return; }
 if(!isEncrypted(raw)){
   try{
     const parsed = JSON.parse(raw);
-    if(parsed && typeof parsed === 'object') applyLoadedData(parsed);
+    if(parsed && typeof parsed === 'object'){
+      applyLoadedData(parsed);
+      window.__aurumDataReady = true;
+    }
   }catch(parseErr){
     console.error('[Aurum] Erro ao parsear dados locais:', parseErr);
     // Tenta backup de emergência
@@ -10387,6 +10394,7 @@ if(!raw||!_cryptoKey) return;
 if(isEncrypted(raw)){
 const d=await decryptData(raw,_cryptoKey);
 applyLoadedData(d);
+window.__aurumDataReady = true;
 render();
 }
 }catch(e){
@@ -19887,7 +19895,8 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
 const GH_DEFAULT = {enabled:false, mode:'manual', owner:'', repo:'', path:'aurum-data.json', branch:'main', token:'', sha:'', lastSync:null, status:'idle'};
 let GH = null;
 let _ghTimer = null;
-function ghProfileKey(){ return profileKey('ghsync'); }
+function ghProfileKey(){ return 'aurum-github-sync'; }
+function ghLegacyProfileKey(){ return profileKey('ghsync'); }
 function ghCurrentProfileId(){
   try{
     if(typeof _activeProfile !== 'undefined' && _activeProfile) return _activeProfile;
@@ -19896,8 +19905,17 @@ function ghCurrentProfileId(){
   return 'u1';
 }
 function loadGhConfig(){
-  try{ GH = Object.assign({}, GH_DEFAULT, JSON.parse(localStorage.getItem(ghProfileKey())||'{}')); }
-  catch(e){ GH = Object.assign({}, GH_DEFAULT); }
+  try{
+    let raw = localStorage.getItem(ghProfileKey());
+    if(!raw){
+      const legacy = localStorage.getItem(ghLegacyProfileKey());
+      if(legacy){
+        raw = legacy;
+        localStorage.setItem(ghProfileKey(), legacy); // migração única: perfil -> configuração global
+      }
+    }
+    GH = Object.assign({}, GH_DEFAULT, JSON.parse(raw||'{}'));
+  }catch(e){ GH = Object.assign({}, GH_DEFAULT); }
 }
 function saveGhConfig(){
   if(!GH) loadGhConfig();
@@ -20194,6 +20212,9 @@ function ghScheduleSync(){
      dispositivo salva dados no mesmo perfil
    ============================================================ */
 (function(){
+  // AUDITORIA 2026-08: Supabase legado desativado de fato.
+  // GitHub Sync é a única fonte remota ativa; evita dois motores disputando o mesmo estado.
+  return;
   const SB_URL  = 'https://lwldroopbooeocchgngg.supabase.co';
   const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3bGRyb29wYm9vZW9jY2hnbmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDY3MDUsImV4cCI6MjA5MDI4MjcwNX0.fDWYV4yVLqf4j8Bce_o7denInTvJUxWhqcexND4UOyc';
   const TABLE   = 'aurum_data';
@@ -24992,4 +25013,3 @@ body.aurum-input-burst .tab-enter{
 })();
 </script>
 <!-- ===== /AURUM CICLO 5 — EVENTOS + MEMÓRIA LEVE v1 ===== -->
-
