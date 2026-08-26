@@ -4612,10 +4612,25 @@ travelMode:false,travelCurrency:'USD',travelRate:5.0,
 sidebarColor:'default',
 smartPerf:true,liteMode:'auto',lowEndDevice:false,reducedMotion:false,
 jbAuto:false,
+deleted:{tx:[],cards:[],payments:[]},
 };
 function curMonth(){const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}`}
 function pad(n){return String(n).padStart(2,'0')}
 function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
+function ensureDeletedState(){
+  if(!S.deleted || typeof S.deleted!=='object') S.deleted={tx:[],cards:[],payments:[]};
+  if(!Array.isArray(S.deleted.tx)) S.deleted.tx=[];
+  if(!Array.isArray(S.deleted.cards)) S.deleted.cards=[];
+  if(!Array.isArray(S.deleted.payments)) S.deleted.payments=[];
+  return S.deleted;
+}
+function markDeleted(kind, ids){
+  const d=ensureDeletedState();
+  const arr=d[kind]||(d[kind]=[]);
+  (Array.isArray(ids)?ids:[ids]).filter(Boolean).forEach(id=>{ if(!arr.includes(id)) arr.push(id); });
+  // limita crescimento sem perder histórico recente de exclusões
+  if(arr.length>5000) d[kind]=arr.slice(-5000);
+}
 function fmt(n){
   if(document.body&&document.body.classList.contains('privacy-on')) return '••••';
   return isNaN(n)?'0,00':Math.abs(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -7157,7 +7172,12 @@ function saveFamilyLaunch(){
     txs.push({
       id: gid+'-'+i, gid,
       cardId, desc: inst>1?desc+` (${i+1}/${inst})`:desc,
-      amount: Math.round(amount/inst*100)/100,
+      amount: (function(){
+        const totalCents=Math.round(amount*100);
+        const baseCents=Math.floor(totalCents/inst);
+        const remainder=totalCents-(baseCents*inst);
+        return (baseCents+(i===inst-1?remainder:0))/100;
+      })(),
       date: txDate.toISOString().slice(0,10),
       invoiceMonth: calcInvoiceMonthForTx(txDate.toISOString().slice(0,10), card, i+1),
       type:'debit', totalInst:inst, instNum:i+1
@@ -7209,9 +7229,9 @@ profiles.forEach(p => {
   function pMonthSummary(cardId, month){
     const card = pCards.find(c=>c.id===cardId);
     if(!card) return {};
-    const debits = pTx.filter(t=>t.cardId===cardId && t.month===month && t.type!=='credit')
+    const debits = pTx.filter(t=>t.cardId===cardId && ((t.invoiceMonth||t.month)||'')===month && t.type!=='credit')
                        .reduce((s,t)=>s+(t.amount||0),0);
-    const paid = pPayments.filter(pm=>pm.cardId===cardId && pm.month===month)
+    const paid = pPayments.filter(pm=>pm.cardId===cardId && ((pm.invoiceMonth||pm.month)||'')===month)
                           .reduce((s,pm)=>s+(pm.amount||0),0);
     const due = Math.max(0, debits - paid);
     const daysLeft = daysUntilDue(month, card.due, card);
@@ -7600,9 +7620,13 @@ const card=getCard(cardId);
 if(!card) return;
 const gid=uid();
 const eff=type==='credit'?1:n;
+const totalCents=Math.round(amt*100);
+const baseCents=Math.floor(totalCents/eff);
+const remainderCents=totalCents-(baseCents*eff);
 for(let i=0;i<eff;i++){
 const im=calcInvoiceMonthForTx(date, card, i+1);
-S.tx.push({id:uid(),cardId,desc:eff>1?`${desc} (${i+1}/${eff})`:desc,amount:amt/eff,type,category:cat,date,invoiceMonth:im,totalInst:eff,instNum:i+1,gid,note,portador,recurring:recurring&&eff===1});
+const partCents=baseCents+(i===eff-1?remainderCents:0);
+S.tx.push({id:uid(),cardId,desc:eff>1?`${desc} (${i+1}/${eff})`:desc,amount:partCents/100,type,category:cat,date,invoiceMonth:im,totalInst:eff,instNum:i+1,gid,note,portador,recurring:recurring&&eff===1,recurringDay:recurring&&eff===1?parseInt(date.slice(8,10)):undefined});
 }
 save();
 aurumRefreshAfterTxSave();
@@ -8691,15 +8715,20 @@ const seen=new Set();
 S.tx.filter(t=>t.recurring&&t.type==='debit').forEach(t=>{
 if(seen.has(t.gid)) return;
 seen.add(t.gid);
-// Usa o cartao dono da transacao e respeita o dia de fechamento
-const txCard=getCard(t.cardId);
-const closeDay=txCard?.close||1;
-const day=String(closeDay).padStart(2,'0');
-const refDate=`${cur}-${day}`;
-const im=invMonth(refDate,closeDay);
-const already=S.tx.some(x=>x.gid===t.gid&&x.invoiceMonth===im);
+const group=S.tx.filter(x=>x.gid===t.gid).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
+const origin=group[0]||t;
+const txCard=getCard(origin.cardId);
+if(!txCard) return;
+// Mantém o dia verdadeiro da compra/assinatura; fechamento decide apenas a competência.
+const originalDay=Math.max(1,Math.min(31,parseInt(origin.recurringDay||String(origin.date||'').slice(8,10))||1));
+const [cy,cm]=cur.split('-').map(Number);
+const daysInMonth=new Date(cy,cm,0).getDate();
+const day=Math.min(originalDay,daysInMonth);
+const refDate=`${cur}-${String(day).padStart(2,'0')}`;
+const im=calcInvoiceMonthForTx(refDate,txCard,1);
+const already=S.tx.some(x=>x.gid===origin.gid&&x.invoiceMonth===im);
 if(!already){
-S.tx.push({...t,id:uid(),invoiceMonth:im,date:refDate});
+S.tx.push({...origin,id:uid(),invoiceMonth:im,date:refDate,recurringDay:originalDay});
 added++;
 }
 });
@@ -9351,7 +9380,7 @@ _confirmCb=null;
 }
 let _undoSnapshot=null;
 function takeSnapshot(){
-_undoSnapshot=JSON.stringify({cards:S.cards,tx:S.tx,payments:S.payments,budgets:S.budgets,cashbacks:S.cashbacks});
+_undoSnapshot=JSON.stringify({cards:S.cards,tx:S.tx,payments:S.payments,budgets:S.budgets,cashbacks:S.cashbacks,deleted:S.deleted});
 const btn=document.getElementById('undoBtn');
 if(btn){btn.style.display='flex';}
 clearTimeout(_undoSnapshot._t);
@@ -9363,7 +9392,7 @@ if(!_undoSnapshot){showToast('Nada para desfazer','');return;}
 try{
 const d=JSON.parse(_undoSnapshot);
 S.cards=d.cards;S.tx=d.tx;S.payments=d.payments;
-S.budgets=d.budgets||{};S.cashbacks=d.cashbacks||{};
+S.budgets=d.budgets||{};S.cashbacks=d.cashbacks||{};S.deleted=d.deleted||{tx:[],cards:[],payments:[]};
 _undoSnapshot=null;
 save();render();
 const btn=document.getElementById('undoBtn');if(btn)btn.style.display='none';
@@ -9545,13 +9574,21 @@ const{type,id,allInst}=S.delTarget;
 if(type==='tx'){
 const tx=S.tx.find(t=>t.id===id);
 if(allInst&&tx&&tx.totalInst>1){
-const count=S.tx.filter(t=>t.gid===tx.gid).length;
+const group=S.tx.filter(t=>t.gid===tx.gid);
+const count=group.length;
+markDeleted('tx', group.map(t=>t.id));
 S.tx=S.tx.filter(t=>t.gid!==tx.gid);
 S.delTarget=null;save();closeModal('del');render();
 showToast(`🗑 ${count} parcelas excluídas`,'');return;
 }
+markDeleted('tx', id);
 S.tx=S.tx.filter(t=>t.id!==id);
 } else if(type==='card'){
+const cardTx=S.tx.filter(t=>t.cardId===id);
+const cardPm=S.payments.filter(p=>p.cardId===id);
+markDeleted('card', id);
+markDeleted('tx', cardTx.map(t=>t.id));
+markDeleted('payments', cardPm.map(p=>p.id).filter(Boolean));
 S.tx=S.tx.filter(t=>t.cardId!==id);
 S.payments=S.payments.filter(p=>p.cardId!==id);
 S.cards=S.cards.filter(c=>c.id!==id);
@@ -10300,6 +10337,7 @@ cards:S.cards,tx:S.tx,payments:S.payments,
 activeCardId:S.activeCardId,
 budgets:S.budgets||{},
 cashbacks:S.cashbacks||{},
+deleted:S.deleted||{tx:[],cards:[],payments:[]},
 monthlyGoal:S.monthlyGoal||0,
 subscriptions:S.subscriptions||[],
 savingsGoals:S.savingsGoals||[],
@@ -10325,19 +10363,24 @@ const myVersion = ++window._saveVersion;
 // Salva JSON puro imediatamente (síncrono) — garante persistência mesmo se criptografia demorar
 const jsonPayload = JSON.stringify(payload);
 try{ localStorage.setItem(storageKey, jsonPayload); }catch(e){}
-// Backup de emergência rotativo (protege contra corrompimento do dado principal)
+// Backup de emergência: texto puro somente quando o perfil NÃO usa PIN.
 try{
-  if(payload.tx && payload.tx.length > 0){
+  if(payload.tx && payload.tx.length > 0 && !_cryptoKey){
     localStorage.setItem(storageKey + '-bkp', jsonPayload);
     localStorage.setItem(storageKey + '-bkp-ts', payload.lastModified);
   }
 }catch(e){}
-// Se tiver chave, sobrescreve com versão cifrada — mas SOMENTE se não houver save mais recente
+// Com PIN, cifra tanto o principal quanto o backup.
 if(_cryptoKey){
 encryptData(payload, _cryptoKey).then(enc=>{
-  // Só sobrescreve se esta ainda for a versão mais recente
   if(myVersion === window._saveVersion){
-    try{ localStorage.setItem(storageKey, enc); }catch(e){}
+    try{
+      localStorage.setItem(storageKey, enc);
+      if(payload.tx && payload.tx.length > 0){
+        localStorage.setItem(storageKey + '-bkp', enc);
+        localStorage.setItem(storageKey + '-bkp-ts', payload.lastModified);
+      }
+    }catch(e){}
   }
 }).catch(()=>{});
 }
@@ -10349,6 +10392,7 @@ S.cards=(typeof _aurumApplySavedCardOrder==='function'?_aurumApplySavedCardOrder
 S.activeCardId=d.activeCardId||null;
 S.budgets=d.budgets||{};
 S.cashbacks=d.cashbacks||{};
+S.deleted=d.deleted||{tx:[],cards:[],payments:[]};
 S.monthlyGoal=d.monthlyGoal||0;
 S.subscriptions=d.subscriptions||[];
 S.savingsGoals=d.savingsGoals||[];
@@ -10395,6 +10439,17 @@ if(isEncrypted(raw)){
 const d=await decryptData(raw,_cryptoKey);
 applyLoadedData(d);
 window.__aurumDataReady = true;
+try{
+  localStorage.removeItem('aurum-auto-snapshots');
+  localStorage.removeItem('aurum-last-snapshot-signature');
+  localStorage.removeItem('aurum-last-snapshot-time');
+  encryptData(d,_cryptoKey).then(enc=>{
+    try{
+      localStorage.setItem(profileKey('ccp')+'-bkp',enc);
+      localStorage.setItem(profileKey('ccp')+'-bkp-ts',d.lastModified||new Date().toISOString());
+    }catch(e){}
+  });
+}catch(e){}
 render();
 }
 }catch(e){
@@ -11974,8 +12029,16 @@ function quickBackupRestoreLast(){
       okText:'Restaurar', danger:true,
       onOk:()=>{
         const storageKey = (typeof profileKey === 'function') ? profileKey('ccp') : 'ccp-' + (localStorage.getItem('ccp-active-profile') || 'u1');
-        localStorage.setItem(storageKey, JSON.stringify(data));
-        localStorage.setItem(storageKey + '-bkp', JSON.stringify(data));
+        if(_cryptoKey){
+          encryptData(data,_cryptoKey).then(enc=>{
+            localStorage.setItem(storageKey, enc);
+            localStorage.setItem(storageKey + '-bkp', enc);
+            setTimeout(()=>location.reload(), 250);
+          });
+        }else{
+          localStorage.setItem(storageKey, JSON.stringify(data));
+          localStorage.setItem(storageKey + '-bkp', JSON.stringify(data));
+        }
         try{ localStorage.setItem('aurum-last-backup-signature', getQuickBackupSignature()); }catch(_e){}
         showToast('✅ Último backup restaurado','success');
         setTimeout(()=>location.reload(), 600);
@@ -12065,6 +12128,7 @@ function updateAutoSnapshotUi(){
 }
 function createAutoSnapshot(reason, force){
   try{
+    if(_cryptoKey) return false; // com PIN, não cria snapshot local em texto puro; GitHub mantém histórico remoto
     if(!window.S || !(S.cards||[]).length) return false;
     const sig = getQuickBackupSignature();
     const lastSig = localStorage.getItem('aurum-last-snapshot-signature') || '';
@@ -12112,7 +12176,7 @@ function quickBackupRestoreAuto(){
         localStorage.setItem(storageKey, JSON.stringify(data));
         localStorage.setItem(storageKey + '-bkp', JSON.stringify(data));
         showToast('✅ Snapshot automático restaurado','success');
-        setTimeout(()=>location.reload(), 600);
+        if(!_cryptoKey) setTimeout(()=>location.reload(), 600);
       }
     });
   }catch(e){
@@ -19982,25 +20046,44 @@ function ghGetPayload(){
       activeCardId: S.activeCardId||null,
       budgets: S.budgets||{}, cashbacks: S.cashbacks||{},
       monthlyGoal: S.monthlyGoal||0, subscriptions: S.subscriptions||[],
-      savingsGoals: S.savingsGoals||[]
+      savingsGoals: S.savingsGoals||[],
+      deleted: S.deleted||{tx:[],cards:[],payments:[]}
     }
   };
 }
 function ghMergeRemotePayload(payload){
   const d = payload && (payload.data || payload);
   if(!d || !Array.isArray(d.cards)) throw new Error('Arquivo remoto sem cartões');
-  const localCards = new Map((S.cards||[]).filter(c=>c&&c.id).map(c=>[c.id,c]));
-  const remoteCards = new Map((d.cards||[]).filter(c=>c&&c.id).map(c=>[c.id,c]));
+
+  const ld=S.deleted||{tx:[],cards:[],payments:[]};
+  const rd=d.deleted||{tx:[],cards:[],payments:[]};
+  const mergedDeleted={
+    tx:[...new Set([...(ld.tx||[]),...(rd.tx||[])])],
+    cards:[...new Set([...(ld.cards||[]),...(rd.cards||[])])],
+    payments:[...new Set([...(ld.payments||[]),...(rd.payments||[])])]
+  };
+  const deadCards=new Set(mergedDeleted.cards), deadTx=new Set(mergedDeleted.tx), deadPm=new Set(mergedDeleted.payments);
+
+  const localCards = new Map((S.cards||[]).filter(c=>c&&c.id&&!deadCards.has(c.id)).map(c=>[c.id,c]));
+  const remoteCards = new Map((d.cards||[]).filter(c=>c&&c.id&&!deadCards.has(c.id)).map(c=>[c.id,c]));
   const mergedCards=[];
   for(const [id, rc] of remoteCards){ mergedCards.push(Object.assign({}, rc, localCards.get(id)||{})); }
   for(const [id, lc] of localCards){ if(!remoteCards.has(id)) mergedCards.push(lc); }
-  const localTx = new Map((S.tx||[]).filter(t=>t&&t.id).map(t=>[t.id,t]));
-  const remoteTx = new Map((d.tx||[]).filter(t=>t&&t.id).map(t=>[t.id,t]));
+
+  const localTx = new Map((S.tx||[]).filter(t=>t&&t.id&&!deadTx.has(t.id)&&!deadCards.has(t.cardId)).map(t=>[t.id,t]));
+  const remoteTx = new Map((d.tx||[]).filter(t=>t&&t.id&&!deadTx.has(t.id)&&!deadCards.has(t.cardId)).map(t=>[t.id,t]));
   const mergedTx = [...remoteTx.values()];
   for(const [id, lt] of localTx){ if(!remoteTx.has(id)) mergedTx.push(lt); }
+
+  const localPm = new Map((S.payments||[]).filter(p=>p&&(!p.id||!deadPm.has(p.id))&&!deadCards.has(p.cardId)).map((p,i)=>[p.id||('local-'+i),p]));
+  const remotePm = new Map((d.payments||[]).filter(p=>p&&(!p.id||!deadPm.has(p.id))&&!deadCards.has(p.cardId)).map((p,i)=>[p.id||('remote-'+i),p]));
+  const mergedPm=[...remotePm.values()];
+  for(const [id,p] of localPm){ if(!remotePm.has(id)) mergedPm.push(p); }
+
+  S.deleted=mergedDeleted;
   S.cards = typeof _aurumApplySavedCardOrder === 'function' ? _aurumApplySavedCardOrder(mergedCards) : (typeof _aurumNormalizeCardOrder === 'function' ? _aurumNormalizeCardOrder(mergedCards) : mergedCards);
   S.tx = mergedTx;
-  S.payments = d.payments || S.payments || [];
+  S.payments = mergedPm;
   S.activeCardId = d.activeCardId || S.activeCardId || (S.cards[0] && S.cards[0].id) || null;
   S.budgets = d.budgets || S.budgets || {};
   S.cashbacks = d.cashbacks || S.cashbacks || {};
