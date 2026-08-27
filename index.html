@@ -4909,13 +4909,17 @@ function effectiveLimit(card, invoiceMonth) {
   return parseFloat(card.limit) || 0;
 }
 function dueDateStr(im,dueDay,card){
-const day = card ? effectiveDue(card, im) : (dueDay||5);
+const rawDay = card ? effectiveDue(card, im) : (dueDay||5);
 const[y,m]=im.split('-').map(Number);
+const lastDay=new Date(y,m,0).getDate();
+const day=Math.max(1,Math.min(parseInt(rawDay)||5,lastDay));
 return new Date(y,m-1,day).toLocaleDateString('pt-BR');
 }
 function daysUntilDue(im,dueDay,card){
-const day = card ? effectiveDue(card, im) : (dueDay||5);
+const rawDay = card ? effectiveDue(card, im) : (dueDay||5);
 const[y,m]=im.split('-').map(Number);
+const lastDay=new Date(y,m,0).getDate();
+const day=Math.max(1,Math.min(parseInt(rawDay)||5,lastDay));
 const due=new Date(y,m-1,day);
 const today=new Date();today.setHours(0,0,0,0);
 return Math.ceil((due-today)/(864e5));
@@ -19940,8 +19944,11 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
     fetch('./sw.js', { method: 'HEAD' })
       .then(function(res){
         if(res.ok){
-          return navigator.serviceWorker.register('./sw.js')
-            .then(function(reg){ console.log('[Aurum SW] Registered:', reg.scope); })
+          return navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'})
+            .then(function(reg){
+              console.log('[Aurum SW] Registered:', reg.scope);
+              try{ reg.update(); }catch(e){}
+            })
             .catch(function(err){ console.warn('[Aurum SW] Failed:', err); });
         }
       })
@@ -20094,6 +20101,25 @@ function ghMergeRemotePayload(payload){
   save();
   if(typeof renderUI === 'function') renderUI();
 }
+function ghApplyRemoteReplace(payload){
+  const d = payload && (payload.data || payload);
+  if(!d || !Array.isArray(d.cards)) throw new Error('Arquivo remoto sem cartões');
+  S.cards = typeof _aurumApplySavedCardOrder === 'function'
+    ? _aurumApplySavedCardOrder((d.cards||[]).slice())
+    : (d.cards||[]).slice();
+  S.tx = (d.tx||[]).slice();
+  S.payments = (d.payments||[]).slice();
+  S.deleted = d.deleted || {tx:[],cards:[],payments:[]};
+  S.activeCardId = d.activeCardId || (S.cards[0] && S.cards[0].id) || null;
+  S.budgets = d.budgets || {};
+  S.cashbacks = d.cashbacks || {};
+  S.monthlyGoal = d.monthlyGoal || 0;
+  S.subscriptions = d.subscriptions || [];
+  S.savingsGoals = d.savingsGoals || [];
+  S.lastModified = new Date().toISOString();
+  save();
+  if(typeof renderUI === 'function') renderUI();
+}
 function ghEncode(obj){
   const bytes = new TextEncoder().encode(JSON.stringify(obj, null, 2));
   let binary='';
@@ -20186,14 +20212,14 @@ async function ghRestoreVersion(sha){
   try{
     ghReadInputs();
     if(!sha) throw new Error('Versão inválida');
-    const sure = !window.confirm || window.confirm('Restaurar esta versão do GitHub? O estado atual local será substituído.');
+    const sure = !window.confirm || window.confirm('Restaurar esta versão do GitHub? Ela substituirá integralmente os dados locais atuais. O histórico do GitHub continuará disponível para desfazer.');
     if(!sure) return;
     const res = await fetch(ghApiUrl().replace(/([?&])ref=[^&]+/,'$1').replace(/[?&]$/,'') + `?ref=${encodeURIComponent(sha)}`, {headers: ghHeaders()});
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     const payload = ghDecode(json.content||'');
-    ghMergeRemotePayload(payload);
-    GH.status='ok'; GH.lastSync = Date.now(); saveGhConfig();
+    ghApplyRemoteReplace(payload);
+    GH.status='ok'; GH.lastSync = new Date().toISOString(); saveGhConfig();
     try{ closeConfirm && closeConfirm(); }catch(e){}
     showToast('Versão restaurada do GitHub','success');
   }catch(err){ GH.status='error'; saveGhConfig(); showToast('GitHub: '+err.message,'error'); }
