@@ -2890,7 +2890,7 @@ body.aurum-diagnostic-mode #diagnosticModeBtn .diag-dot{background:var(--red);op
 </head>
 <script>
 var APP_VERSION = '2.2.5';
-var APP_BUILD   = new Date().toISOString().slice(0,10).replace(/-/g,'.');
+var APP_BUILD   = localDateISO().replace(/-/g,'.');
 </script>
 <script id="aurum-mobile-postpaint-pwa">
 window.addEventListener('load', function(){
@@ -4616,6 +4616,10 @@ deleted:{tx:[],cards:[],payments:[]},
 };
 function curMonth(){const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}`}
 function pad(n){return String(n).padStart(2,'0')}
+function localDateISO(d){
+  const x=d instanceof Date?d:new Date();
+  return `${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}`;
+}
 function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
 function ensureDeletedState(){
   if(!S.deleted || typeof S.deleted!=='object') S.deleted={tx:[],cards:[],payments:[]};
@@ -4656,7 +4660,7 @@ return `${nx.getFullYear()}-${pad(nx.getMonth()+1)}`;
 }
 function calcInvoiceMonthForTx(dateStr, cardOrId, instNum){
 const card = typeof cardOrId==='string' ? getCard(cardOrId) : cardOrId;
-const safeDate = /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr||'')) ? String(dateStr) : new Date().toISOString().slice(0,10);
+const safeDate = /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr||'')) ? String(dateStr) : localDateISO();
 const closeDay = Number(card && (card.close || card.closeDay || card.closing || card.fechamento)) || 0;
 let baseMonth = safeDate.slice(0,7);
 try{
@@ -4676,7 +4680,7 @@ return true;
 }
 
 function closingLineMeta(dateStr, closeDay){
-const safeDate = /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr||'')) ? String(dateStr) : new Date().toISOString().slice(0,10);
+const safeDate = /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr||'')) ? String(dateStr) : localDateISO();
 const d = new Date(safeDate+'T12:00:00');
 const day = d.getDate();
 const daysInMonth = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
@@ -4695,7 +4699,7 @@ const card = typeof cardId === 'string' ? getCard(cardId) : cardId;
 const safeType = type === 'credit' ? 'credit' : 'debit';
 const safeAmount = Math.max(0, Number(amount)||0);
 const safeInst = Math.max(1, parseInt(installments)||1);
-const safeDate = /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr||'')) ? String(dateStr) : new Date().toISOString().slice(0,10);
+const safeDate = /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr||'')) ? String(dateStr) : localDateISO();
 if(!card){
   return { ready:false, message:'Selecione um cartão para simular a fatura.' };
 }
@@ -4711,11 +4715,13 @@ const currentNextProjected = (Array.isArray(S.tx)?S.tx:[])
   .reduce((s,t)=>s+(Number(t.amount)||0),0);
 const estThis = monthSummary(card.id, baseMonth);
 const estNext = monthSummary(card.id, nextMonth);
-const installmentValue = safeType==='credit' ? safeAmount : (safeInst>0 ? safeAmount / safeInst : safeAmount);
+const installmentValue = safeType==='credit' ? safeAmount : (safeInst>0 ? Math.floor(Math.round(safeAmount*100)/safeInst)/100 : safeAmount);
 const projectedAfter = safeType==='credit' ? Math.max(0, currentProjected - safeAmount) : currentProjected + installmentValue;
 const projectedNextAfter = currentNextProjected;
-const available = Math.max(0, Number(card.limit||0) - Number(estThis.used||0));
-const highAmount = safeAmount >= Math.max(500, (Number(card.limit||0) * 0.12));
+const previewLimit = Math.max(0, Number(effectiveLimit(card, baseMonth)||card.limit||0));
+const previewCommitted = Math.max(0, Number(cardCommitted(card.id)||0));
+const available = Math.max(0, previewLimit - previewCommitted);
+const highAmount = safeAmount >= Math.max(500, (previewLimit * 0.12));
 const warnings = [];
 if(safeType==='debit' && line.isAfterClose){
   warnings.push(`Compra após o fechamento: entra em ${monthLabel(baseMonth)}.`);
@@ -4723,7 +4729,7 @@ if(safeType==='debit' && line.isAfterClose){
 if(safeType==='debit' && highAmount){
   warnings.push(`Compra alta para este cartão: ${fmtR(safeAmount)}.`);
 }
-if(safeType==='debit' && Number(card.limit||0) > 0 && safeAmount > available){
+if(safeType==='debit' && previewLimit > 0 && safeAmount > available){
   warnings.push(`Atenção ao limite: disponível aproximado ${fmtR(available)}.`);
 }
 if(safeType==='debit' && safeInst >= 6){
@@ -4977,7 +4983,7 @@ return Math.max(0,futDebits-futCredits);
 function cardCommitted(cardId){
 const card=getCard(cardId);
 if(!card) return 0;
-const today=new Date().toISOString().slice(0,10);
+const today=localDateISO();
 const openMonth=invMonth(today,card.close);
 const current=monthSummary(cardId,openMonth);
 const future=futureCommitted(cardId,openMonth);
@@ -5114,7 +5120,7 @@ function _aurumApplySavedCardOrder(cards){
 function _aurumRenderInfoTicker(bar){
   if(!bar || !S || !Array.isArray(S.cards) || !S.cards.length) return;
   const ranked = S.cards.slice().map(c=>{
-    const openM = invMonth(new Date().toISOString().slice(0,10), c.close);
+    const openM = invMonth(localDateISO(), c.close);
     const s = monthSummary(c.id, openM);
     return { c, due: Number(s && s.due || 0), debits: Number(s && s.debits || 0), openM };
   }).sort((a,b)=> (b.due - a.due) || (b.debits - a.debits));
@@ -5156,7 +5162,7 @@ if(!cards.length){
   bar.innerHTML='';
   return;
 }
-const todayStr=new Date().toISOString().slice(0,10);
+const todayStr=localDateISO();
 const metrics=cards.map(c=>{
   const selected=typeof monthSummary==='function' ? (monthSummary(c.id,month)||{}) : {};
   const openM=typeof invMonth==='function' ? invMonth(todayStr,c.close) : month;
@@ -5459,7 +5465,7 @@ if(!aurumShouldShowCardDetail(currentTab)){ el.innerHTML=''; return; }
 if(!c){el.innerHTML='';return}
 const used=cardUsed(c.id);
 // Limite real inclui saldo anterior carregado
-const _today2=new Date().toISOString().slice(0,10);
+const _today2=localDateISO();
 const _om2=invMonth(_today2,c.close);
 const _ms2=monthSummary(c.id,_om2);
 const _realUsed=cardCommitted(c.id);
@@ -5469,7 +5475,7 @@ const barGrad=pct>85?'linear-gradient(90deg,#f97316,#ef4444)':pct>60?'linear-gra
 const g=safeGrad(c&&c.colorIdx);
 const cur=curMonth();
 // Breakdown: compras atuais vs saldo anterior
-const _today=new Date().toISOString().slice(0,10);
+const _today=localDateISO();
 const _openM=invMonth(_today,c.close);
 const _ms=monthSummary(c.id,_openM);
 const _debits=_ms.debits||0;
@@ -5895,11 +5901,10 @@ else dueBadge=`<span class="due-badge ok">✓ Vence ${s.dueDate}</span>`;
 } else if(s.daysLeft<0) dueBadge=`<span class="due-badge ok">✓ Quitada</span>`;
 const dc=daysUntilClose(c.close);
 const dl=s.daysLeft;
-// Limite comprometido = fatura atual em aberto + parcelas futuras já lançadas
+// Limite comprometido: usa a mesma fonte de verdade do cartão (saldo aberto + parcelas futuras).
 const _invMs=monthSummary(c.id,m);
 const _futureCommitted=futureCommitted(c.id,m);
-// Limite bloqueado = compras do mês - créditos - pagamentos + parcelas futuras (sem juros/carried)
-const _totalUsed=Math.max(0,(_invMs.netCharges||0)-(_invMs.paidGross||0))+_futureCommitted;
+const _totalUsed=Math.max(0,cardCommitted(c.id));
 const _invLimit=effectiveLimit(c,S.month||curMonth());
 const avail=Math.max(0,_invLimit-_totalUsed);
 const usedPct=_invLimit>0?Math.min(100,Math.round((_totalUsed/_invLimit)*100)):0;
@@ -7095,7 +7100,7 @@ function openFamilyLaunch(profileId){
   document.getElementById('fl-profile-name').textContent = 'Lançar para ' + p.name;
   const sel = document.getElementById('fl-card-select');
   sel.innerHTML = pCards.map(c=>`<option value="${c.id}">${c.name} •••• ${c.last4||'????'}</option>`).join('');
-  document.getElementById('fl-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('fl-date').value = localDateISO();
   document.getElementById('fl-amount').value = '';
   document.getElementById('fl-desc').value = '';
   document.getElementById('fl-inst').value = '1';
@@ -7182,8 +7187,8 @@ function saveFamilyLaunch(){
         const remainder=totalCents-(baseCents*inst);
         return (baseCents+(i===inst-1?remainder:0))/100;
       })(),
-      date: txDate.toISOString().slice(0,10),
-      invoiceMonth: calcInvoiceMonthForTx(txDate.toISOString().slice(0,10), card, i+1),
+      date: localDateISO(txDate),
+      invoiceMonth: calcInvoiceMonthForTx(localDateISO(txDate), card, i+1),
       type:'debit', totalInst:inst, instNum:i+1
     });
   }
@@ -11892,7 +11897,7 @@ function exportBackupJSON(){
     const blob = new Blob([json], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
-    const date = new Date().toISOString().slice(0,10);
+    const date = localDateISO();
     a.href     = url;
     a.download = `aurum-backup-${date}.json`;
     document.body.appendChild(a);
@@ -13126,7 +13131,7 @@ return;
 }
 saveUndo();
 if(!S.payments) S.payments=[];
-S.payments.push({id:uid(),cardId:ctx.cardId,invoiceMonth:ctx.month,amount:ctx.due,date:new Date().toISOString().slice(0,10),auto:true});
+S.payments.push({id:uid(),cardId:ctx.cardId,invoiceMonth:ctx.month,amount:ctx.due,date:localDateISO(),auto:true});
 save();renderContent();
 closeModal('encerramento');
 showToast('✓ Pagamento registrado!','green');
@@ -15632,7 +15637,7 @@ if(false && JB.key && JB.binId){ jbPull(false); }</script>
       const cardMap = new Map((S.cards||[]).map(c => [c.id, c]));
       S.tx = Array.isArray(S.tx) ? S.tx.filter(t => t && t.cardId).map(t => {
         const card = cardMap.get(t.cardId) || {};
-        const safeDate = t.date || new Date().toISOString().slice(0,10);
+        const safeDate = t.date || localDateISO();
         const totalInst = Math.max(1, parseInt(t.totalInst)||1);
         const instNum = Math.min(totalInst, Math.max(1, parseInt(t.instNum)||1));
         const derivedMonth = (() => {
@@ -21338,14 +21343,14 @@ function normalizeOcrDate(dateStr){
   const now = new Date();
   const m = String(dateStr||'').trim();
   const parts = m.split('/');
-  if(parts.length < 2) return now.toISOString().slice(0,10);
+  if(parts.length < 2) return localDateISO(now);
   let d = parseInt(parts[0],10)||1;
   let mo = parseInt(parts[1],10)||1;
   let y = parts[2] ? parseInt(parts[2],10) : now.getFullYear();
   if(y < 100) y += 2000;
   if(mo < 1 || mo > 12) mo = now.getMonth()+1;
   const dt = new Date(y, mo-1, d, 12, 0, 0);
-  return dt.toISOString().slice(0,10);
+  return localDateISO(dt);
 }
 function ocrExtractMeta(text){
   const meta = {};
@@ -21620,7 +21625,7 @@ function ocrImportSelected(){
   function ltSuggestCards(){
     if(!window.S || !Array.isArray(S.cards)) return [];
     const amount = Number((document.getElementById('lt-amount')||{}).value||0);
-    const dateStr = (document.getElementById('lt-date')||{}).value || new Date().toISOString().slice(0,10);
+    const dateStr = (document.getElementById('lt-date')||{}).value || localDateISO();
     const categoryRaw = (document.getElementById('lt-cat')||{}).value || '';
     const category = ltNormalizeCat(categoryRaw);
     const inst = Math.max(1, Number((document.getElementById('lt-inst')||{}).value||1));
