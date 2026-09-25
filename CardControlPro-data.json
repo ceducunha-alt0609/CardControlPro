@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-25T23:09:28.978Z",
+  "syncedAt": "2026-09-25T23:13:23.036Z",
   "profile": "u1",
-  "lastModified": "2026-09-25T23:09:16.897Z",
+  "lastModified": "2026-09-25T23:12:57.258Z",
   "data": {
     "cards": [
       {
@@ -864,6 +864,6 @@
     "tab": "cardreport",
     "month": "2026-10",
     "compact": false,
-    "lastModified": "2026-09-25T23:09:16.897Z"
+    "lastModified": "2026-09-25T23:12:57.258Z"
   }
 }
