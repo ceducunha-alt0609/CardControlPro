@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-25T23:19:23.561Z",
+  "syncedAt": "2026-09-25T23:41:05.399Z",
   "profile": "u1",
-  "lastModified": "2026-09-25T23:19:18.423Z",
+  "lastModified": "2026-09-25T23:32:29.074Z",
   "data": {
     "cards": [
       {
@@ -70,19 +70,6 @@
       }
     ],
     "tx": [
-      {
-        "id": "2feyqp7uiammtapufw2",
-        "cardId": "c1",
-        "desc": "Supermercado Extra",
-        "amount": 312.5,
-        "type": "debit",
-        "category": "🛒 Alimentação",
-        "date": "2026-08-05",
-        "invoiceMonth": "2026-08",
-        "totalInst": 1,
-        "instNum": 1,
-        "gid": "1dfsfkfg69wmtapufw2"
-      },
       {
         "id": "jtudtuyejlmtapufw2",
         "cardId": "c1",
@@ -251,19 +238,6 @@
         "totalInst": 12,
         "instNum": 12,
         "gid": "ub1pc0hii2bmtapufw2"
-      },
-      {
-        "id": "mcxqx8bi8vmtapufw2",
-        "cardId": "c1",
-        "desc": "Posto Shell",
-        "amount": 180,
-        "type": "debit",
-        "category": "🚗 Transporte",
-        "date": "2026-08-12",
-        "invoiceMonth": "2026-08",
-        "totalInst": 1,
-        "instNum": 1,
-        "gid": "5nfiyh2plzhmtapufw2"
       },
       {
         "id": "996dag37exmtapufw2",
@@ -813,7 +787,9 @@
     "cashbacks": {},
     "deleted": {
       "tx": [
-        "a4upn6juzcvmtapufw2"
+        "a4upn6juzcvmtapufw2",
+        "mcxqx8bi8vmtapufw2",
+        "2feyqp7uiammtapufw2"
       ],
       "cards": [],
       "payments": []
@@ -853,6 +829,6 @@
     "tab": "lancamentos",
     "month": "2026-10",
     "compact": false,
-    "lastModified": "2026-09-25T23:19:18.423Z"
+    "lastModified": "2026-09-25T23:32:29.074Z"
   }
 }
