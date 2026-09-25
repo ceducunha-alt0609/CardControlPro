@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-25T23:18:04.886Z",
+  "syncedAt": "2026-09-25T23:19:23.561Z",
   "profile": "u1",
-  "lastModified": "2026-09-25T23:17:28.507Z",
+  "lastModified": "2026-09-25T23:19:18.423Z",
   "data": {
     "cards": [
       {
@@ -277,19 +277,6 @@
         "totalInst": 1,
         "instNum": 1,
         "gid": "hnh5y7w3kbjmtapufw2"
-      },
-      {
-        "id": "a4upn6juzcvmtapufw2",
-        "cardId": "c1",
-        "desc": "iFood",
-        "amount": 68,
-        "type": "debit",
-        "category": "🛒 Alimentação",
-        "date": "2026-08-16",
-        "invoiceMonth": "2026-08",
-        "totalInst": 1,
-        "instNum": 1,
-        "gid": "wrwtfuekswmtapufw2"
       },
       {
         "id": "1lu8aq77tfmtapufw2",
@@ -825,7 +812,9 @@
     },
     "cashbacks": {},
     "deleted": {
-      "tx": [],
+      "tx": [
+        "a4upn6juzcvmtapufw2"
+      ],
       "cards": [],
       "payments": []
     },
@@ -861,9 +850,9 @@
     "lowEndDevice": false,
     "reducedMotion": false,
     "jbAuto": false,
-    "tab": "cardreport",
+    "tab": "lancamentos",
     "month": "2026-10",
     "compact": false,
-    "lastModified": "2026-09-25T23:17:28.507Z"
+    "lastModified": "2026-09-25T23:19:18.423Z"
   }
 }
