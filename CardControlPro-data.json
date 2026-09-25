@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-25T23:41:05.399Z",
+  "syncedAt": "2026-09-25T23:41:19.875Z",
   "profile": "u1",
-  "lastModified": "2026-09-25T23:32:29.074Z",
+  "lastModified": "2026-09-25T23:41:16.312Z",
   "data": {
     "cards": [
       {
@@ -70,19 +70,6 @@
       }
     ],
     "tx": [
-      {
-        "id": "jtudtuyejlmtapufw2",
-        "cardId": "c1",
-        "desc": "Netflix",
-        "amount": 55.9,
-        "type": "debit",
-        "category": "🎬 Entretenimento",
-        "date": "2026-08-08",
-        "invoiceMonth": "2026-08",
-        "totalInst": 1,
-        "instNum": 1,
-        "gid": "tcw7ihy276lmtapufw2"
-      },
       {
         "id": "4gu8ct2yoa7mtapufw2",
         "cardId": "c1",
@@ -789,7 +776,8 @@
       "tx": [
         "a4upn6juzcvmtapufw2",
         "mcxqx8bi8vmtapufw2",
-        "2feyqp7uiammtapufw2"
+        "2feyqp7uiammtapufw2",
+        "jtudtuyejlmtapufw2"
       ],
       "cards": [],
       "payments": []
@@ -829,6 +817,6 @@
     "tab": "lancamentos",
     "month": "2026-10",
     "compact": false,
-    "lastModified": "2026-09-25T23:32:29.074Z"
+    "lastModified": "2026-09-25T23:41:16.312Z"
   }
 }
