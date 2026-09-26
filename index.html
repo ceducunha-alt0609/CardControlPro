@@ -14136,6 +14136,25 @@ setTimeout(()=>{
 if(el.parentNode) el.remove();
 const s=document.getElementById('appShell');
 if(s) s.style.visibility='visible';
+// Refresh final após o splash: garante que a aba atual não fique vazia no mobile.
+try{
+  if(window.S && Array.isArray(S.cards) && S.cards.length){
+    const activeOk = S.cards.some(c=>c && c.id===S.activeCardId);
+    if(!activeOk) S.activeCardId = S.cards[0].id;
+  }
+  if(typeof renderUI==='function') renderUI();
+  else {
+    if(typeof renderCarousel==='function') renderCarousel();
+    if(typeof renderContent==='function') renderContent();
+    if(typeof renderTopbarCardDot==='function') renderTopbarCardDot();
+  }
+}catch(e){ console.warn('[Aurum] refresh pós-splash falhou', e); }
+setTimeout(function(){
+  try{
+    const tc=document.getElementById('tabContent');
+    if(tc && !tc.children.length && typeof renderContent==='function') renderContent();
+  }catch(e){}
+},120);
 }, 650);
 }, remaining);
 }
