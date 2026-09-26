@@ -3761,12 +3761,6 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
     <div class="bn-item" data-tab="lancamentos" onclick="setTab('lancamentos')">
       <span class="bn-icon">➕</span><span class="bn-label">Lançar</span>
     </div>
-    <div class="bn-item" data-tab="history" onclick="setTab('history')">
-      <span class="bn-icon">🕑</span><span class="bn-label">Histórico</span>
-    </div>
-    <div class="bn-item" data-tab="cardreport" onclick="setTab('cardreport')">
-      <span class="bn-icon">📄</span><span class="bn-label">Relatório</span>
-    </div>
     <div class="bn-item" id="bnHamburger" onclick="openMobDrawer()">
       <span class="bn-icon">☰</span><span class="bn-label">Menu</span>
     </div>
@@ -3785,6 +3779,12 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
   </div>
   <div class="mob-drawer-body">
     <div class="mob-drawer-section-title">Análise</div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('history')">
+      <span class="mob-drawer-icon">🕑</span><span>Histórico</span>
+    </div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('cardreport')">
+      <span class="mob-drawer-icon">📄</span><span>Relatório por Cartão</span>
+    </div>
     <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('charts')">
       <span class="mob-drawer-icon">📊</span><span>Gráficos</span>
     </div>
