@@ -13899,17 +13899,7 @@ const bioBtn=document.getElementById('pinBioBtn');
 if(bioBtn) bioBtn.style.display=localStorage.getItem(profileKey('ccp-bio'))?'flex':'none';
 if(localStorage.getItem(profileKey('ccp-bio'))) setTimeout(tryBiometric,400);
 }
-function aurumSyncDiag(msg){
-try{
-let el=document.getElementById('aurum-sync-diag');
-if(!el){
-el=document.createElement('div'); el.id='aurum-sync-diag';
-el.style.cssText='position:fixed;left:10px;right:10px;bottom:86px;z-index:999999;padding:8px 10px;border-radius:10px;background:#101b2dcc;border:1px solid #caa85e;color:#f5e8c8;font:11px/1.3 monospace;pointer-events:none';
-document.body.appendChild(el);
-}
-el.textContent='SYNC DIAG · '+msg;
-}catch(e){}
-}
+function aurumSyncDiag(msg){ /* diagnóstico temporário removido */ }
 function aurumScheduleGithubPull(reason){
 let tries=0;
 aurumSyncDiag('agendado · '+reason);
@@ -14391,6 +14381,8 @@ if(profiles.length > 1){
 showProfileScreen();
 } else {
 lockApp();
+// Perfil único também precisa iniciar a leitura remota; com PIN, o unlock fará nova tentativa segura.
+setTimeout(()=>{ try{ if(typeof aurumScheduleGithubPull==='function') aurumScheduleGithubPull('single-profile-boot'); }catch(e){} },900);
 // Se não tem PIN, mostra alertas direto após load
 if(!localStorage.getItem(profileKey('ccp-pin'))){
   setTimeout(showStartupAlerts, 800);
@@ -23368,6 +23360,7 @@ body.aurum-input-burst .card-thumb,body.aurum-input-burst .aurum-card-mini,body.
 })();
 </script>
 
+<script id="aurum-github-auto-pull-runtime">
 // GitHub Sync: leitura automática ao iniciar e ao retomar o app.
 // Não chama ghPush e não cria commit quando nada mudou.
 (function(){
@@ -23382,6 +23375,7 @@ body.aurum-input-burst .card-thumb,body.aurum-input-burst .aurum-card-mini,body.
     if(document.visibilityState==='visible' && hiddenAt && Date.now()-hiddenAt>=10000) runAutoPull();
   },{passive:true});
 })();
+</script>
 
 </body>
 </html>
