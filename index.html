@@ -2717,6 +2717,46 @@ document.addEventListener('click',function(e){
   }
 }
 </style>
+
+<style id="aurum-mobile-history-filters-v2">
+/* ===== MOBILE HISTÓRICO — fallback estrutural 2x2 ===== */
+@media(max-width:768px){
+  .search-bar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:8px!important;
+    width:100%!important;
+    flex-direction:initial!important;
+  }
+  .search-bar > .search-input:first-child{
+    grid-column:1 / -1!important;
+    grid-row:1!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+  .search-bar > select:nth-of-type(1){
+    grid-column:1!important;
+    grid-row:2!important;
+  }
+  .search-bar > select:nth-of-type(2){
+    grid-column:2!important;
+    grid-row:2!important;
+  }
+  .search-bar > select:nth-of-type(3){
+    grid-column:1!important;
+    grid-row:3!important;
+  }
+  .search-bar > select:nth-of-type(4){
+    grid-column:2!important;
+    grid-row:3!important;
+  }
+  .search-bar > .sort-sel{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+}
+</style>
 </head>
 <script>
 var APP_VERSION = '2.2.5';
