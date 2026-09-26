@@ -2757,6 +2757,22 @@ document.addEventListener('click',function(e){
   }
 }
 </style>
+
+<style id="aurum-mobile-settings-accordion-fix">
+/* ===== MOBILE CONFIG — accordions touch fix ===== */
+@media(max-width:820px){
+  #fpanel-settings .set-acc{touch-action:auto!important}
+  #fpanel-settings .set-acc-hd{
+    touch-action:manipulation!important;
+    -webkit-user-select:none!important;
+    user-select:none!important;
+  }
+  #fpanel-settings .cfg-drag-handle{
+    display:none!important;
+    pointer-events:none!important;
+  }
+}
+</style>
 </head>
 <script>
 var APP_VERSION = '2.2.5';
@@ -7261,12 +7277,12 @@ const accStates=JSON.parse(localStorage.getItem('ccp-acc')||'{}');
 function acc(id,icon,title,body){
 const open=accStates[id]===true;
 return `<div class="set-acc${open?' open':''}" id="acc-${id}"
-draggable="true"
-ondragstart="cfgDragStart(event,'${id}')"
-ondragover="cfgDragOver(event)"
-ondragleave="cfgDragLeave(event)"
-ondrop="cfgDrop(event,'${id}')"
-ondragend="cfgDragEnd(event)">
+draggable="${window.innerWidth>820?'true':'false'}"
+ondragstart="if(window.innerWidth>820)cfgDragStart(event,'${id}')"
+ondragover="if(window.innerWidth>820)cfgDragOver(event)"
+ondragleave="if(window.innerWidth>820)cfgDragLeave(event)"
+ondrop="if(window.innerWidth>820)cfgDrop(event,'${id}')"
+ondragend="if(window.innerWidth>820)cfgDragEnd(event)">
 <div class="set-acc-hd" onclick="toggleAcc('${id}')">
 <span class="cfg-drag-handle" title="Arraste para reorganizar">⠿</span>
 <span class="set-acc-icon">${icon}</span>
