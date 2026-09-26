@@ -2637,6 +2637,60 @@ document.addEventListener('click',function(e){
   .invoice-export-actions{display:none!important}
 }
 </style>
+
+<style id="aurum-mobile-lancamentos-compact">
+/* ===== MOBILE LANÇAR — formulário compacto em linhas ===== */
+@media(max-width:768px){
+  /* Tipo: Compra/Débito + Crédito/Estorno lado a lado */
+  .aurum-lt-two{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:8px!important;
+  }
+  .aurum-lt-two > *{
+    min-width:0!important;
+    width:100%!important;
+  }
+  #lt-btn-debit,#lt-btn-credit{
+    padding:10px 6px!important;
+    font-size:var(--fs-xs)!important;
+    white-space:nowrap!important;
+  }
+
+  /* Data + Valor + Parcelas na mesma linha */
+  .aurum-lt-main-row{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.18fr) minmax(0,1fr) minmax(0,.72fr)!important;
+    gap:8px!important;
+    align-items:start!important;
+  }
+  .aurum-lt-main-row > div{
+    min-width:0!important;
+  }
+  .aurum-lt-main-row .fc{
+    width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  #lt-date,#lt-amount,#lt-inst{
+    padding-left:10px!important;
+    padding-right:8px!important;
+    font-size:var(--fs-sm)!important;
+  }
+
+  /* Limpar + Adicionar na mesma linha, com ação principal maior */
+  .aurum-lt-actions{
+    display:grid!important;
+    grid-template-columns:minmax(0,.75fr) minmax(0,1.35fr)!important;
+    gap:8px!important;
+  }
+  .aurum-lt-actions > button{
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+  }
+}
+</style>
 </head>
 <script>
 var APP_VERSION = '2.2.5';
