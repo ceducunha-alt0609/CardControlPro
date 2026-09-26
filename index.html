@@ -2476,42 +2476,519 @@ document.addEventListener('click',function(e){
 </script>
 
 
-<style id="aurum-mobile-audit-20260926">
-/* Auditoria mobile 26/09/2026 — correções cirúrgicas */
-/* Dashboard: respeita integralmente o dark mode */
-body.theme-dark .dash-overview-panel,body.theme-system.is-dark .dash-overview-panel{background:var(--bg2)!important;border-color:var(--border2)!important}
-body.theme-dark .dash-static-block,body.theme-system.is-dark .dash-static-block{background:linear-gradient(180deg,var(--bg3),var(--bg2))!important;border-color:var(--border2)!important;box-shadow:0 12px 28px rgba(0,0,0,.24)!important}
-body.theme-dark .dash-static-head,body.theme-system.is-dark .dash-static-head{background:linear-gradient(180deg,var(--bg3),color-mix(in srgb,var(--bg2) 88%,var(--blue-l) 12%))!important;border-color:var(--border)!important}
-body.theme-dark .dash-static-title,body.theme-system.is-dark .dash-static-title{color:var(--text)!important}
-body.theme-dark .dash-static-sub,body.theme-system.is-dark .dash-static-sub{color:var(--text2)!important}
-body.theme-dark .chart-wrap,body.theme-system.is-dark .chart-wrap,body.theme-dark .dash-chart-card,body.theme-system.is-dark .dash-chart-card{background:var(--bg2)!important;border-color:var(--border)!important}
-/* Busca global premium: um painel que cresce apenas quando há resultado */
-.gsearch-overlay{position:fixed;inset:0;z-index:8000;background:rgba(2,10,20,.56);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:56px 16px 16px}
-.gsearch-panel{max-width:620px;margin:0 auto;background:linear-gradient(180deg,color-mix(in srgb,var(--bg2) 96%,var(--gold-l) 4%),var(--bg2));border:1px solid var(--border2);border-radius:22px;padding:10px;box-shadow:0 18px 60px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.05);transition:padding .22s ease,box-shadow .22s ease}
-.gsearch-row{display:flex;align-items:center;gap:8px;min-height:48px}
-.gsearch-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:var(--gold-d);font-size:22px;flex:0 0 auto}
-.gsearch-input{flex:1;min-width:0;height:44px;border:0!important;background:transparent!important;color:var(--text)!important;outline:none!important;box-shadow:none!important;font:600 var(--fs-md)/1.2 var(--body);padding:0 4px!important}
-.gsearch-input::placeholder{color:var(--text3)!important;opacity:.9}
-.gsearch-close{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font:700 15px var(--body);cursor:pointer;flex:0 0 auto}
-.gsearch-results{max-height:0;opacity:0;overflow:hidden;border-top:1px solid transparent;transition:max-height .28s cubic-bezier(.16,1,.3,1),opacity .18s ease,margin .2s ease,padding .2s ease,border-color .2s ease}
-.gsearch-panel.has-results .gsearch-results{max-height:68vh;opacity:1;overflow-y:auto;margin-top:8px;padding-top:6px;border-top-color:var(--border)}
-.gsearch-results .tx-item{background:transparent;margin:2px 0}
-.gsearch-results .tx-item:hover{background:var(--bg3)}
+<style id="aurum-mobile-dashboard-v54">
+/* ===== MOBILE V54 — topbar enxuta + dashboard sem título/data ===== */
 @media(max-width:768px){
- .gsearch-overlay{padding:72px 12px 82px}
- .gsearch-panel{border-radius:20px;padding:8px 10px}
- .gsearch-panel.has-results{padding-bottom:10px}
- .gsearch-results .tx-item{padding:11px 8px;gap:9px}
- .gsearch-results .tx-actions{display:none!important}
- /* Android/WebView: evita artefato 3D que exibia os ciclos invertidos. No mobile o flip vira troca de faces, sem rotação. */
+  /* Topbar: apenas Aurum Pro + busca global + olho */
+  .topbar{
+    padding:0 12px!important;
+    gap:8px!important;
+    justify-content:space-between!important;
+  }
+  .topbar > div:first-child{
+    flex:1!important;
+    min-width:0!important;
+  }
+  .topbar > div:first-child > div{
+    min-width:0!important;
+  }
+  #topbarProfileBadge,
+  #topbarCardDot{
+    display:none!important;
+  }
+  #topbarTitle{
+    display:block!important;
+    font-size:0!important;
+    min-width:0!important;
+    white-space:nowrap!important;
+  }
+  #topbarTitle::after{
+    content:"Aurum Pro";
+    font-family:var(--display);
+    font-size:17px;
+    font-weight:800;
+    letter-spacing:-.35px;
+    color:var(--text);
+  }
+
+  .topbar > div:last-child{
+    display:flex!important;
+    align-items:center!important;
+    gap:6px!important;
+    flex-shrink:0!important;
+  }
+  .topbar > div:last-child > *{
+    display:none!important;
+  }
+  .topbar #privacyToggle,
+  .topbar button[onclick="openGlobalSearch()"]{
+    display:flex!important;
+    width:34px!important;
+    height:34px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex-shrink:0!important;
+  }
+  .topbar button[onclick="openGlobalSearch()"]{order:1!important}
+  .topbar #privacyToggle{order:2!important}
+
+  /* Dashboard mobile: remove título/data e deixa apenas o Resumo financeiro */
+  .dash-overview-head{
+    display:none!important;
+  }
+  .dash-overview-panel{
+    padding:13px!important;
+  }
+}
+</style>
+
+<style id="aurum-mobile-topbar-v55">
+/* ===== MOBILE V55 — marca em duas linhas + busca global visível ===== */
+@media(max-width:768px){
+  .topbar{
+    min-height:68px!important;
+    height:68px!important;
+    padding:0 12px!important;
+    gap:10px!important;
+  }
+  .topbar > div:first-child{
+    flex:0 0 auto!important;
+    min-width:62px!important;
+  }
+  #topbarTitle{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    line-height:.92!important;
+    min-width:58px!important;
+    font-size:0!important;
+  }
+  #topbarTitle::before{
+    content:"Aurum";
+    font-family:var(--display);
+    font-size:17px;
+    font-weight:800;
+    letter-spacing:-.35px;
+    color:var(--text);
+  }
+  #topbarTitle::after{
+    content:"PRO";
+    font-family:var(--body);
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.16em;
+    color:var(--text3);
+    margin-top:4px;
+  }
+  .topbar > div:last-child{
+    flex:1!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 38px!important;
+    gap:8px!important;
+    align-items:center!important;
+    min-width:0!important;
+  }
+  .topbar #privacyToggle{
+    grid-column:2!important;
+    grid-row:1!important;
+    display:flex!important;
+    width:38px!important;
+    height:38px!important;
+    justify-self:end!important;
+  }
+  .topbar button[onclick="openGlobalSearch()"]{
+    grid-column:1!important;
+    grid-row:1!important;
+    display:flex!important;
+    width:100%!important;
+    height:40px!important;
+    border-radius:12px!important;
+    justify-content:flex-start!important;
+    align-items:center!important;
+    gap:8px!important;
+    padding:0 12px!important;
+    font-size:0!important;
+    color:var(--text3)!important;
+    overflow:hidden!important;
+  }
+  .topbar button[onclick="openGlobalSearch()"]::before{
+    content:"🔍";
+    font-size:15px;
+    line-height:1;
+    flex-shrink:0;
+  }
+  .topbar button[onclick="openGlobalSearch()"]::after{
+    content:"Pesquisar...";
+    font-family:var(--body);
+    font-size:13px;
+    font-weight:500;
+    color:var(--text3);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+}
+</style>
+
+<style id="aurum-mobile-invoice-clean">
+/* ===== MOBILE FATURA — ocultar ações de exportação ===== */
+@media(max-width:768px){
+  .invoice-export-actions{display:none!important}
+}
+</style>
+
+<style id="aurum-mobile-lancamentos-compact">
+/* ===== MOBILE LANÇAR — formulário compacto em linhas ===== */
+@media(max-width:768px){
+  /* Tipo: Compra/Débito + Crédito/Estorno lado a lado */
+  .aurum-lt-two{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:8px!important;
+  }
+  .aurum-lt-two > *{
+    min-width:0!important;
+    width:100%!important;
+  }
+  #lt-btn-debit,#lt-btn-credit{
+    padding:10px 6px!important;
+    font-size:var(--fs-xs)!important;
+    white-space:nowrap!important;
+  }
+
+  /* Data + Valor + Parcelas na mesma linha */
+  .aurum-lt-main-row{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.18fr) minmax(0,1fr) minmax(0,.72fr)!important;
+    gap:8px!important;
+    align-items:start!important;
+  }
+  .aurum-lt-main-row > div{
+    min-width:0!important;
+  }
+  .aurum-lt-main-row .fc{
+    width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  #lt-date,#lt-amount,#lt-inst{
+    padding-left:10px!important;
+    padding-right:8px!important;
+    font-size:var(--fs-sm)!important;
+  }
+
+  /* Limpar + Adicionar na mesma linha, com ação principal maior */
+  .aurum-lt-actions{
+    display:grid!important;
+    grid-template-columns:minmax(0,.75fr) minmax(0,1.35fr)!important;
+    gap:8px!important;
+  }
+  .aurum-lt-actions > button{
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+  }
+}
+</style>
+
+<style id="aurum-mobile-history-filters">
+/* ===== MOBILE HISTÓRICO — filtros 2x2 ===== */
+@media(max-width:768px){
+  .hist-search-bar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:8px!important;
+    width:100%!important;
+  }
+  .hist-search-bar .hist-search-input{
+    grid-column:1 / -1!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+  .hist-search-bar .hist-period{grid-column:1!important;grid-row:2!important}
+  .hist-search-bar .hist-card{grid-column:2!important;grid-row:2!important}
+  .hist-search-bar .hist-cat{grid-column:1!important;grid-row:3!important}
+  .hist-search-bar .hist-sort{grid-column:2!important;grid-row:3!important}
+  .hist-search-bar .sort-sel{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+}
+</style>
+
+<style id="aurum-mobile-history-filters-v2">
+/* ===== MOBILE HISTÓRICO — fallback estrutural 2x2 ===== */
+@media(max-width:768px){
+  .search-bar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:8px!important;
+    width:100%!important;
+    flex-direction:initial!important;
+  }
+  .search-bar > .search-input:first-child{
+    grid-column:1 / -1!important;
+    grid-row:1!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+  .search-bar > select:nth-of-type(1){
+    grid-column:1!important;
+    grid-row:2!important;
+  }
+  .search-bar > select:nth-of-type(2){
+    grid-column:2!important;
+    grid-row:2!important;
+  }
+  .search-bar > select:nth-of-type(3){
+    grid-column:1!important;
+    grid-row:3!important;
+  }
+  .search-bar > select:nth-of-type(4){
+    grid-column:2!important;
+    grid-row:3!important;
+  }
+  .search-bar > .sort-sel{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+}
+</style>
+
+<style id="aurum-mobile-settings-accordion-fix">
+/* ===== MOBILE CONFIG — accordions touch fix ===== */
+@media(max-width:820px){
+  #fpanel-settings .set-acc{touch-action:auto!important}
+  #fpanel-settings .set-acc-hd{
+    touch-action:manipulation!important;
+    -webkit-user-select:none!important;
+    user-select:none!important;
+  }
+  #fpanel-settings .cfg-drag-handle{
+    display:none!important;
+    pointer-events:none!important;
+  }
+}
+</style>
+
+<style id="aurum-mobile-settings-accordion-state-fix">
+/* ===== MOBILE CONFIG — força estado real dos acordeões sobre V47 ===== */
+@media(max-width:820px){
+  #fpanel-settings .set-acc:not(.open) > .set-acc-body{
+    display:none!important;
+  }
+  #fpanel-settings .set-acc.open > .set-acc-body{
+    display:block!important;
+  }
+}
+</style>
+
+<style id="aurum-mobile-menu-type">
+/* ===== MOBILE MENU — tipografia ampliada ===== */
+@media(max-width:768px){
+  .mob-drawer-section-title{
+    font-size:calc(var(--fs-micro) * 1.10)!important;
+    letter-spacing:.15em!important;
+  }
+  .mob-drawer-item{
+    font-size:calc(var(--fs-base) * 1.10)!important;
+    line-height:1.25!important;
+  }
+  .mob-drawer-title{
+    font-size:calc(var(--fs-lg) * 1.06)!important;
+  }
+}
+</style>
+
+<style id="aurum-mobile-faq-clean">
+/* ===== MOBILE FAQ — ocultar pílulas de categoria ===== */
+@media(max-width:768px){
+  #fpanel-faq #faq-cats{display:none!important}
+}
+</style>
+
+<style id="aurum-mobile-stability-audit">
+/* ===== MOBILE STABILITY AUDIT — paint/text flicker hardening ===== */
+@media(max-width:768px){
+  /* Evita artefatos de rasterização/repaint no Chrome Android */
+  main{
+    transform:none!important;
+    transform-origin:initial!important;
+    transition:none!important;
+  }
+
+  #tabContent,
+  .content-inner,
+  .content-scroll,
+  .tx-list,
+  .hist-list,
+  .cards-carousel,
+  .tx-list > .tx-item,
+  .annual-total-card,
+  .budget-row,
+  .sub-item,
+  .history-month,
+  .report-section,
+  .stat-tile,
+  .dash-card,
+  .aurum-offscreen-pause{
+    content-visibility:visible!important;
+    contain:none!important;
+  }
+
+  .aurum-offscreen-pause,
+  .aurum-offscreen-pause *{
+    animation-play-state:running!important;
+  }
+
+  /* Texto/valores nunca somem durante transições no mobile */
+  .num-flip,
+  .topbar-title-anim{
+    animation:none!important;
+    opacity:1!important;
+    transform:none!important;
+  }
+
+  #tabContent.tab-enter{
+    animation:none!important;
+  }
+
+  /* Evita promoção desnecessária de camadas em itens de texto/lista */
+  .tx-item,
+  .history-month,
+  .report-section,
+  .dash-card,
+  .set-acc,
+  .set-acc-body{
+    will-change:auto!important;
+  }
+}
+</style>
+
+<style id="aurum-mobile-compositor-hardening">
+/* ===== MOBILE COMPOSITOR HARDENING — texto estável no Chrome Android ===== */
+@media(max-width:820px){
+  /*
+    Reverte otimizações antigas de GPU que podem fazer glyphs/textos
+    desaparecerem até o próximo repaint em navegadores Android.
+  */
+  body *,
+  body *::before,
+  body *::after{
+    backface-visibility:visible!important;
+    -webkit-backface-visibility:visible!important;
+  }
+
+  html,body,
+  .app-shell,
+  .content-area,
+  .content-scroll,
+  main,
+  #tabContent,
+  .content-inner{
+    transform-style:flat!important;
+    perspective:none!important;
+  }
+
+  /* Sem virtualização/contain nos blocos que rolam no mobile */
+  .cards-tray,
+  #tabContent,
+  .content-inner,
+  .pl-premium-wrap,
+  .pl-card-block,
+  .pl-events,
+  .pl-hero,
+  .pl-premium-head,
+  .pl-day,
+  .cal-day,
+  .card,
+  .tx-list,
+  .hist-list,
+  .history-month,
+  .report-section,
+  .chart-wrap,
+  .chart-canvas-wrap,
+  .budget-widget,
+  .budget-row,
+  .sub-item,
+  .set-acc,
+  .set-acc-body,
+  .aurum-offscreen-pause{
+    content-visibility:visible!important;
+    contain:none!important;
+    will-change:auto!important;
+  }
+
+  /* Sticky + blur é uma combinação propensa a flicker no Android */
+  .topbar{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+
+  /* Evita camadas GPU artificiais em controles/textos */
+  .btn,
+  .tool-btn,
+  .tab-btn,
+  .mnb,
+  .corp-chip,
+  .grad-dir-btn,
+  .bn-item,
+  .nav-item,
+  .mob-drawer-item,
+  #privacyToggle,
+  .mob-menu-btn{
+    will-change:auto!important;
+  }
+
+  /* Preserve resposta ao toque, mas sem translateZ permanente */
+  .btn:not(:active),
+  .tool-btn:not(:active),
+  .tab-btn:not(:active),
+  .mnb:not(:active),
+  .corp-chip:not(:active),
+  .grad-dir-btn:not(:active),
+  #privacyToggle:not(:active),
+  .mob-menu-btn:not(:active){
+    transform:none!important;
+  }
+
+  /* Conteúdo textual nunca deve depender de animação para ficar visível */
+  #tabContent,
+  #tabContent *,
+  .mob-drawer,
+  .mob-drawer *{
+    text-rendering:auto;
+  }
+}
+</style>
+
+<style id="aurum-mobile-hotfix-20260926">
+/* Hotfix isolado: preserva bottom-nav, formulários e componentes globais. */
+body.theme-dark .dash-overview-panel,body.theme-system.is-dark .dash-overview-panel{background:var(--bg2);border-color:var(--border)}
+body.theme-dark .dash-static-block,body.theme-system.is-dark .dash-static-block{background:linear-gradient(180deg,var(--bg2),var(--bg3));border-color:var(--border);box-shadow:var(--sh)}
+body.theme-dark .dash-static-head,body.theme-system.is-dark .dash-static-head{background:linear-gradient(180deg,var(--bg3),var(--bg2));border-color:var(--border)}
+@media(prefers-color-scheme:dark){
+ body.theme-system .dash-overview-panel{background:var(--bg2);border-color:var(--border)}
+ body.theme-system .dash-static-block{background:linear-gradient(180deg,var(--bg2),var(--bg3));border-color:var(--border);box-shadow:var(--sh)}
+ body.theme-system .dash-static-head{background:linear-gradient(180deg,var(--bg3),var(--bg2));border-color:var(--border)}
+}
+@media(max-width:768px){
  .plan-cycle-card{perspective:none!important}
  .plan-cycle-card-inner{transform:none!important;transform-style:flat!important;transition:none!important;height:auto!important}
- .plan-cycle-face{backface-visibility:visible!important;-webkit-backface-visibility:visible!important;transform:none!important}
- .plan-cycle-face-front{display:flex!important;position:relative!important}
- .plan-cycle-face-back{display:none!important;position:relative!important;top:auto!important;left:auto!important;width:100%!important}
+ .plan-cycle-face{backface-visibility:visible!important;-webkit-backface-visibility:visible!important}
+ .plan-cycle-face-back{position:relative!important;inset:auto!important;width:100%!important;transform:none!important;display:none!important}
  .plan-cycle-card.flipped .plan-cycle-face-front{display:none!important}
  .plan-cycle-card.flipped .plan-cycle-face-back{display:flex!important}
 }
+#modal-gsearch{padding:72px 14px 16px!important}
+#gsearch-panel{background:var(--bg2);border:1.5px solid var(--gold-m);border-radius:20px;padding:10px;box-shadow:0 18px 54px rgba(0,0,0,.38);overflow:hidden}
+#gsearch-bar{align-items:center}
+#gsearch-input{border-color:var(--border2)!important;background:var(--bg3)!important;border-radius:14px!important}
+#gsearch-results{margin-top:10px;border-top:1px solid var(--border);border-radius:0 0 14px 14px!important;box-shadow:none!important;background:transparent!important}
+@media(max-width:600px){#gsearch-panel{width:100%;padding:9px;border-radius:18px}#modal-gsearch{padding-top:64px!important}}
 </style>
 </head>
 <script>
@@ -3517,12 +3994,6 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
     <div class="bn-item" data-tab="lancamentos" onclick="setTab('lancamentos')">
       <span class="bn-icon">➕</span><span class="bn-label">Lançar</span>
     </div>
-    <div class="bn-item" data-tab="history" onclick="setTab('history')">
-      <span class="bn-icon">🕑</span><span class="bn-label">Histórico</span>
-    </div>
-    <div class="bn-item" data-tab="cardreport" onclick="setTab('cardreport')">
-      <span class="bn-icon">📄</span><span class="bn-label">Relatório</span>
-    </div>
     <div class="bn-item" id="bnHamburger" onclick="openMobDrawer()">
       <span class="bn-icon">☰</span><span class="bn-label">Menu</span>
     </div>
@@ -3541,6 +4012,12 @@ if(typeof showToast==='function') showToast('✅ App instalado com sucesso!','su
   </div>
   <div class="mob-drawer-body">
     <div class="mob-drawer-section-title">Análise</div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('history')">
+      <span class="mob-drawer-icon">🕑</span><span>Histórico</span>
+    </div>
+    <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('cardreport')">
+      <span class="mob-drawer-icon">📄</span><span>Relatório por Cartão</span>
+    </div>
     <div class="mob-drawer-item" onclick="closeMobDrawer();setTab('charts')">
       <span class="mob-drawer-icon">📊</span><span>Gráficos</span>
     </div>
@@ -3911,14 +4388,14 @@ function closeMobDrawer(){
 </div>
 
 <!-- GLOBAL SEARCH OVERLAY -->
-<div id="modal-gsearch" class="gsearch-overlay" style="display:none" onclick="closeGlobalSearch()">
-  <div class="gsearch-panel" onclick="event.stopPropagation()">
-    <div class="gsearch-row">
-      <span class="gsearch-icon">⌕</span>
-      <input id="gsearch-input" class="gsearch-input" placeholder="Buscar lançamentos…" oninput="runGlobalSearch()" autocomplete="off">
-      <button class="gsearch-close" onclick="closeGlobalSearch()" aria-label="Fechar busca">✕</button>
+<div id="modal-gsearch" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,20,60,.5);backdrop-filter:blur(6px);padding:60px 16px 16px" onclick="closeGlobalSearch()">
+  <div id="gsearch-panel" onclick="event.stopPropagation()" style="max-width:600px;margin:0 auto">
+    <div id="gsearch-bar" style="display:flex;gap:8px;margin-bottom:0">
+      <input id="gsearch-input" class="search-input" placeholder="🔍 Buscar em todos os lançamentos..." oninput="runGlobalSearch()"
+        style="flex:1;height:44px;font-size:var(--fs-md);border-radius:var(--rl);background:var(--bg2);border:2px solid var(--blue)">
+      <button onclick="closeGlobalSearch()" style="padding:0 16px;height:44px;border-radius:var(--rl);border:var(--bw) solid var(--border);background:var(--bg2);color:var(--text2);font-family:var(--body);font-size:var(--fs-base);font-weight:600;cursor:pointer">✕</button>
     </div>
-    <div id="gsearch-results" class="gsearch-results"></div>
+    <div id="gsearch-results" style="background:var(--bg2);border-radius:var(--rl);overflow:hidden;max-height:70vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.3)"></div>
   </div>
 </div>
 
@@ -5368,7 +5845,7 @@ ${s.carried>0?`<div class="prev-bal">
 <div class="sec-collapsible" id="sec-txpreview">
 <div class="sec-collapse-btn" onclick="toggleSection('sec-txpreview')">
 <span style="font-size:var(--fs-base);font-weight:700;color:var(--text)">🧾 Fatura · ${debits.length} compra${debits.length!==1?'s':''} · ${fmtR(s.netCharges||s.debits)}</span>
-<div style="display:flex;gap:6px;margin-left:auto;margin-right:8px;flex-wrap:wrap" onclick="event.stopPropagation()">
+<div class="invoice-export-actions" style="display:flex;gap:6px;margin-left:auto;margin-right:8px;flex-wrap:wrap" onclick="event.stopPropagation()">
 <button class="pdf-btn" onclick="genPDF()">📄 PDF</button>
 <button class="pdf-btn" onclick="genMonthlyReport()" style="color:var(--blue)">📊 Relatório</button>
 <button class="pdf-btn" onclick="printInvoice()" style="color:var(--blue)">🖨️ Imprimir</button>
@@ -6800,7 +7277,7 @@ S.tx.push({id:uid(),cardId,desc:eff>1?`${desc} (${i+1}/${eff})`:desc,amount:part
 }
 save();
 aurumRefreshAfterTxSave();
-showToast(`✓ ${eff>1?eff+' parcelas salvas':'Lançamento salvo'}`,'green');
+showToast(`✓ ${eff>1?eff+'× parcelas salvas':'Lançamento salvo'}`,'green');
 ltLearnCategory();
 ltClear();
 ltRefreshList();
@@ -6924,12 +7401,12 @@ const periodOpts=[
 ].map(o=>`<option value="${o.v}" ${filterPeriod===o.v?'selected':''}>${o.l}</option>`).join('');
 const totalShown=all.reduce((s,t)=>s+((t.type==='credit'?-1:1)*(Number(t.amount)||0)),0);
 const searchBar=`
-<div class="search-bar">
-<input class="search-input" placeholder="🔍  Buscar..." oninput="S.histSearch=this.value;renderContent()" value="${S.histSearch||''}">
-<select class="sort-sel" onchange="S.histPeriod=this.value;renderContent()">${periodOpts}</select>
-<select class="sort-sel" onchange="S.histCard=this.value;renderContent()">${cardOpts}</select>
-<select class="sort-sel" onchange="S.histCat=this.value;renderContent()">${catOpts}</select>
-<select class="sort-sel" onchange="S.histSort=this.value;renderContent()">
+<div class="search-bar hist-search-bar">
+<input class="search-input hist-search-input" placeholder="🔍  Buscar..." oninput="S.histSearch=this.value;renderContent()" value="${S.histSearch||''}">
+<select class="sort-sel hist-period" onchange="S.histPeriod=this.value;renderContent()">${periodOpts}</select>
+<select class="sort-sel hist-card" onchange="S.histCard=this.value;renderContent()">${cardOpts}</select>
+<select class="sort-sel hist-cat" onchange="S.histCat=this.value;renderContent()">${catOpts}</select>
+<select class="sort-sel hist-sort" onchange="S.histSort=this.value;renderContent()">
 <option value="date-desc" ${sortH==='date-desc'?'selected':''}>Data ↓</option>
 <option value="date-asc"  ${sortH==='date-asc'?'selected':''}>Data ↑</option>
 <option value="amt-desc"  ${sortH==='amt-desc'?'selected':''}>Valor ↓</option>
@@ -7017,13 +7494,13 @@ const accStates=JSON.parse(localStorage.getItem('ccp-acc')||'{}');
 function acc(id,icon,title,body){
 const open=accStates[id]===true;
 return `<div class="set-acc${open?' open':''}" id="acc-${id}"
-draggable="true"
-ondragstart="cfgDragStart(event,'${id}')"
-ondragover="cfgDragOver(event)"
-ondragleave="cfgDragLeave(event)"
-ondrop="cfgDrop(event,'${id}')"
-ondragend="cfgDragEnd(event)">
-<div class="set-acc-hd" onclick="toggleAcc('${id}')">
+draggable="${window.innerWidth>820?'true':'false'}"
+ondragstart="if(window.innerWidth>820)cfgDragStart(event,'${id}')"
+ondragover="if(window.innerWidth>820)cfgDragOver(event)"
+ondragleave="if(window.innerWidth>820)cfgDragLeave(event)"
+ondrop="if(window.innerWidth>820)cfgDrop(event,'${id}')"
+ondragend="if(window.innerWidth>820)cfgDragEnd(event)">
+<div class="set-acc-hd" onclick="toggleAccEl(this.closest('.set-acc'),'${id}')">
 <span class="cfg-drag-handle" title="Arraste para reorganizar">⠿</span>
 <span class="set-acc-icon">${icon}</span>
 <span class="set-acc-title">${title}</span>
@@ -8461,8 +8938,7 @@ function openGlobalSearch(){
 document.getElementById('modal-gsearch').style.display='block';
 const inp=document.getElementById('gsearch-input');
 inp.value='';
-document.getElementById('gsearch-results').innerHTML='';
- document.querySelector('.gsearch-panel')?.classList.remove('has-results');
+const res=document.getElementById('gsearch-results'); res.innerHTML=''; res.style.display='none';
 setTimeout(()=>inp.focus(),80);
 }
 function closeGlobalSearch(){
@@ -8471,8 +8947,8 @@ document.getElementById('modal-gsearch').style.display='none';
 function runGlobalSearch(){
 const q=(document.getElementById('gsearch-input').value||'').toLowerCase().trim();
 const el=document.getElementById('gsearch-results');
-if(!q){el.innerHTML='';document.querySelector('.gsearch-panel')?.classList.remove('has-results');return;}
- document.querySelector('.gsearch-panel')?.classList.add('has-results');
+if(!q){el.innerHTML='';el.style.display='none';return;}
+el.style.display='block';
 const results=S.tx.filter(t=>
 t.desc.toLowerCase().includes(q)||
 (t.category||'').toLowerCase().includes(q)||
@@ -8706,6 +9182,28 @@ const states=JSON.parse(localStorage.getItem('ccp-sections')||'{}');
 states[id]=closed;
 localStorage.setItem('ccp-sections',JSON.stringify(states));
 }
+function toggleAccEl(el,id){
+if(!el) return;
+const settingsPanelOpen = document.getElementById('fpanel-settings')?.classList.contains('open');
+const splitMode = settingsPanelOpen && window.innerWidth > 820;
+const states=JSON.parse(localStorage.getItem('ccp-acc')||'{}');
+let open;
+if(splitMode){
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('#fpanel-settings .set-acc.open').forEach(node=>node.classList.remove('open'));
+  Object.keys(states).forEach(k=>states[k]=false);
+  open = !isOpen;
+  if(open){ el.classList.add('open'); states[id]=true; }
+} else {
+  open=el.classList.toggle('open');
+  states[id]=open;
+}
+localStorage.setItem('ccp-acc',JSON.stringify(states));
+try{
+  if(typeof window._aurumSyncSettingsContentArea==='function') window._aurumSyncSettingsContentArea();
+}catch(e){}
+}
+
 function toggleAcc(id){
 const el=document.getElementById('acc-'+id);
 if(!el) return;
@@ -10366,9 +10864,8 @@ if(typeof Chart==='undefined'){
 if(_chartInst){try{_chartInst.forEach(ch=>{if(ch&&typeof ch.destroy==='function')ch.destroy();})}catch(e){}}_chartInst=[];
 /* Destrói qualquer instância Chart.js residual nos canvas para evitar "canvas already in use" */
 ['mainChart','lineChart','projChart','donutChart','gastosChart'].forEach(id=>{const cv=document.getElementById(id);if(cv){const prev=Chart.getChart(cv);if(prev)try{prev.destroy()}catch(e){}}});
-const _chartDark=document.body.classList.contains('theme-dark')||document.body.classList.contains('is-dark');
-const gridColor=_chartDark?'rgba(138,174,210,.24)':text3+'44';
-const tickColor=_chartDark?'#c7d9ed':(cs.getPropertyValue('--text2').trim()||text3);
+const gridColor=text3+'44';
+const tickColor=cs.getPropertyValue('--text2').trim()||text3;
 const numFont=cs.getPropertyValue('--num-font').trim().replace(/^'|'$/g,'')||'Merriweather';
 // ── Painel por Usuário ───────────────────────────────────────────────────────
 (function(){
@@ -13828,6 +14325,25 @@ setTimeout(()=>{
 if(el.parentNode) el.remove();
 const s=document.getElementById('appShell');
 if(s) s.style.visibility='visible';
+// Refresh final após o splash: garante que a aba atual não fique vazia no mobile.
+try{
+  if(window.S && Array.isArray(S.cards) && S.cards.length){
+    const activeOk = S.cards.some(c=>c && c.id===S.activeCardId);
+    if(!activeOk) S.activeCardId = S.cards[0].id;
+  }
+  if(typeof renderUI==='function') renderUI();
+  else {
+    if(typeof renderCarousel==='function') renderCarousel();
+    if(typeof renderContent==='function') renderContent();
+    if(typeof renderTopbarCardDot==='function') renderTopbarCardDot();
+  }
+}catch(e){ console.warn('[Aurum] refresh pós-splash falhou', e); }
+setTimeout(function(){
+  try{
+    const tc=document.getElementById('tabContent');
+    if(tc && !tc.children.length && typeof renderContent==='function') renderContent();
+  }catch(e){}
+},120);
 }, 650);
 }, remaining);
 }
@@ -16638,6 +17154,13 @@ function renderDashboard(el){
 // ============================================================
 // renderPlanejamento — guia Planejamento
 // ============================================================
+function switchPlanSubTab(tab){
+  if(tab!=='ciclo' && tab!=='adicionais') return;
+  S._planSubTab = tab;
+  const el = document.getElementById('tabContent');
+  if(el && typeof renderPlanejamento === 'function') renderPlanejamento(el);
+}
+
 function renderPlanejamento(el){
   const cards = S.cards || [];
   const today = new Date();
@@ -16664,8 +17187,8 @@ function renderPlanejamento(el){
       <div style="font-size:var(--fs-xs);color:var(--text3);margin-top:2px">Ciclo de fatura de cada cartão — fechamento, melhor dia de compra e vencimento</div>
     </div>
     <div class="tabs" style="margin-bottom:20px">
-      <button class="tab-btn ${activePlanTab==='ciclo'?'active':''}" onclick="S._planSubTab='ciclo';renderContent()">📅 Ciclo de Fatura</button>
-      <button class="tab-btn ${activePlanTab==='adicionais'?'active':''}" onclick="S._planSubTab='adicionais';renderContent()">👥 Gastos Adicionais</button>
+      <button type="button" class="tab-btn ${activePlanTab==='ciclo'?'active':''}" onclick="switchPlanSubTab('ciclo')">📅 Ciclo de Fatura</button>
+      <button type="button" class="tab-btn ${activePlanTab==='adicionais'?'active':''}" onclick="switchPlanSubTab('adicionais')">👥 Gastos Adicionais</button>
     </div>
     ${activePlanTab==='ciclo' ? cicloContent : adicionaisContent}
   </main>`;
@@ -17767,6 +18290,8 @@ body:not(.theme-dark):not(.is-dark) #fpanel-settings .set-acc.open>.set-acc-hd{
       }
     });
   }
+
+  window._aurumSyncSettingsContentArea = _syncContentArea;
 
   document.addEventListener('DOMContentLoaded', function(){
     const _origRenderSettings = window.renderSettings;
@@ -22736,6 +23261,37 @@ body.aurum-input-burst .card-thumb,body.aurum-input-burst .aurum-card-mini,body.
   document.addEventListener('click',function(e){
     if(e.target.closest && e.target.closest('#fpanel-settings')) setTimeout(enhance,0);
   },true);
+})();
+</script>
+
+<script id="aurum-mobile-stability-runtime">
+/* ===== MOBILE STABILITY AUDIT — disable offscreen observer ===== */
+(function(){
+  function stabilizeMobile(){
+    if(!window.matchMedia || !window.matchMedia('(max-width:768px)').matches) return;
+    try{
+      if(window.__aurumCycle5MutationObserver){
+        window.__aurumCycle5MutationObserver.disconnect();
+      }
+    }catch(e){}
+    try{
+      document.querySelectorAll('.aurum-offscreen-pause').forEach(function(el){
+        el.classList.remove('aurum-offscreen-pause');
+      });
+    }catch(e){}
+    try{
+      var m=document.querySelector('main');
+      if(m){
+        m.style.removeProperty('transform');
+        m.style.removeProperty('transform-origin');
+        m.style.removeProperty('transition');
+      }
+    }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',stabilizeMobile);
+  else stabilizeMobile();
+  window.addEventListener('load',function(){setTimeout(stabilizeMobile,120);},{passive:true});
+  window.addEventListener('pageshow',function(){setTimeout(stabilizeMobile,60);},{passive:true});
 })();
 </script>
 </body>
