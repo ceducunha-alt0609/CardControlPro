@@ -6602,7 +6602,7 @@ const hasPin = !!localStorage.getItem(profileKey('ccp-pin'));
 if(!hasPin){
 document.querySelector('.app-shell').style.visibility = 'visible';
 render();
-setTimeout(()=>{ try{ if(typeof ghAutoPullIfChanged==='function') ghPull(false); }catch(e){} },700);
+aurumScheduleGithubPull('ready');
 }
 }
 function showAddProfile(){
@@ -13899,6 +13899,20 @@ const bioBtn=document.getElementById('pinBioBtn');
 if(bioBtn) bioBtn.style.display=localStorage.getItem(profileKey('ccp-bio'))?'flex':'none';
 if(localStorage.getItem(profileKey('ccp-bio'))) setTimeout(tryBiometric,400);
 }
+function aurumScheduleGithubPull(reason){
+let tries=0;
+const attempt=()=>{
+tries++;
+try{
+if(typeof ghPull==='function' && typeof GH!=='undefined' && GH){
+ghPull(false);
+return;
+}
+}catch(e){}
+if(tries<30) setTimeout(attempt,250);
+};
+setTimeout(attempt,250);
+}
 async function unlockApp(pin){
 if(pin){
 try{
@@ -13912,7 +13926,7 @@ if(_cryptoKey){
 await loadDecrypted();
 }
 // O GitHub só deve ser consultado depois que perfil + PIN + dados locais estiverem prontos.
-setTimeout(()=>{ try{ if(typeof ghAutoPullIfChanged==='function') ghPull(false); }catch(e){} },700);
+aurumScheduleGithubPull('ready');
 // Mostra alertas só após dados reais carregados e renderizados
 setTimeout(showStartupAlerts, 1200);
 }
