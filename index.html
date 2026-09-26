@@ -2630,6 +2630,13 @@ document.addEventListener('click',function(e){
   }
 }
 </style>
+
+<style id="aurum-mobile-invoice-clean">
+/* ===== MOBILE FATURA — ocultar ações de exportação ===== */
+@media(max-width:768px){
+  .invoice-export-actions{display:none!important}
+}
+</style>
 </head>
 <script>
 var APP_VERSION = '2.2.5';
@@ -5485,7 +5492,7 @@ ${s.carried>0?`<div class="prev-bal">
 <div class="sec-collapsible" id="sec-txpreview">
 <div class="sec-collapse-btn" onclick="toggleSection('sec-txpreview')">
 <span style="font-size:var(--fs-base);font-weight:700;color:var(--text)">🧾 Fatura · ${debits.length} compra${debits.length!==1?'s':''} · ${fmtR(s.netCharges||s.debits)}</span>
-<div style="display:flex;gap:6px;margin-left:auto;margin-right:8px;flex-wrap:wrap" onclick="event.stopPropagation()">
+<div class="invoice-export-actions" style="display:flex;gap:6px;margin-left:auto;margin-right:8px;flex-wrap:wrap" onclick="event.stopPropagation()">
 <button class="pdf-btn" onclick="genPDF()">📄 PDF</button>
 <button class="pdf-btn" onclick="genMonthlyReport()" style="color:var(--blue)">📊 Relatório</button>
 <button class="pdf-btn" onclick="printInvoice()" style="color:var(--blue)">🖨️ Imprimir</button>
