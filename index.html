@@ -7283,7 +7283,7 @@ ondragover="if(window.innerWidth>820)cfgDragOver(event)"
 ondragleave="if(window.innerWidth>820)cfgDragLeave(event)"
 ondrop="if(window.innerWidth>820)cfgDrop(event,'${id}')"
 ondragend="if(window.innerWidth>820)cfgDragEnd(event)">
-<div class="set-acc-hd" onclick="toggleAcc('${id}')">
+<div class="set-acc-hd" onclick="toggleAccEl(this.closest('.set-acc'),'${id}')">
 <span class="cfg-drag-handle" title="Arraste para reorganizar">⠿</span>
 <span class="set-acc-icon">${icon}</span>
 <span class="set-acc-title">${title}</span>
@@ -8964,6 +8964,28 @@ const states=JSON.parse(localStorage.getItem('ccp-sections')||'{}');
 states[id]=closed;
 localStorage.setItem('ccp-sections',JSON.stringify(states));
 }
+function toggleAccEl(el,id){
+if(!el) return;
+const settingsPanelOpen = document.getElementById('fpanel-settings')?.classList.contains('open');
+const splitMode = settingsPanelOpen && window.innerWidth > 820;
+const states=JSON.parse(localStorage.getItem('ccp-acc')||'{}');
+let open;
+if(splitMode){
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('#fpanel-settings .set-acc.open').forEach(node=>node.classList.remove('open'));
+  Object.keys(states).forEach(k=>states[k]=false);
+  open = !isOpen;
+  if(open){ el.classList.add('open'); states[id]=true; }
+} else {
+  open=el.classList.toggle('open');
+  states[id]=open;
+}
+localStorage.setItem('ccp-acc',JSON.stringify(states));
+try{
+  if(typeof window._aurumSyncSettingsContentArea==='function') window._aurumSyncSettingsContentArea();
+}catch(e){}
+}
+
 function toggleAcc(id){
 const el=document.getElementById('acc-'+id);
 if(!el) return;
@@ -18031,6 +18053,8 @@ body:not(.theme-dark):not(.is-dark) #fpanel-settings .set-acc.open>.set-acc-hd{
       }
     });
   }
+
+  window._aurumSyncSettingsContentArea = _syncContentArea;
 
   document.addEventListener('DOMContentLoaded', function(){
     const _origRenderSettings = window.renderSettings;
