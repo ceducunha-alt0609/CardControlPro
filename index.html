@@ -2541,6 +2541,95 @@ document.addEventListener('click',function(e){
   }
 }
 </style>
+
+<style id="aurum-mobile-topbar-v55">
+/* ===== MOBILE V55 — marca em duas linhas + busca global visível ===== */
+@media(max-width:768px){
+  .topbar{
+    min-height:68px!important;
+    height:68px!important;
+    padding:0 12px!important;
+    gap:10px!important;
+  }
+  .topbar > div:first-child{
+    flex:0 0 auto!important;
+    min-width:62px!important;
+  }
+  #topbarTitle{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    line-height:.92!important;
+    min-width:58px!important;
+    font-size:0!important;
+  }
+  #topbarTitle::before{
+    content:"Aurum";
+    font-family:var(--display);
+    font-size:17px;
+    font-weight:800;
+    letter-spacing:-.35px;
+    color:var(--text);
+  }
+  #topbarTitle::after{
+    content:"PRO";
+    font-family:var(--body);
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.16em;
+    color:var(--text3);
+    margin-top:4px;
+  }
+  .topbar > div:last-child{
+    flex:1!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 38px!important;
+    gap:8px!important;
+    align-items:center!important;
+    min-width:0!important;
+  }
+  .topbar #privacyToggle{
+    grid-column:2!important;
+    grid-row:1!important;
+    display:flex!important;
+    width:38px!important;
+    height:38px!important;
+    justify-self:end!important;
+  }
+  .topbar button[onclick="openGlobalSearch()"]{
+    grid-column:1!important;
+    grid-row:1!important;
+    display:flex!important;
+    width:100%!important;
+    height:40px!important;
+    border-radius:12px!important;
+    justify-content:flex-start!important;
+    align-items:center!important;
+    gap:8px!important;
+    padding:0 12px!important;
+    font-size:0!important;
+    color:var(--text3)!important;
+    overflow:hidden!important;
+  }
+  .topbar button[onclick="openGlobalSearch()"]::before{
+    content:"🔍";
+    font-size:15px;
+    line-height:1;
+    flex-shrink:0;
+  }
+  .topbar button[onclick="openGlobalSearch()"]::after{
+    content:"Pesquisar...";
+    font-family:var(--body);
+    font-size:13px;
+    font-weight:500;
+    color:var(--text3);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+}
+</style>
 </head>
 <script>
 var APP_VERSION = '2.2.5';
