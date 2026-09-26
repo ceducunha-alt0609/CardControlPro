@@ -6602,6 +6602,7 @@ const hasPin = !!localStorage.getItem(profileKey('ccp-pin'));
 if(!hasPin){
 document.querySelector('.app-shell').style.visibility = 'visible';
 render();
+setTimeout(()=>{ try{ if(typeof ghAutoPullIfChanged==='function') ghAutoPullIfChanged('profile-ready'); }catch(e){} },700);
 }
 }
 function showAddProfile(){
@@ -13910,6 +13911,8 @@ if(sh) sh.style.visibility='visible';
 if(_cryptoKey){
 await loadDecrypted();
 }
+// O GitHub só deve ser consultado depois que perfil + PIN + dados locais estiverem prontos.
+setTimeout(()=>{ try{ if(typeof ghAutoPullIfChanged==='function') ghAutoPullIfChanged('unlock-ready'); }catch(e){} },700);
 // Mostra alertas só após dados reais carregados e renderizados
 setTimeout(showStartupAlerts, 1200);
 }
@@ -23338,8 +23341,6 @@ body.aurum-input-burst .card-thumb,body.aurum-input-burst .aurum-card-mini,body.
 (function(){
   let hiddenAt=0;
   function runAutoPull(){ setTimeout(()=>{ try{ ghAutoPullIfChanged('resume'); }catch(e){} },650); }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ try{ ghAutoPullIfChanged('boot'); }catch(e){} },1400),{once:true});
-  else setTimeout(()=>{ try{ ghAutoPullIfChanged('boot'); }catch(e){} },1400);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){ hiddenAt=Date.now(); return; }
     if(!hiddenAt || Date.now()-hiddenAt>=10000) runAutoPull();
