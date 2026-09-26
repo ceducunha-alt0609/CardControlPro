@@ -13899,17 +13899,31 @@ const bioBtn=document.getElementById('pinBioBtn');
 if(bioBtn) bioBtn.style.display=localStorage.getItem(profileKey('ccp-bio'))?'flex':'none';
 if(localStorage.getItem(profileKey('ccp-bio'))) setTimeout(tryBiometric,400);
 }
+function aurumSyncDiag(msg){
+try{
+let el=document.getElementById('aurum-sync-diag');
+if(!el){
+el=document.createElement('div'); el.id='aurum-sync-diag';
+el.style.cssText='position:fixed;left:10px;right:10px;bottom:86px;z-index:999999;padding:8px 10px;border-radius:10px;background:#101b2dcc;border:1px solid #caa85e;color:#f5e8c8;font:11px/1.3 monospace;pointer-events:none';
+document.body.appendChild(el);
+}
+el.textContent='SYNC DIAG · '+msg;
+}catch(e){}
+}
 function aurumScheduleGithubPull(reason){
 let tries=0;
+aurumSyncDiag('agendado · '+reason);
 const attempt=()=>{
 tries++;
 try{
 if(typeof ghPull==='function' && typeof GH!=='undefined' && GH){
-ghPull(false);
+aurumSyncDiag('módulo pronto · tentativa '+tries+' · enabled='+GH.enabled+' · mode='+GH.mode);
+ghPull(false,'diag');
 return;
 }
-}catch(e){}
+}catch(e){ aurumSyncDiag('erro agendador · '+(e&&e.message||e)); }
 if(tries<30) setTimeout(attempt,250);
+else aurumSyncDiag('módulo NÃO ficou pronto em 7,5s');
 };
 setTimeout(attempt,250);
 }
@@ -18841,7 +18855,8 @@ async function ghTestConnection(){
     ghReadInputs();
     if(!GH.enabled) throw new Error('Ative o GitHub Sync primeiro');
     GH.status='syncing'; saveGhConfig(); ghRefreshSettingsUI();
-    const res = await fetch(ghApiUrl(), {headers: ghHeaders()});
+    const res = await fetch(ghApiUrl(), {headers: ghHeaders(), cache:'no-store'});
+    if(diag) aurumSyncDiag('GitHub respondeu HTTP '+res.status);
     if(res.status===404){ GH.status='ok'; GH.lastSync = new Date().toISOString(); saveGhConfig(); showToast('Repo acessível — arquivo ainda não existe, pode enviar','success'); ghRefreshSettingsUI(); return; }
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
@@ -18851,9 +18866,10 @@ async function ghTestConnection(){
   }catch(err){ GH.status='error'; saveGhConfig(); showToast('GitHub: '+err.message,'error'); }
   ghRefreshSettingsUI();
 }
-async function ghPull(manual=false){
+async function ghPull(manual=false,diag=''){
   try{
     ghReadInputs();
+    if(diag) aurumSyncDiag('pull iniciou · enabled='+GH.enabled+' · mode='+GH.mode+' · repo='+(GH.owner||'?')+'/'+(GH.repo||'?'));
     if(!GH.enabled || GH.mode==='off') { if(manual) showToast('GitHub Sync está desligado','error'); return; }
     GH.status='syncing'; saveGhConfig(); ghRefreshSettingsUI();
     const res = await fetch(ghApiUrl(), {headers: ghHeaders()});
@@ -18863,9 +18879,10 @@ async function ghPull(manual=false){
     GH.sha = json.sha || '';
     const payload = ghDecode(json.content||'');
     ghMergeRemotePayload(payload);
+    if(diag) aurumSyncDiag('merge executado · remoto '+((payload&&payload.data&&payload.data.tx)||[]).length+' lançamentos');
     GH.status='ok'; GH.lastSync = new Date().toISOString(); saveGhConfig();
     showToast('Dados carregados do GitHub','success');
-  }catch(err){ GH.status='error'; saveGhConfig(); if(manual) showToast('GitHub: '+err.message,'error'); }
+  }catch(err){ GH.status='error'; saveGhConfig(); if(diag) aurumSyncDiag('ERRO · '+(err&&err.message||err)); if(manual) showToast('GitHub: '+err.message,'error'); }
   ghRefreshSettingsUI();
 }
 
