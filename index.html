@@ -6602,7 +6602,7 @@ const hasPin = !!localStorage.getItem(profileKey('ccp-pin'));
 if(!hasPin){
 document.querySelector('.app-shell').style.visibility = 'visible';
 render();
-setTimeout(()=>{ try{ if(typeof ghAutoPullIfChanged==='function') ghAutoPullIfChanged('profile-ready'); }catch(e){} },700);
+setTimeout(()=>{ try{ if(typeof ghAutoPullIfChanged==='function') ghPull(false); }catch(e){} },700);
 }
 }
 function showAddProfile(){
@@ -13912,7 +13912,7 @@ if(_cryptoKey){
 await loadDecrypted();
 }
 // O GitHub só deve ser consultado depois que perfil + PIN + dados locais estiverem prontos.
-setTimeout(()=>{ try{ if(typeof ghAutoPullIfChanged==='function') ghAutoPullIfChanged('unlock-ready'); }catch(e){} },700);
+setTimeout(()=>{ try{ if(typeof ghAutoPullIfChanged==='function') ghPull(false); }catch(e){} },700);
 // Mostra alertas só após dados reais carregados e renderizados
 setTimeout(showStartupAlerts, 1200);
 }
@@ -18540,7 +18540,7 @@ if('serviceWorker' in navigator && !location.hostname.includes('claudeuserconten
 /* ============================================================
    AURUM PRO — GitHub Sync (manual / auto / off)
    ============================================================ */
-const GH_DEFAULT = {enabled:false, mode:'manual', owner:'', repo:'', path:'aurum-data.json', branch:'main', token:'', sha:'', lastSync:null, status:'idle'};
+const GH_DEFAULT = {enabled:true, mode:'auto', owner:'ceducunha-alt0609', repo:'CardControlPro', path:'aurum-data.json', branch:'main', token:'', sha:'', lastSync:null, status:'idle'};
 let GH = null;
 let _ghTimer = null;
 function ghProfileKey(){ return profileKey('ghsync-v2'); }
@@ -18729,13 +18729,14 @@ function ghDecode(b64){
 }
 function ghReadInputs(){
   const $ = id => document.getElementById(id);
-  GH.enabled = !!$('gh-enabled')?.checked;
-  GH.mode = $('gh-mode')?.value || GH.mode || 'manual';
-  GH.owner = ($('gh-owner')?.value || GH.owner || '').trim();
-  GH.repo = ($('gh-repo')?.value || GH.repo || '').trim();
-  GH.path = ($('gh-path')?.value || GH.path || 'aurum-data.json').trim() || 'aurum-data.json';
-  GH.branch = ($('gh-branch')?.value || GH.branch || 'main').trim() || 'main';
-  GH.token = ($('gh-token')?.value || GH.token || '').trim();
+  const enabledEl=$('gh-enabled'), modeEl=$('gh-mode'), ownerEl=$('gh-owner'), repoEl=$('gh-repo'), pathEl=$('gh-path'), branchEl=$('gh-branch'), tokenEl=$('gh-token');
+  if(enabledEl) GH.enabled=!!enabledEl.checked;
+  if(modeEl) GH.mode=modeEl.value || GH.mode || 'manual';
+  if(ownerEl) GH.owner=(ownerEl.value || GH.owner || '').trim();
+  if(repoEl) GH.repo=(repoEl.value || GH.repo || '').trim();
+  if(pathEl) GH.path=(pathEl.value || GH.path || 'aurum-data.json').trim() || 'aurum-data.json';
+  if(branchEl) GH.branch=(branchEl.value || GH.branch || 'main').trim() || 'main';
+  if(tokenEl) GH.token=(tokenEl.value || GH.token || '').trim();
   saveGhConfig();
 }
 function renderGithubSyncStatus(){
@@ -23340,7 +23341,7 @@ body.aurum-input-burst .card-thumb,body.aurum-input-burst .aurum-card-mini,body.
 // Não chama ghPush e não cria commit quando nada mudou.
 (function(){
   let hiddenAt=0;
-  function runAutoPull(){ setTimeout(()=>{ try{ ghAutoPullIfChanged('resume'); }catch(e){} },650); }
+  function runAutoPull(){ setTimeout(()=>{ try{ ghPull(false); }catch(e){} },650); }
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){ hiddenAt=Date.now(); return; }
     if(!hiddenAt || Date.now()-hiddenAt>=10000) runAutoPull();
