@@ -2691,6 +2691,32 @@ document.addEventListener('click',function(e){
   }
 }
 </style>
+
+<style id="aurum-mobile-history-filters">
+/* ===== MOBILE HISTÓRICO — filtros 2x2 ===== */
+@media(max-width:768px){
+  .hist-search-bar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:8px!important;
+    width:100%!important;
+  }
+  .hist-search-bar .hist-search-input{
+    grid-column:1 / -1!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+  .hist-search-bar .hist-period{grid-column:1!important;grid-row:2!important}
+  .hist-search-bar .hist-card{grid-column:2!important;grid-row:2!important}
+  .hist-search-bar .hist-cat{grid-column:1!important;grid-row:3!important}
+  .hist-search-bar .hist-sort{grid-column:2!important;grid-row:3!important}
+  .hist-search-bar .sort-sel{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+}
+</style>
 </head>
 <script>
 var APP_VERSION = '2.2.5';
@@ -7102,12 +7128,12 @@ const periodOpts=[
 ].map(o=>`<option value="${o.v}" ${filterPeriod===o.v?'selected':''}>${o.l}</option>`).join('');
 const totalShown=all.reduce((s,t)=>s+((t.type==='credit'?-1:1)*(Number(t.amount)||0)),0);
 const searchBar=`
-<div class="search-bar">
-<input class="search-input" placeholder="🔍  Buscar..." oninput="S.histSearch=this.value;renderContent()" value="${S.histSearch||''}">
-<select class="sort-sel" onchange="S.histPeriod=this.value;renderContent()">${periodOpts}</select>
-<select class="sort-sel" onchange="S.histCard=this.value;renderContent()">${cardOpts}</select>
-<select class="sort-sel" onchange="S.histCat=this.value;renderContent()">${catOpts}</select>
-<select class="sort-sel" onchange="S.histSort=this.value;renderContent()">
+<div class="search-bar hist-search-bar">
+<input class="search-input hist-search-input" placeholder="🔍  Buscar..." oninput="S.histSearch=this.value;renderContent()" value="${S.histSearch||''}">
+<select class="sort-sel hist-period" onchange="S.histPeriod=this.value;renderContent()">${periodOpts}</select>
+<select class="sort-sel hist-card" onchange="S.histCard=this.value;renderContent()">${cardOpts}</select>
+<select class="sort-sel hist-cat" onchange="S.histCat=this.value;renderContent()">${catOpts}</select>
+<select class="sort-sel hist-sort" onchange="S.histSort=this.value;renderContent()">
 <option value="date-desc" ${sortH==='date-desc'?'selected':''}>Data ↓</option>
 <option value="date-asc"  ${sortH==='date-asc'?'selected':''}>Data ↑</option>
 <option value="amt-desc"  ${sortH==='amt-desc'?'selected':''}>Valor ↓</option>
