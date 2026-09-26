@@ -2867,6 +2867,103 @@ document.addEventListener('click',function(e){
   }
 }
 </style>
+
+<style id="aurum-mobile-compositor-hardening">
+/* ===== MOBILE COMPOSITOR HARDENING — texto estável no Chrome Android ===== */
+@media(max-width:820px){
+  /*
+    Reverte otimizações antigas de GPU que podem fazer glyphs/textos
+    desaparecerem até o próximo repaint em navegadores Android.
+  */
+  body *,
+  body *::before,
+  body *::after{
+    backface-visibility:visible!important;
+    -webkit-backface-visibility:visible!important;
+  }
+
+  html,body,
+  .app-shell,
+  .content-area,
+  .content-scroll,
+  main,
+  #tabContent,
+  .content-inner{
+    transform-style:flat!important;
+    perspective:none!important;
+  }
+
+  /* Sem virtualização/contain nos blocos que rolam no mobile */
+  .cards-tray,
+  #tabContent,
+  .content-inner,
+  .pl-premium-wrap,
+  .pl-card-block,
+  .pl-events,
+  .pl-hero,
+  .pl-premium-head,
+  .pl-day,
+  .cal-day,
+  .card,
+  .tx-list,
+  .hist-list,
+  .history-month,
+  .report-section,
+  .chart-wrap,
+  .chart-canvas-wrap,
+  .budget-widget,
+  .budget-row,
+  .sub-item,
+  .set-acc,
+  .set-acc-body,
+  .aurum-offscreen-pause{
+    content-visibility:visible!important;
+    contain:none!important;
+    will-change:auto!important;
+  }
+
+  /* Sticky + blur é uma combinação propensa a flicker no Android */
+  .topbar{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+
+  /* Evita camadas GPU artificiais em controles/textos */
+  .btn,
+  .tool-btn,
+  .tab-btn,
+  .mnb,
+  .corp-chip,
+  .grad-dir-btn,
+  .bn-item,
+  .nav-item,
+  .mob-drawer-item,
+  #privacyToggle,
+  .mob-menu-btn{
+    will-change:auto!important;
+  }
+
+  /* Preserve resposta ao toque, mas sem translateZ permanente */
+  .btn:not(:active),
+  .tool-btn:not(:active),
+  .tab-btn:not(:active),
+  .mnb:not(:active),
+  .corp-chip:not(:active),
+  .grad-dir-btn:not(:active),
+  #privacyToggle:not(:active),
+  .mob-menu-btn:not(:active){
+    transform:none!important;
+  }
+
+  /* Conteúdo textual nunca deve depender de animação para ficar visível */
+  #tabContent,
+  #tabContent *,
+  .mob-drawer,
+  .mob-drawer *{
+    text-rendering:auto;
+  }
+}
+</style>
 </head>
 <script>
 var APP_VERSION = '2.2.5';
