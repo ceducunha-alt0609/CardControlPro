@@ -2773,6 +2773,18 @@ document.addEventListener('click',function(e){
   }
 }
 </style>
+
+<style id="aurum-mobile-settings-accordion-state-fix">
+/* ===== MOBILE CONFIG — força estado real dos acordeões sobre V47 ===== */
+@media(max-width:820px){
+  #fpanel-settings .set-acc:not(.open) > .set-acc-body{
+    display:none!important;
+  }
+  #fpanel-settings .set-acc.open > .set-acc-body{
+    display:block!important;
+  }
+}
+</style>
 </head>
 <script>
 var APP_VERSION = '2.2.5';
