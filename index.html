@@ -2475,6 +2475,72 @@ document.addEventListener('click',function(e){
 });
 </script>
 
+
+<style id="aurum-mobile-dashboard-v54">
+/* ===== MOBILE V54 — topbar enxuta + dashboard sem título/data ===== */
+@media(max-width:768px){
+  /* Topbar: apenas Aurum Pro + busca global + olho */
+  .topbar{
+    padding:0 12px!important;
+    gap:8px!important;
+    justify-content:space-between!important;
+  }
+  .topbar > div:first-child{
+    flex:1!important;
+    min-width:0!important;
+  }
+  .topbar > div:first-child > div{
+    min-width:0!important;
+  }
+  #topbarProfileBadge,
+  #topbarCardDot{
+    display:none!important;
+  }
+  #topbarTitle{
+    display:block!important;
+    font-size:0!important;
+    min-width:0!important;
+    white-space:nowrap!important;
+  }
+  #topbarTitle::after{
+    content:"Aurum Pro";
+    font-family:var(--display);
+    font-size:17px;
+    font-weight:800;
+    letter-spacing:-.35px;
+    color:var(--text);
+  }
+
+  .topbar > div:last-child{
+    display:flex!important;
+    align-items:center!important;
+    gap:6px!important;
+    flex-shrink:0!important;
+  }
+  .topbar > div:last-child > *{
+    display:none!important;
+  }
+  .topbar #privacyToggle,
+  .topbar button[onclick="openGlobalSearch()"]{
+    display:flex!important;
+    width:34px!important;
+    height:34px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex-shrink:0!important;
+  }
+  .topbar button[onclick="openGlobalSearch()"]{order:1!important}
+  .topbar #privacyToggle{order:2!important}
+
+  /* Dashboard mobile: remove título/data e deixa apenas o Resumo financeiro */
+  .dash-overview-head{
+    display:none!important;
+  }
+  .dash-overview-panel{
+    padding:13px!important;
+  }
+}
+</style>
 </head>
 <script>
 var APP_VERSION = '2.2.5';
