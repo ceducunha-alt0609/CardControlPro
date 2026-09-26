@@ -16752,6 +16752,13 @@ function renderDashboard(el){
 // ============================================================
 // renderPlanejamento — guia Planejamento
 // ============================================================
+function switchPlanSubTab(tab){
+  if(tab!=='ciclo' && tab!=='adicionais') return;
+  S._planSubTab = tab;
+  const el = document.getElementById('tabContent');
+  if(el && typeof renderPlanejamento === 'function') renderPlanejamento(el);
+}
+
 function renderPlanejamento(el){
   const cards = S.cards || [];
   const today = new Date();
@@ -16778,8 +16785,8 @@ function renderPlanejamento(el){
       <div style="font-size:var(--fs-xs);color:var(--text3);margin-top:2px">Ciclo de fatura de cada cartão — fechamento, melhor dia de compra e vencimento</div>
     </div>
     <div class="tabs" style="margin-bottom:20px">
-      <button class="tab-btn ${activePlanTab==='ciclo'?'active':''}" onclick="S._planSubTab='ciclo';renderContent()">📅 Ciclo de Fatura</button>
-      <button class="tab-btn ${activePlanTab==='adicionais'?'active':''}" onclick="S._planSubTab='adicionais';renderContent()">👥 Gastos Adicionais</button>
+      <button type="button" class="tab-btn ${activePlanTab==='ciclo'?'active':''}" onclick="switchPlanSubTab('ciclo')">📅 Ciclo de Fatura</button>
+      <button type="button" class="tab-btn ${activePlanTab==='adicionais'?'active':''}" onclick="switchPlanSubTab('adicionais')">👥 Gastos Adicionais</button>
     </div>
     ${activePlanTab==='ciclo' ? cicloContent : adicionaisContent}
   </main>`;
