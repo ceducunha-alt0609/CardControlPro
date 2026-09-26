@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-26T15:11:09.964Z",
+  "syncedAt": "2026-09-26T16:14:23.940Z",
   "profile": "u1",
-  "lastModified": "2026-09-26T14:58:17.158Z",
+  "lastModified": "2026-09-26T16:14:04.731Z",
   "data": {
     "cards": [
       {
@@ -9572,22 +9572,6 @@
         "note": "",
         "portador": "",
         "recurring": false
-      },
-      {
-        "id": "e8l6x3ln294muiil9za",
-        "cardId": "0ahds3kadi5imnsvz6b7",
-        "desc": "teste",
-        "amount": 4.99,
-        "type": "debit",
-        "category": "🛍️ Outros",
-        "date": "2026-09-26",
-        "invoiceMonth": "2026-10",
-        "totalInst": 1,
-        "instNum": 1,
-        "gid": "4pxz9yhaczfmuiil9z9",
-        "note": "",
-        "portador": "",
-        "recurring": false
       }
     ],
     "payments": [
@@ -10069,7 +10053,10 @@
     "budgets": {},
     "cashbacks": {},
     "deleted": {
-      "tx": [],
+      "tx": [
+        "e8l6x3ln294muiil9za",
+        "rxf3ncr7ssmuilal08"
+      ],
       "cards": [],
       "payments": []
     },
@@ -10178,6 +10165,6 @@
     "tab": "lancamentos",
     "month": "2026-10",
     "compact": false,
-    "lastModified": "2026-09-26T14:58:17.158Z"
+    "lastModified": "2026-09-26T16:14:04.731Z"
   }
 }
