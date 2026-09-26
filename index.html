@@ -18850,6 +18850,44 @@ async function ghPull(manual=false){
   }catch(err){ GH.status='error'; saveGhConfig(); if(manual) showToast('GitHub: '+err.message,'error'); }
   ghRefreshSettingsUI();
 }
+
+// Auto-pull seguro: consulta o GitHub sem criar commits e só faz merge se o blob remoto mudou.
+let _ghAutoPullInFlight=false;
+let _ghAutoPullLastCheck=0;
+async function ghAutoPullIfChanged(reason='auto'){
+  if(_ghAutoPullInFlight) return false;
+  try{
+    if(!GH) loadGhConfig();
+    if(!GH.enabled || GH.mode==='off' || !GH.token || !GH.owner || !GH.repo || !GH.path) return false;
+    const now=Date.now();
+    if(now-_ghAutoPullLastCheck < 15000) return false;
+    _ghAutoPullLastCheck=now;
+    _ghAutoPullInFlight=true;
+    const knownSha=GH.sha||'';
+    const res=await fetch(ghApiUrl(),{headers:ghHeaders(),cache:'no-store'});
+    if(res.status===404) return false;
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    const remoteSha=json.sha||'';
+    if(remoteSha && knownSha && remoteSha===knownSha){
+      GH.status='ok'; saveGhConfig(); return false;
+    }
+    const payload=ghDecode(json.content||'');
+    ghMergeRemotePayload(payload);
+    GH.sha=remoteSha||GH.sha||'';
+    GH.status='ok'; GH.lastSync=new Date().toISOString(); saveGhConfig();
+    showToast('GitHub atualizado neste dispositivo','success');
+    return true;
+  }catch(err){
+    GH.status='error'; saveGhConfig();
+    return false;
+  }finally{
+    _ghAutoPullInFlight=false;
+    ghRefreshSettingsUI();
+  }
+}
+window.ghAutoPullIfChanged=ghAutoPullIfChanged;
+
 let _ghPushInFlight = false;
 async function ghReadGithubError(res){
   try{
@@ -23294,5 +23332,23 @@ body.aurum-input-burst .card-thumb,body.aurum-input-burst .aurum-card-mini,body.
   window.addEventListener('pageshow',function(){setTimeout(stabilizeMobile,60);},{passive:true});
 })();
 </script>
+
+// GitHub Sync: leitura automática ao iniciar e ao retomar o app.
+// Não chama ghPush e não cria commit quando nada mudou.
+(function(){
+  let hiddenAt=0;
+  function runAutoPull(){ setTimeout(()=>{ try{ ghAutoPullIfChanged('resume'); }catch(e){} },650); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ try{ ghAutoPullIfChanged('boot'); }catch(e){} },1400),{once:true});
+  else setTimeout(()=>{ try{ ghAutoPullIfChanged('boot'); }catch(e){} },1400);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){ hiddenAt=Date.now(); return; }
+    if(!hiddenAt || Date.now()-hiddenAt>=10000) runAutoPull();
+    hiddenAt=0;
+  },{passive:true});
+  window.addEventListener('focus',()=>{
+    if(document.visibilityState==='visible' && hiddenAt && Date.now()-hiddenAt>=10000) runAutoPull();
+  },{passive:true});
+})();
+
 </body>
 </html>
