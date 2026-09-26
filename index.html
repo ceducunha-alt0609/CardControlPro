@@ -2809,6 +2809,64 @@ document.addEventListener('click',function(e){
   #fpanel-faq #faq-cats{display:none!important}
 }
 </style>
+
+<style id="aurum-mobile-stability-audit">
+/* ===== MOBILE STABILITY AUDIT — paint/text flicker hardening ===== */
+@media(max-width:768px){
+  /* Evita artefatos de rasterização/repaint no Chrome Android */
+  main{
+    transform:none!important;
+    transform-origin:initial!important;
+    transition:none!important;
+  }
+
+  #tabContent,
+  .content-inner,
+  .content-scroll,
+  .tx-list,
+  .hist-list,
+  .cards-carousel,
+  .tx-list > .tx-item,
+  .annual-total-card,
+  .budget-row,
+  .sub-item,
+  .history-month,
+  .report-section,
+  .stat-tile,
+  .dash-card,
+  .aurum-offscreen-pause{
+    content-visibility:visible!important;
+    contain:none!important;
+  }
+
+  .aurum-offscreen-pause,
+  .aurum-offscreen-pause *{
+    animation-play-state:running!important;
+  }
+
+  /* Texto/valores nunca somem durante transições no mobile */
+  .num-flip,
+  .topbar-title-anim{
+    animation:none!important;
+    opacity:1!important;
+    transform:none!important;
+  }
+
+  #tabContent.tab-enter{
+    animation:none!important;
+  }
+
+  /* Evita promoção desnecessária de camadas em itens de texto/lista */
+  .tx-item,
+  .history-month,
+  .report-section,
+  .dash-card,
+  .set-acc,
+  .set-acc-body{
+    will-change:auto!important;
+  }
+}
+</style>
 </head>
 <script>
 var APP_VERSION = '2.2.5';
@@ -23079,6 +23137,37 @@ body.aurum-input-burst .card-thumb,body.aurum-input-burst .aurum-card-mini,body.
   document.addEventListener('click',function(e){
     if(e.target.closest && e.target.closest('#fpanel-settings')) setTimeout(enhance,0);
   },true);
+})();
+</script>
+
+<script id="aurum-mobile-stability-runtime">
+/* ===== MOBILE STABILITY AUDIT — disable offscreen observer ===== */
+(function(){
+  function stabilizeMobile(){
+    if(!window.matchMedia || !window.matchMedia('(max-width:768px)').matches) return;
+    try{
+      if(window.__aurumCycle5MutationObserver){
+        window.__aurumCycle5MutationObserver.disconnect();
+      }
+    }catch(e){}
+    try{
+      document.querySelectorAll('.aurum-offscreen-pause').forEach(function(el){
+        el.classList.remove('aurum-offscreen-pause');
+      });
+    }catch(e){}
+    try{
+      var m=document.querySelector('main');
+      if(m){
+        m.style.removeProperty('transform');
+        m.style.removeProperty('transform-origin');
+        m.style.removeProperty('transition');
+      }
+    }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',stabilizeMobile);
+  else stabilizeMobile();
+  window.addEventListener('load',function(){setTimeout(stabilizeMobile,120);},{passive:true});
+  window.addEventListener('pageshow',function(){setTimeout(stabilizeMobile,60);},{passive:true});
 })();
 </script>
 </body>
