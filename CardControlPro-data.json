@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-27T14:30:45.071Z",
+  "syncedAt": "2026-09-27T14:31:51.672Z",
   "profile": "u1",
-  "lastModified": "2026-09-27T14:30:22.171Z",
+  "lastModified": "2026-09-27T14:31:44.867Z",
   "data": {
     "cards": [
       {
@@ -10997,6 +10997,17 @@
         "multa": 0,
         "mora": 0,
         "estorno": 0
+      },
+      {
+        "id": "goya205erdrmujx2zil",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "invoiceMonth": "2026-09",
+        "amount": 3946.79,
+        "date": "2026-09-24",
+        "isPartial": false,
+        "multa": 0,
+        "mora": 0,
+        "estorno": 0
       }
     ],
     "activeCardId": "x96p92fwvtmnsutu3c",
@@ -11115,9 +11126,9 @@
     "lowEndDevice": false,
     "reducedMotion": false,
     "jbAuto": false,
-    "tab": "history",
+    "tab": "invoice",
     "month": "2026-09",
     "compact": false,
-    "lastModified": "2026-09-27T14:30:22.171Z"
+    "lastModified": "2026-09-27T14:31:44.867Z"
   }
 }
