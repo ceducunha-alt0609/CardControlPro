@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-26T16:14:23.940Z",
+  "syncedAt": "2026-09-27T13:47:40.647Z",
   "profile": "u1",
-  "lastModified": "2026-09-26T16:14:04.731Z",
+  "lastModified": "2026-09-27T13:45:05.629Z",
   "data": {
     "cards": [
       {
@@ -9572,6 +9572,54 @@
         "note": "",
         "portador": "",
         "recurring": false
+      },
+      {
+        "id": "0brxtnz6ptvrmujva3lb",
+        "cardId": "vs0llp2ohzmnsvu3kq",
+        "desc": "Barbosa Loja",
+        "amount": 33.07,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-08-28",
+        "invoiceMonth": "2026-09",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "9m8wiivy1aqmujva3la",
+        "note": "",
+        "portador": "Olinda",
+        "recurring": false
+      },
+      {
+        "id": "cgz3zhcd34pmujvawl5",
+        "cardId": "vs0llp2ohzmnsvu3kq",
+        "desc": "Jd Ideal",
+        "amount": 18.22,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-08-29",
+        "invoiceMonth": "2026-09",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "z12delcvgjmujvawl5",
+        "note": "",
+        "portador": "Olinda",
+        "recurring": false
+      },
+      {
+        "id": "9bn68ji197lmujvbij3",
+        "cardId": "vs0llp2ohzmnsvu3kq",
+        "desc": "Paulo Bolo Cleusa",
+        "amount": 580,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-09-07",
+        "invoiceMonth": "2026-09",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "82u60ajoqlwmujvbij3",
+        "note": "",
+        "portador": "Olinda",
+        "recurring": false
       }
     ],
     "payments": [
@@ -10047,9 +10095,31 @@
         "multa": 0,
         "mora": 0,
         "estorno": 0
+      },
+      {
+        "id": "yxz0q9l8vwmujvd7xf",
+        "cardId": "vs0llp2ohzmnsvu3kq",
+        "invoiceMonth": "2026-09",
+        "amount": 2522.26,
+        "date": "2026-09-20",
+        "isPartial": false,
+        "multa": 0,
+        "mora": 0,
+        "estorno": 0
+      },
+      {
+        "id": "ebv22l8a4dmujve9zd",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "invoiceMonth": "2026-09",
+        "amount": 1355.76,
+        "date": "2026-09-20",
+        "isPartial": false,
+        "multa": 0,
+        "mora": 0,
+        "estorno": 0
       }
     ],
-    "activeCardId": "0ahds3kadi5imnsvz6b7",
+    "activeCardId": "vs0llp2ohzmnsvu3kq",
     "budgets": {},
     "cashbacks": {},
     "deleted": {
@@ -10165,6 +10235,6 @@
     "tab": "lancamentos",
     "month": "2026-10",
     "compact": false,
-    "lastModified": "2026-09-26T16:14:04.731Z"
+    "lastModified": "2026-09-27T13:45:05.629Z"
   }
 }
