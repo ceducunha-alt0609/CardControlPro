@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-28T15:33:38.947Z",
+  "syncedAt": "2026-09-28T16:22:49.150Z",
   "profile": "u1",
-  "lastModified": "2026-09-28T15:29:25.656Z",
+  "lastModified": "2026-09-28T16:19:29.816Z",
   "data": {
     "cards": [
       {
@@ -11341,7 +11341,7 @@
         "estorno": 0
       }
     ],
-    "activeCardId": "ui6gdqec29mnsvvh7a",
+    "activeCardId": "vs0llp2ohzmnsvu3kq",
     "budgets": {},
     "cashbacks": {},
     "deleted": {
@@ -11463,9 +11463,9 @@
     "lowEndDevice": false,
     "reducedMotion": false,
     "jbAuto": false,
-    "tab": "invoice",
-    "month": "2026-08",
+    "tab": "lancamentos",
+    "month": "2026-09",
     "compact": false,
-    "lastModified": "2026-09-28T15:29:25.656Z"
+    "lastModified": "2026-09-28T16:19:29.816Z"
   }
 }
