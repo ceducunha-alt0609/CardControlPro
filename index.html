@@ -5828,8 +5828,8 @@ ${dueBadge}
 </div>
 <!-- Rodapé: juros -->
 <div class="inv-panel-footer">
-<span class="inv-footer-label">Juros rotativos:</span>
-<span class="inv-footer-val">${c.rate}% ao mês</span>
+<span class="inv-footer-label">${Number(c.rate)>0?'Juros rotativos:':'Rotativo:'}</span>
+<span class="inv-footer-val">${Number(c.rate)>0?c.rate+'% ao mês':'Sem juros'}</span>
 </div>
 </div>
 <button class="inv-panel-nav" onclick="nextM()" aria-label="Próximo mês">›</button>
@@ -5837,8 +5837,8 @@ ${dueBadge}
 </div>
 ${s.carried>0?`<div class="prev-bal">
 <div>
-<div style="color:var(--text2);font-size:var(--fs-sm)">Saldo anterior + Juros (${c.rate}% a.m.)</div>
-<div style="font-size:var(--fs-micro);color:var(--text3);margin-top:3px">Saldo: ${fmtR(s.prevBal)} + Juros: ${fmtR(s.interest)}</div>
+<div style="color:var(--text2);font-size:var(--fs-sm)">${(c.noInterest||Number(c.rate)<=0)?'Saldo anterior sem juros':'Saldo anterior + Juros ('+c.rate+'% a.m.)'}</div>
+<div style="font-size:var(--fs-micro);color:var(--text3);margin-top:3px">${(c.noInterest||Number(c.rate)<=0)?'Saldo: '+fmtR(s.prevBal):'Saldo: '+fmtR(s.prevBal)+' + Juros: '+fmtR(s.interest)}</div>
 </div>
 <div class="prev-bal-val">${fmtR(s.carried)}</div>
 </div>`:''}
@@ -8548,7 +8548,7 @@ expiry:document.getElementById('c-expiry').value.trim()||'',
 limit:parseFloat(document.getElementById('c-limit').value)||0,
 close:parseInt(document.getElementById('c-close').value)||20,
 due:parseInt(document.getElementById('c-due').value)||5,
-rate:parseFloat(document.getElementById('c-rate').value)||14.9,
+rate:(()=>{const v=parseFloat(document.getElementById('c-rate').value);return Number.isFinite(v)?v:14.9;})(),
 noInterest:document.getElementById('c-no-interest')?.checked||false,
 autoDebit:document.getElementById('c-auto-debit')?.checked||false,
 brand:document.getElementById('c-brand').value,
