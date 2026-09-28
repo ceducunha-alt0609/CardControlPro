@@ -21371,9 +21371,9 @@ function hrGenerate(){
     const cols=!cardId?4:3;
     const _mColor=_multiMonths?_monthTone(monthIdx):'#c8922a';
 
-    /* Breakdown por portador — só quando não há filtro de portador específico */
+    /* Breakdown por portador — mostra em "Todos" e também quando há 2+ selecionados */
     let portadorBlockHtml='';
-    if(!portadores.length){
+    if(!portadores.length || portadores.length>1){
       const portMap={};
       mTxs.filter(t=>(t.type||'debit')!=='credit').forEach(t=>{
         const key=(t.portador||'').trim()||'__titular__';
@@ -21606,9 +21606,9 @@ function hrPrint(){
     const __monthMidBg=_multiMonths?_mixWhite(__monthColor,0.44):'#fffbf0';
     const __monthDeepText=_multiMonths?_mixDark(__monthColor,0.34):'#7a5208';
 
-    /* Breakdown por portador no PDF — só quando sem filtro de portador específico */
+    /* Breakdown por portador no PDF — mostra em "Todos" e também quando há 2+ selecionados */
     let prPortadorHtml='';
-    if(!(portadores||[]).length){
+    if(!(portadores||[]).length || (portadores||[]).length>1){
       const portMap={};
       mTxs.filter(t=>(t.type||'debit')!=='credit').forEach(t=>{
         const key=(t.portador||'').trim()||'__titular__';
