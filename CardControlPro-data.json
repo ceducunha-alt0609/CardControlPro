@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-28T14:54:21.579Z",
+  "syncedAt": "2026-09-28T15:30:21.431Z",
   "profile": "u1",
-  "lastModified": "2026-09-28T14:19:40.940Z",
+  "lastModified": "2026-09-28T15:29:25.656Z",
   "data": {
     "cards": [
       {
@@ -97,7 +97,7 @@
         "limit": 7650,
         "close": 18,
         "due": 26,
-        "rate": 14.9,
+        "rate": 0,
         "brand": "Visa",
         "colorIdx": 26,
         "dueHistory": [],
@@ -11463,9 +11463,9 @@
     "lowEndDevice": false,
     "reducedMotion": false,
     "jbAuto": false,
-    "tab": "lancamentos",
-    "month": "2026-09",
+    "tab": "invoice",
+    "month": "2026-08",
     "compact": false,
-    "lastModified": "2026-09-28T14:19:40.940Z"
+    "lastModified": "2026-09-28T15:29:25.656Z"
   }
 }
