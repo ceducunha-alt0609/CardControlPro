@@ -18685,7 +18685,11 @@ function ghMergeRemotePayload(payload){
   const localCards = new Map((S.cards||[]).filter(c=>c&&c.id&&!deadCards.has(c.id)).map(c=>[c.id,c]));
   const remoteCards = new Map((d.cards||[]).filter(c=>c&&c.id&&!deadCards.has(c.id)).map(c=>[c.id,c]));
   const mergedCards=[];
-  for(const [id, rc] of remoteCards){ mergedCards.push(Object.assign({}, rc, localCards.get(id)||{})); }
+  // Ao sincronizar do GitHub, a versão remota do MESMO cartão deve prevalecer.
+  // Antes os dados locais eram aplicados por último e podiam reativar valores antigos
+  // como juros, noInterest, débito automático, limite, vencimento e portadores.
+  for(const [id, rc] of remoteCards){ mergedCards.push(Object.assign({}, localCards.get(id)||{}, rc)); }
+  // Cartões que existem somente neste aparelho continuam preservados.
   for(const [id, lc] of localCards){ if(!remoteCards.has(id)) mergedCards.push(lc); }
 
   const localTx = new Map((S.tx||[]).filter(t=>t&&t.id&&!deadTx.has(t.id)&&!deadCards.has(t.cardId)).map(t=>[t.id,t]));
