@@ -21207,39 +21207,83 @@ function hrGenerate(){
   const to=document.getElementById('hr-to')?.value||_hrNowYM();
   const type=document.getElementById('hr-type')?.value||'debit';
 
-  // Portador: só mostra se cartão específico tiver adicionais
+  // Portador: seleção múltipla (Todos / Titular / um ou mais adicionais)
   const portadorWrap=document.getElementById('hr-portador-wrap');
   const portadorSel=document.getElementById('hr-portador');
+  if(!Array.isArray(window._hrSelectedPortadores)) window._hrSelectedPortadores=[];
+  let portadores=window._hrSelectedPortadores.slice();
+
   if(cardId){
     const selCard=(appS.cards||[]).find(c=>c.id===cardId);
     const holders=(selCard?.holders||[]).filter(h=>h&&h.trim());
+    const validValues=['__titular__',...holders];
+    portadores=portadores.filter(v=>validValues.includes(v));
+    window._hrSelectedPortadores=portadores.slice();
+
     if(holders.length>0){
-      const curVal=portadorSel?.value||'';
-      if(portadorSel){
-        const drop=document.getElementById('hr-portador-drop');
-        const lbl=document.getElementById('hr-portador-label');
-        const opts=[
-          {value:'',label:'Todos os portadores'},
-          {value:'__titular__',label:'👤 '+(selCard.holder||selCard.name)+' (titular)'},
-          ...holders.map(h=>({value:h,label:'👤 '+h}))
-        ];
-        if(drop){
-          drop.innerHTML=opts.map(o=>`<div onclick="hrSetDrop('hr-portador','${o.value.replace(/'/g,"\\'")}','${o.label.replace(/'/g,"\\'")}');hrGenerate()" style="padding:8px 12px;cursor:pointer;font-size:var(--fs-xs);color:var(--text2);transition:background .12s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">${o.label}</div>`).join('');
-        }
-        const curOpt=opts.find(o=>o.value===curVal)||opts[0];
-        portadorSel.value=curOpt.value;
-        if(lbl) lbl.textContent=curOpt.label;
+      const drop=document.getElementById('hr-portador-drop');
+      const lbl=document.getElementById('hr-portador-label');
+      const titularLabel=(selCard.holder||selCard.name)+' (titular)';
+      const opts=[
+        {value:'__titular__',label:'👤 '+titularLabel},
+        ...holders.map(h=>({value:h,label:'👤 '+h}))
+      ];
+
+      const refreshPortadorLabel=()=>{
+        const selected=window._hrSelectedPortadores||[];
+        if(!lbl) return;
+        if(!selected.length){ lbl.textContent='Todos os portadores'; return; }
+        const names=selected.map(v=>v==='__titular__'?titularLabel:v);
+        lbl.textContent=names.length<=2?names.join(' + '):names.length+' portadores selecionados';
+      };
+
+      if(drop){
+        const allChecked=portadores.length===0;
+        drop.innerHTML=
+          `<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:var(--fs-xs);color:var(--text2);border-bottom:1px solid var(--border)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+             <input type="checkbox" data-hr-holder="__all__" ${allChecked?'checked':''} style="accent-color:var(--gold);width:15px;height:15px"> <strong>Todos os portadores</strong>
+           </label>`+
+          opts.map(o=>`<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:var(--fs-xs);color:var(--text2);transition:background .12s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+             <input type="checkbox" data-hr-holder="${o.value.replace(/"/g,'&quot;')}" ${portadores.includes(o.value)?'checked':''} style="accent-color:var(--gold);width:15px;height:15px"> ${o.label}
+           </label>`).join('');
+
+        drop.querySelectorAll('input[data-hr-holder]').forEach(cb=>{
+          cb.addEventListener('change',e=>{
+            e.stopPropagation();
+            const value=cb.getAttribute('data-hr-holder');
+            if(value==='__all__'){
+              window._hrSelectedPortadores=[];
+            }else{
+              let selected=(window._hrSelectedPortadores||[]).filter(v=>validValues.includes(v));
+              if(cb.checked){
+                if(!selected.includes(value)) selected.push(value);
+              }else{
+                selected=selected.filter(v=>v!==value);
+              }
+              window._hrSelectedPortadores=selected;
+            }
+            if(portadorSel) portadorSel.value=(window._hrSelectedPortadores||[]).join('||');
+            refreshPortadorLabel();
+            hrGenerate();
+            setTimeout(()=>{ const d=document.getElementById('hr-portador-drop'); if(d) d.style.display='block'; },0);
+          });
+        });
       }
+      if(portadorSel) portadorSel.value=portadores.join('||');
+      refreshPortadorLabel();
       if(portadorWrap) portadorWrap.style.display='block';
     } else {
+      window._hrSelectedPortadores=[];
+      portadores=[];
       if(portadorWrap) portadorWrap.style.display='none';
       if(portadorSel) portadorSel.value='';
     }
   } else {
+    window._hrSelectedPortadores=[];
+    portadores=[];
     if(portadorWrap) portadorWrap.style.display='none';
     if(portadorSel) portadorSel.value='';
   }
-  const portador=portadorSel?.value||'';
 
   if(from>to){
     preview.innerHTML='<div style="text-align:center;padding:30px;color:var(--red);font-weight:600">⚠️ "De" não pode ser posterior a "Até"</div>';
@@ -21254,9 +21298,10 @@ function hrGenerate(){
     const ym=(t.invoiceMonth||t.date||'').substring(0,7);
     if(!ym||ym<from||ym>to) return false;
     if(cardId&&t.cardId!==cardId) return false;
-    if(portador){
-      if(portador==='__titular__'){ if((t.portador||'').trim()!=='') return false; }
-      else { if((t.portador||'').trim()!==portador) return false; }
+    if(portadores.length){
+      const txPortador=(t.portador||'').trim();
+      const txKey=txPortador||'__titular__';
+      if(!portadores.includes(txKey)) return false;
     }
     return true;
   };
@@ -21328,7 +21373,7 @@ function hrGenerate(){
 
     /* Breakdown por portador — só quando não há filtro de portador específico */
     let portadorBlockHtml='';
-    if(!portador){
+    if(!portadores.length){
       const portMap={};
       mTxs.filter(t=>(t.type||'debit')!=='credit').forEach(t=>{
         const key=(t.portador||'').trim()||'__titular__';
@@ -21445,7 +21490,7 @@ function hrGenerate(){
   preview.innerHTML=html;
 
   // Salva para impressão (inclui estornoTxs separado)
-  window._hrPrintData={cardId,from,to,type,txs,estornoTxs,months,totalDeb,totalCr,countTx,avgMonth,cardMap,portador};
+  window._hrPrintData={cardId,from,to,type,txs,estornoTxs,months,totalDeb,totalCr,countTx,avgMonth,cardMap,portadores:portadores.slice()};
 }
 
 function hrPrint(){
@@ -21454,15 +21499,16 @@ function hrPrint(){
     if(typeof showToast==='function') showToast('Nenhum dado para imprimir. Gere o relatório primeiro.','error');
     return;
   }
-  const{cardId,from,to,type,txs,estornoTxs=[],months,totalDeb,totalCr,countTx,avgMonth,cardMap,portador}=d;
+  const{cardId,from,to,type,txs,estornoTxs=[],months,totalDeb,totalCr,countTx,avgMonth,cardMap,portadores=[]}=d;
   const appS=_hrGetS();
   const selectedCard=cardId?((appS&&appS.cards)||[]).find(c=>c.id===cardId):null;
   const cardName=selectedCard?.name|| (cardId?'':'Todos os cartões');
   const autoDebitBadge=selectedCard?.autoDebit?'<br><span style="display:inline-block;margin-top:4px;padding:3px 8px;border-radius:999px;background:#e7f6ec;color:#146c43;font-size:8pt;font-weight:800;letter-spacing:.04em">Débito automático ativo</span>':'';
   const autoDebitLine=selectedCard?.autoDebit?'<br>Débito automático: Ativo':'';
   const typeLabel=type==='debit'?'Débitos':type==='credit'?'Créditos':'Débitos e Créditos';
-  const portadorLabel=portador?(portador==='__titular__'?'Titular':portador):'Todos os portadores';
-  const portadorShow=!!portador;
+  const portadorNames=(portadores||[]).map(v=>v==='__titular__'?'Titular':v);
+  const portadorLabel=portadorNames.length?portadorNames.join(' + '):'Todos os portadores';
+  const portadorShow=portadorNames.length>0;
   const _monthKey=t=>(t.invoiceMonth||t.date||'').substring(0,7);
   const _creditRowsForMonth=ym=>type==='debit'?estornoTxs.filter(t=>_monthKey(t)===ym):[];
   const _monthFooterLabel=type==='credit'?'Subtotal créditos':'Subtotal débitos';
@@ -21562,7 +21608,7 @@ function hrPrint(){
 
     /* Breakdown por portador no PDF — só quando sem filtro de portador específico */
     let prPortadorHtml='';
-    if(!portador){
+    if(!(portadores||[]).length){
       const portMap={};
       mTxs.filter(t=>(t.type||'debit')!=='credit').forEach(t=>{
         const key=(t.portador||'').trim()||'__titular__';
