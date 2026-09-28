@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-27T14:59:46.645Z",
+  "syncedAt": "2026-09-28T14:54:21.579Z",
   "profile": "u1",
-  "lastModified": "2026-09-27T14:59:44.044Z",
+  "lastModified": "2026-09-28T14:19:40.940Z",
   "data": {
     "cards": [
       {
@@ -112,7 +112,7 @@
           "Condominio"
         ],
         "sortOrder": 3,
-        "noInterest": false,
+        "noInterest": true,
         "autoDebit": false
       },
       {
@@ -6265,7 +6265,7 @@
         "id": "mwwowqcpxmmt2zy291",
         "cardId": "ui6gdqec29mnsvvh7a",
         "desc": "Droga Viva (2/2)",
-        "amount": 52.79,
+        "amount": 52.78,
         "type": "debit",
         "category": "💊 Saúde",
         "date": "2026-08-07",
@@ -6489,7 +6489,7 @@
         "id": "chuojgmlmfmt309l6g",
         "cardId": "ui6gdqec29mnsvvh7a",
         "desc": "Amazon (aspirador) (2/10)",
-        "amount": 47.2,
+        "amount": 47.15,
         "type": "debit",
         "category": "🎬 Entretenimento",
         "date": "2026-07-19",
@@ -9225,7 +9225,7 @@
         "id": "ucp7fabcmiqmt4iklan",
         "cardId": "ui6gdqec29mnsvvh7a",
         "desc": "DARF  - ESCOLA",
-        "amount": 528.44,
+        "amount": 528.43,
         "type": "debit",
         "category": "📚 Educação",
         "date": "2026-08-21",
@@ -9241,7 +9241,7 @@
         "id": "z63yl2m9pwpmt4il53o",
         "cardId": "ui6gdqec29mnsvvh7a",
         "desc": "DAS - ESCOLA",
-        "amount": 341.09,
+        "amount": 341.08,
         "type": "debit",
         "category": "📚 Educação",
         "date": "2026-08-21",
@@ -9273,7 +9273,7 @@
         "id": "mo0j28f321qmt4imfbl",
         "cardId": "ui6gdqec29mnsvvh7a",
         "desc": "CLARO - ESCOLA",
-        "amount": 37.34,
+        "amount": 37.33,
         "type": "debit",
         "category": "📚 Educação",
         "date": "2026-08-21",
@@ -9289,7 +9289,7 @@
         "id": "6s24mgbel8xmt4imun6",
         "cardId": "ui6gdqec29mnsvvh7a",
         "desc": "COMGAS",
-        "amount": 13.61,
+        "amount": 13.6,
         "type": "debit",
         "category": "🛍️ Outros",
         "date": "2026-08-21",
@@ -10772,6 +10772,54 @@
         "note": "",
         "portador": "Olinda",
         "recurring": false
+      },
+      {
+        "id": "enz8g25c3hmulbg38q",
+        "cardId": "ui6gdqec29mnsvvh7a",
+        "desc": "HBO Max",
+        "amount": 22.45,
+        "type": "debit",
+        "category": "🎬 Entretenimento",
+        "date": "2026-09-03",
+        "invoiceMonth": "2026-09",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "2ew342tgdz6mulbg38q",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "uxpjbqujcumulbxvzd",
+        "cardId": "ui6gdqec29mnsvvh7a",
+        "desc": "Encargos",
+        "amount": 174.83,
+        "type": "debit",
+        "category": "💡 Contas/Serviços",
+        "date": "2026-09-17",
+        "invoiceMonth": "2026-09",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "qhg091vk0kkmulbxvzd",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "hdweto1shopmulbya4z",
+        "cardId": "ui6gdqec29mnsvvh7a",
+        "desc": "Encargos",
+        "amount": 174.83,
+        "type": "debit",
+        "category": "💡 Contas/Serviços",
+        "date": "2026-09-17",
+        "invoiceMonth": "2026-09",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "ybsw0c2l6fmulbya4z",
+        "note": "",
+        "portador": "Olinda",
+        "recurring": false
       }
     ],
     "payments": [
@@ -11280,9 +11328,20 @@
         "multa": 0,
         "mora": 0,
         "estorno": 0
+      },
+      {
+        "id": "dycb1dg2q2mulaeagq",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "invoiceMonth": "2026-09",
+        "amount": 3946.79,
+        "date": "2026-09-24",
+        "isPartial": false,
+        "multa": 0,
+        "mora": 0,
+        "estorno": 0
       }
     ],
-    "activeCardId": "x96p92fwvtmnsutu3c",
+    "activeCardId": "ui6gdqec29mnsvvh7a",
     "budgets": {},
     "cashbacks": {},
     "deleted": {
@@ -11291,7 +11350,13 @@
         "rxf3ncr7ssmuilal08",
         "tqy6f1eifomt320w12",
         "ja0vi68dxqmt320w12",
-        "v17nzmr6hgomt320w12"
+        "v17nzmr6hgomt320w12",
+        "1fml6ggc2fbmulb8ra5",
+        "o25grof34aamulb93lv",
+        "j9moq0w7ummulb9uap",
+        "75lnq94np4imulba314",
+        "gkf7osmmfofmulbamq3",
+        "kgr6n8dd7armulbaxmq"
       ],
       "cards": [],
       "payments": []
@@ -11399,8 +11464,8 @@
     "reducedMotion": false,
     "jbAuto": false,
     "tab": "lancamentos",
-    "month": "2026-10",
+    "month": "2026-09",
     "compact": false,
-    "lastModified": "2026-09-27T14:59:44.044Z"
+    "lastModified": "2026-09-28T14:19:40.940Z"
   }
 }
