@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-28T16:22:49.150Z",
+  "syncedAt": "2026-09-28T17:18:16.285Z",
   "profile": "u1",
-  "lastModified": "2026-09-28T16:19:29.816Z",
+  "lastModified": "2026-09-28T17:17:50.332Z",
   "data": {
     "cards": [
       {
@@ -10712,7 +10712,7 @@
       {
         "id": "hgro7tvqw4kmujxtmwd",
         "cardId": "x96p92fwvtmnsutu3c",
-        "desc": "Boleto",
+        "desc": "Boleto - Enel",
         "amount": 51.24,
         "type": "debit",
         "category": "🛍️ Outros",
@@ -10728,7 +10728,7 @@
       {
         "id": "lxd3cqixzdqmujxtyh8",
         "cardId": "x96p92fwvtmnsutu3c",
-        "desc": "Boleto",
+        "desc": "Boleto - Enel",
         "amount": 129.3,
         "type": "debit",
         "category": "🛍️ Outros",
@@ -10819,6 +10819,22 @@
         "gid": "ybsw0c2l6fmulbya4z",
         "note": "",
         "portador": "Olinda",
+        "recurring": false
+      },
+      {
+        "id": "ao8evkiajvmuligg3f",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "desc": "IOF Chatgpt",
+        "amount": 3.5,
+        "type": "debit",
+        "category": "💡 Contas/Serviços",
+        "date": "2026-09-27",
+        "invoiceMonth": "2026-10",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "x94yj7rtgdmuligg3f",
+        "note": "",
+        "portador": "",
         "recurring": false
       }
     ],
@@ -11341,7 +11357,7 @@
         "estorno": 0
       }
     ],
-    "activeCardId": "vs0llp2ohzmnsvu3kq",
+    "activeCardId": "x96p92fwvtmnsutu3c",
     "budgets": {},
     "cashbacks": {},
     "deleted": {
@@ -11464,8 +11480,8 @@
     "reducedMotion": false,
     "jbAuto": false,
     "tab": "lancamentos",
-    "month": "2026-09",
+    "month": "2026-10",
     "compact": false,
-    "lastModified": "2026-09-28T16:19:29.816Z"
+    "lastModified": "2026-09-28T17:17:50.332Z"
   }
 }
