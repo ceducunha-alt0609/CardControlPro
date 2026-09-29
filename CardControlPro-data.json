@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-28T17:18:16.285Z",
+  "syncedAt": "2026-09-29T12:56:29.861Z",
   "profile": "u1",
-  "lastModified": "2026-09-28T17:17:50.332Z",
+  "lastModified": "2026-09-29T12:56:20.636Z",
   "data": {
     "cards": [
       {
@@ -10836,6 +10836,86 @@
         "note": "",
         "portador": "",
         "recurring": false
+      },
+      {
+        "id": "znqel4khquomulkqyep",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Kalunga",
+        "amount": 298.79,
+        "type": "debit",
+        "category": "📚 Educação",
+        "date": "2026-09-28",
+        "invoiceMonth": "2026-10",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "92upmupr8y7mulkqyep",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "iu2ex4ep9temumnxxk6",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Leroy Merlin (1/2)",
+        "amount": 166.76,
+        "type": "debit",
+        "category": "🏠 Casa/Moradia",
+        "date": "2026-09-29",
+        "invoiceMonth": "2026-10",
+        "totalInst": 2,
+        "instNum": 1,
+        "gid": "g58vh79i6jqmumnxxk5",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "crl3ezfulzamumnxxk6",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Leroy Merlin (2/2)",
+        "amount": 166.76,
+        "type": "debit",
+        "category": "🏠 Casa/Moradia",
+        "date": "2026-09-29",
+        "invoiceMonth": "2026-11",
+        "totalInst": 2,
+        "instNum": 2,
+        "gid": "g58vh79i6jqmumnxxk5",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "r7go0cidc2mumoglte",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre - peças cond (1/2)",
+        "amount": 106.21,
+        "type": "debit",
+        "category": "🏠 Casa/Moradia",
+        "date": "2026-09-29",
+        "invoiceMonth": "2026-10",
+        "totalInst": 2,
+        "instNum": 1,
+        "gid": "jj1kq3hvg8pmumoglte",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "skl12eb9cqmumoglte",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre - peças cond (2/2)",
+        "amount": 106.22,
+        "type": "debit",
+        "category": "🏠 Casa/Moradia",
+        "date": "2026-09-29",
+        "invoiceMonth": "2026-11",
+        "totalInst": 2,
+        "instNum": 2,
+        "gid": "jj1kq3hvg8pmumoglte",
+        "note": "",
+        "portador": "",
+        "recurring": false
       }
     ],
     "payments": [
@@ -11355,9 +11435,20 @@
         "multa": 0,
         "mora": 0,
         "estorno": 0
+      },
+      {
+        "id": "g0utz7291sgmumm3dnf",
+        "cardId": "ui6gdqec29mnsvvh7a",
+        "invoiceMonth": "2026-09",
+        "amount": 4111.95,
+        "date": "2026-09-25",
+        "isPartial": false,
+        "multa": 0,
+        "mora": 0,
+        "estorno": 0
       }
     ],
-    "activeCardId": "x96p92fwvtmnsutu3c",
+    "activeCardId": "0ahds3kadi5imnsvz6b7",
     "budgets": {},
     "cashbacks": {},
     "deleted": {
@@ -11479,9 +11570,9 @@
     "lowEndDevice": false,
     "reducedMotion": false,
     "jbAuto": false,
-    "tab": "lancamentos",
+    "tab": "invoice",
     "month": "2026-10",
     "compact": false,
-    "lastModified": "2026-09-28T17:17:50.332Z"
+    "lastModified": "2026-09-29T12:56:20.636Z"
   }
 }
