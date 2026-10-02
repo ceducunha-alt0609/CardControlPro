@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-09-29T12:56:29.861Z",
+  "syncedAt": "2026-10-02T21:54:36.953Z",
   "profile": "u1",
-  "lastModified": "2026-09-29T12:56:20.636Z",
+  "lastModified": "2026-10-02T21:53:56.011Z",
   "data": {
     "cards": [
       {
@@ -10916,6 +10916,22 @@
         "note": "",
         "portador": "",
         "recurring": false
+      },
+      {
+        "id": "zvoubxplc4pmuri2wx7",
+        "cardId": "ui6gdqec29mnsvvh7a",
+        "desc": "HBO Max",
+        "amount": 22.45,
+        "type": "debit",
+        "category": "🎬 Entretenimento",
+        "date": "2026-10-02",
+        "invoiceMonth": "2026-10",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "jedhgs29hqsmuri2wx7",
+        "note": "",
+        "portador": "",
+        "recurring": false
       }
     ],
     "payments": [
@@ -11448,7 +11464,7 @@
         "estorno": 0
       }
     ],
-    "activeCardId": "0ahds3kadi5imnsvz6b7",
+    "activeCardId": "ui6gdqec29mnsvvh7a",
     "budgets": {},
     "cashbacks": {},
     "deleted": {
@@ -11570,9 +11586,9 @@
     "lowEndDevice": false,
     "reducedMotion": false,
     "jbAuto": false,
-    "tab": "invoice",
+    "tab": "lancamentos",
     "month": "2026-10",
     "compact": false,
-    "lastModified": "2026-09-29T12:56:20.636Z"
+    "lastModified": "2026-10-02T21:53:56.011Z"
   }
 }
