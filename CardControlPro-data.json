@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-10-02T21:54:36.953Z",
+  "syncedAt": "2026-10-03T17:28:17.792Z",
   "profile": "u1",
-  "lastModified": "2026-10-02T21:53:56.011Z",
+  "lastModified": "2026-10-03T17:26:56.281Z",
   "data": {
     "cards": [
       {
@@ -11464,7 +11464,7 @@
         "estorno": 0
       }
     ],
-    "activeCardId": "ui6gdqec29mnsvvh7a",
+    "activeCardId": "0ahds3kadi5imnsvz6b7",
     "budgets": {},
     "cashbacks": {},
     "deleted": {
@@ -11589,6 +11589,6 @@
     "tab": "lancamentos",
     "month": "2026-10",
     "compact": false,
-    "lastModified": "2026-10-02T21:53:56.011Z"
+    "lastModified": "2026-10-03T17:26:56.281Z"
   }
 }
