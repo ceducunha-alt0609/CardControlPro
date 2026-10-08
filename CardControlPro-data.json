@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-10-08T12:49:20.419Z",
+  "syncedAt": "2026-10-08T20:48:23.001Z",
   "profile": "u1",
-  "lastModified": "2026-10-08T12:46:03.211Z",
+  "lastModified": "2026-10-08T20:48:16.386Z",
   "data": {
     "cards": [
       {
@@ -11716,6 +11716,38 @@
         "note": "",
         "portador": "",
         "recurring": false
+      },
+      {
+        "id": "6yanmdxozh2muzvwx9a",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "desc": "Estacionamento Interlagos",
+        "amount": 16.2,
+        "type": "debit",
+        "category": "🚗 Transporte",
+        "date": "2026-10-08",
+        "invoiceMonth": "2026-10",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "hu34clfqlbfmuzvwx99",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "qnc21utph5muzvxkg5",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "desc": "Max Atacadista",
+        "amount": 39.56,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-10-08",
+        "invoiceMonth": "2026-10",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "42tbsopt60qmuzvxkg5",
+        "note": "",
+        "portador": "",
+        "recurring": false
       }
     ],
     "payments": [
@@ -12491,6 +12523,6 @@
     "tab": "lancamentos",
     "month": "2026-10",
     "compact": false,
-    "lastModified": "2026-10-08T12:46:03.211Z"
+    "lastModified": "2026-10-08T20:48:16.386Z"
   }
 }
