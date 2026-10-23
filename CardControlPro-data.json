@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-10-17T20:55:06.960Z",
+  "syncedAt": "2026-10-23T21:07:42.207Z",
   "profile": "u1",
-  "lastModified": "2026-10-17T20:54:50.158Z",
+  "lastModified": "2026-10-23T21:07:25.193Z",
   "data": {
     "cards": [
       {
@@ -12068,6 +12068,118 @@
         "note": "",
         "portador": "",
         "recurring": false
+      },
+      {
+        "id": "5g18hxuismomvi16913",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre - bombons",
+        "amount": 100.06,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-10-17",
+        "invoiceMonth": "2026-11",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "iytjeggtq5omvi16913",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "m5aeyzkj6ehmvinbj3q",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre - diversos casa (1/3)",
+        "amount": 305.7,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-10-21",
+        "invoiceMonth": "2026-11",
+        "totalInst": 3,
+        "instNum": 1,
+        "gid": "gu206meah1mvinbj3q",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "om2xpkq4wqmvinbj3q",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre - diversos casa (2/3)",
+        "amount": 305.7,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-10-21",
+        "invoiceMonth": "2026-12",
+        "totalInst": 3,
+        "instNum": 2,
+        "gid": "gu206meah1mvinbj3q",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "b75kwf73dpmvinbj3q",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre - diversos casa (3/3)",
+        "amount": 305.71,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-10-21",
+        "invoiceMonth": "2027-01",
+        "totalInst": 3,
+        "instNum": 3,
+        "gid": "gu206meah1mvinbj3q",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "z6beva8zejmvlcxtqc",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre - condo (1/3)",
+        "amount": 210.42,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-10-23",
+        "invoiceMonth": "2026-11",
+        "totalInst": 3,
+        "instNum": 1,
+        "gid": "q8ssdo5xotmmvlcxtqc",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "fzyfadocylmvlcxtqc",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre - condo (2/3)",
+        "amount": 210.42,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-10-23",
+        "invoiceMonth": "2026-12",
+        "totalInst": 3,
+        "instNum": 2,
+        "gid": "q8ssdo5xotmmvlcxtqc",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "2485180ewjhmvlcxtqc",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre - condo (3/3)",
+        "amount": 210.43,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-10-23",
+        "invoiceMonth": "2027-01",
+        "totalInst": 3,
+        "instNum": 3,
+        "gid": "q8ssdo5xotmmvlcxtqc",
+        "note": "",
+        "portador": "",
+        "recurring": false
       }
     ],
     "payments": [
@@ -12633,7 +12745,7 @@
         "estorno": 0
       }
     ],
-    "activeCardId": "vs0llp2ohzmnsvu3kq",
+    "activeCardId": "0ahds3kadi5imnsvz6b7",
     "budgets": {},
     "cashbacks": {},
     "deleted": {
@@ -12851,9 +12963,9 @@
     "lowEndDevice": false,
     "reducedMotion": false,
     "jbAuto": false,
-    "tab": "lancamentos",
-    "month": "2026-10",
+    "tab": "invoice",
+    "month": "2026-11",
     "compact": false,
-    "lastModified": "2026-10-17T20:54:50.158Z"
+    "lastModified": "2026-10-23T21:07:25.193Z"
   }
 }
