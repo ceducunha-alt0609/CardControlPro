@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-10-24T13:28:48.347Z",
+  "syncedAt": "2026-10-24T16:51:44.156Z",
   "profile": "u1",
-  "lastModified": "2026-10-24T13:27:41.781Z",
+  "lastModified": "2026-10-24T16:51:24.620Z",
   "data": {
     "cards": [
       {
@@ -12995,9 +12995,9 @@
     "lowEndDevice": false,
     "reducedMotion": false,
     "jbAuto": false,
-    "tab": "lancamentos",
+    "tab": "invoice",
     "month": "2026-11",
     "compact": false,
-    "lastModified": "2026-10-24T13:27:41.781Z"
+    "lastModified": "2026-10-24T16:51:24.620Z"
   }
 }
