@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-10-23T21:07:42.207Z",
+  "syncedAt": "2026-10-24T13:28:48.347Z",
   "profile": "u1",
-  "lastModified": "2026-10-23T21:07:25.193Z",
+  "lastModified": "2026-10-24T13:27:41.781Z",
   "data": {
     "cards": [
       {
@@ -12180,6 +12180,38 @@
         "note": "",
         "portador": "",
         "recurring": false
+      },
+      {
+        "id": "t2kvwsz63xmvmfomol",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre - meus (1/2)",
+        "amount": 176.18,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-10-24",
+        "invoiceMonth": "2026-11",
+        "totalInst": 2,
+        "instNum": 1,
+        "gid": "ic42drec0lmvmfomok",
+        "note": "",
+        "portador": "",
+        "recurring": false
+      },
+      {
+        "id": "sepvipyiiyfmvmfomol",
+        "cardId": "0ahds3kadi5imnsvz6b7",
+        "desc": "Mercado Livre - meus (2/2)",
+        "amount": 176.18,
+        "type": "debit",
+        "category": "🛒 Alimentação",
+        "date": "2026-10-24",
+        "invoiceMonth": "2026-12",
+        "totalInst": 2,
+        "instNum": 2,
+        "gid": "ic42drec0lmvmfomok",
+        "note": "",
+        "portador": "",
+        "recurring": false
       }
     ],
     "payments": [
@@ -12963,9 +12995,9 @@
     "lowEndDevice": false,
     "reducedMotion": false,
     "jbAuto": false,
-    "tab": "invoice",
+    "tab": "lancamentos",
     "month": "2026-11",
     "compact": false,
-    "lastModified": "2026-10-23T21:07:25.193Z"
+    "lastModified": "2026-10-24T13:27:41.781Z"
   }
 }
