@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "syncedAt": "2026-10-24T16:51:44.156Z",
+  "syncedAt": "2026-11-07T11:35:30.524Z",
   "profile": "u1",
-  "lastModified": "2026-10-24T16:51:24.620Z",
+  "lastModified": "2026-11-07T11:34:51.886Z",
   "data": {
     "cards": [
       {
@@ -12212,6 +12212,102 @@
         "note": "",
         "portador": "",
         "recurring": false
+      },
+      {
+        "id": "xvlnp72853pmvpesjzs",
+        "cardId": "ui6gdqec29mnsvvh7a",
+        "desc": "Akki - nova",
+        "amount": 61.18,
+        "type": "debit",
+        "category": "🛍️ Outros",
+        "date": "2026-10-19",
+        "invoiceMonth": "2026-11",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "17xb6apreb1mvpesjzs",
+        "note": "",
+        "portador": "Olinda",
+        "recurring": false
+      },
+      {
+        "id": "3mbqfekxz5lmvpet7qr",
+        "cardId": "ui6gdqec29mnsvvh7a",
+        "desc": "Akki - nova",
+        "amount": 34.72,
+        "type": "debit",
+        "category": "🛍️ Outros",
+        "date": "2026-10-20",
+        "invoiceMonth": "2026-11",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "50eqppoxuw4mvpet7qr",
+        "note": "",
+        "portador": "Olinda",
+        "recurring": false
+      },
+      {
+        "id": "sicvq6p9d1jmvpetu6l",
+        "cardId": "ui6gdqec29mnsvvh7a",
+        "desc": "Akki - nova",
+        "amount": 238.91,
+        "type": "debit",
+        "category": "🛍️ Outros",
+        "date": "2026-10-21",
+        "invoiceMonth": "2026-11",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "q564xoizvojmvpetu6l",
+        "note": "",
+        "portador": "Olinda",
+        "recurring": false
+      },
+      {
+        "id": "zljen1buydmvpeugbr",
+        "cardId": "ui6gdqec29mnsvvh7a",
+        "desc": "Google one - nova",
+        "amount": 4.5,
+        "type": "debit",
+        "category": "🛍️ Outros",
+        "date": "2026-10-23",
+        "invoiceMonth": "2026-11",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "phtg6zxvw5mvpeugbr",
+        "note": "",
+        "portador": "Olinda",
+        "recurring": false
+      },
+      {
+        "id": "ejy1srgbk4omvpex5ci",
+        "cardId": "ui6gdqec29mnsvvh7a",
+        "desc": "Alvarenga Cosmeticos",
+        "amount": 44.97,
+        "type": "debit",
+        "category": "🛍️ Outros",
+        "date": "2026-10-22",
+        "invoiceMonth": "2026-11",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "1mb0lqb9pgdmvpex5ci",
+        "note": "",
+        "portador": "Olinda",
+        "recurring": false
+      },
+      {
+        "id": "bmtgrhk0li7mvpf0ijk",
+        "cardId": "x96p92fwvtmnsutu3c",
+        "desc": "Chatgpt",
+        "amount": 99.9,
+        "type": "debit",
+        "category": "🎬 Entretenimento",
+        "date": "2026-10-26",
+        "invoiceMonth": "2026-11",
+        "totalInst": 1,
+        "instNum": 1,
+        "gid": "xj5qnsp5ntmvpf0ijk",
+        "note": "",
+        "portador": "",
+        "recurring": false
       }
     ],
     "payments": [
@@ -12998,6 +13094,6 @@
     "tab": "invoice",
     "month": "2026-11",
     "compact": false,
-    "lastModified": "2026-10-24T16:51:24.620Z"
+    "lastModified": "2026-11-07T11:34:51.886Z"
   }
 }
