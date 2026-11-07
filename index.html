@@ -18852,7 +18852,7 @@ async function ghTestConnection(){
     if(!GH.enabled) throw new Error('Ative o GitHub Sync primeiro');
     GH.status='syncing'; saveGhConfig(); ghRefreshSettingsUI();
     const res = await fetch(ghApiUrl(), {headers: ghHeaders(), cache:'no-store'});
-    if(diag) aurumSyncDiag('GitHub respondeu HTTP '+res.status);
+    aurumSyncDiag('GitHub respondeu HTTP '+res.status);
     if(res.status===404){ GH.status='ok'; GH.lastSync = new Date().toISOString(); saveGhConfig(); showToast('Repo acessível — arquivo ainda não existe, pode enviar','success'); ghRefreshSettingsUI(); return; }
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
